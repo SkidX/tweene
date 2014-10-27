@@ -158,7 +158,7 @@ gulp.task('default', ['src'], function(){
 });
 
 
-//var srcWatcher = gulp.watch('src/modules/*.js', ['src']);
-//srcWatcher.on('change', function(event) {
-//    console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
-//});
+var srcWatcher = gulp.watch('src/modules/*.js', ['src']);
+srcWatcher.on('change', function(event) {
+    console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
+});

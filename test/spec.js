@@ -152,9 +152,9 @@ describe('Tweene Utilities: ', function() {
     it('transformMapping', function() {      
         expect(transformMapping('scale', 1.2)).toEqual({scaleX: '1.2', scaleY: '1.2'});
         expect(transformMapping('rotate', '30deg')).toEqual({rotateZ: '30deg'});
-        expect(transformMapping('rotate3d', '-30deg')).toEqual({rotateZ: '-30deg'});
-        expect(transformMapping('rotate3d', '-30deg,60,-20deg')).toEqual({rotateX: '-30deg', rotateY: '60', rotateZ: '-20deg'});
-        expect(transformMapping('rotate3d', '-30deg, 60,-20deg, 10')).toEqual({rotateX: '-30deg', rotateY: '60', rotateZ: '-20deg'});
+        expect(transformMapping('rotate3d', '0, 0, 1, -30deg')).toEqual({rotateZ: '-30deg'});
+        expect(transformMapping('rotate3d', '1,0,0, -30deg')).toEqual({rotateX: '-30deg'});
+        expect(transformMapping('rotate3d', '0,1,0,60')).toEqual({rotateY: '60'});
         expect(transformMapping('translate', '50, 100')).toEqual({translateX: '50', translateY: '100'});
         expect(transformMapping('translate', '50  , -100')).toEqual({translateX: '50', translateY: '-100'});
         expect(transformMapping('translate3d', '0,1,2')).toEqual({translateX: '0', translateY: '1', translateZ: '2'});
@@ -303,7 +303,7 @@ describe('Tweene set: ', function() {
                 expect(style.top).toBe('30px');
                 $target.remove();
                 done();           
-            }, 100);
+            }, 200);
         });                        
         
     };

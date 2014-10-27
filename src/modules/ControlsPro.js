@@ -222,13 +222,17 @@ var ControlsPro = function()
             {
                 this._playAllowed = true;
                 this._reverseAllowed = true;
-                // resume progress ticker, if needed
-                this._startProgress();
             }
 
             // always true after the very first execution of resume()
             if(this._running)
             {
+                if(this._duration)
+                {
+                    // resume progress ticker, if needed
+                    this._startProgress();                    
+                }
+                
                 // when the animation library does not have native support for begin callback
                 if(this._emulatedBegin && this._hasHandlers('_begin'))
                 {

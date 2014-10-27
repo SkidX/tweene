@@ -431,7 +431,7 @@ function compoundMapping(name, value)
  */
 function transformMapping(name, value)
 {
-    var easing, dirs = ['X', 'Y', 'Z'], values = {}, parts;
+    var easing, dirs = ['X', 'Y', 'Z'], values = {}, parts, baseName;
     if(isArray(value))
     {
         value = value[0];
@@ -443,25 +443,41 @@ function transformMapping(name, value)
     }
                     
     parts = String(value).split(/\s*,\s*/);
-    name = name.indexOf('3') !== -1? name.substr(0, name.length - 2) : name;
-        
-    switch(parts.length)
-    {
-        // for rotations, a single value is passed as Z-value, while for other transforms it is applied to X and Y       
-        case 1:
-            parts = name == 'rotate' || name == 'rotation'? [null, null, parts[0]] : [parts[0], parts[0], null];
-        break;
-        
-        case 2:
-            parts = [parts[0], parts[1], null];
-        break;                
-    }
+    baseName = name.indexOf('3') !== -1? name.substr(0, name.length - 2) : name;
     
-    for(var i = 0; i < 3; i++)
+    if(name == 'rotate3d')
+    {
+        if(parts.length == 4)
+        {
+            dirs = [parts[0] == '1'? 'X' : (parts[1] == '1'? 'Y' : 'Z')];
+            parts[0] = parts[3];
+        }
+        else
+        {
+            throw 'invalid rotate 3d value';
+        }
+    }
+    else
+    {
+        switch(parts.length)
+        {
+            // for rotations, a single value is passed as Z-value, while for other transforms it is applied to X and Y       
+            case 1:
+                parts = baseName == 'rotate' || baseName == 'rotation'? [null, null, parts[0]] : [parts[0], parts[0], null];
+            break;
+
+            case 2:
+                parts = [parts[0], parts[1], null];
+            break;                
+        }
+        
+    }
+            
+    for(var i = 0; i < dirs.length; i++)
     {
         if(parts[i] !== null)
         {
-            values[name + dirs[i]] = easing? [parts[i], easing] : parts[i];
+            values[baseName + dirs[i]] = easing? [parts[i], easing] : parts[i];
         }
     }
     return values;
@@ -3072,13 +3088,17 @@ var ControlsPro = function()
             {
                 this._playAllowed = true;
                 this._reverseAllowed = true;
-                // resume progress ticker, if needed
-                this._startProgress();
             }
 
             // always true after the very first execution of resume()
             if(this._running)
             {
+                if(this._duration)
+                {
+                    // resume progress ticker, if needed
+                    this._startProgress();                    
+                }
+                
                 // when the animation library does not have native support for begin callback
                 if(this._emulatedBegin && this._hasHandlers('_begin'))
                 {
@@ -3648,6 +3668,10 @@ var TweenPro = function()
      */
     this._run = function()
     {
+        if(this._duration)
+        {
+            this._startProgress();
+        }
         // get current display and/or visibility values before starting, if needed
         if(this._hasStaticProps)
         {
@@ -4429,7 +4453,7 @@ var TimelinePro = function()
         {
             time = this._backIndex[i];
             elemList = this._backKeyframes[time][type];
-            for(var j = 0, endj = elemList.length; j < endj; j++)
+            for(var j = elemList.length - 1; j >= 0; j--)
             {
                 var child = elemList[j];
                 // disable back in children timelines 
@@ -5640,7 +5664,7 @@ window.Tweene.registerDriver('transit', 'tween', function() {
     
     this._styles = [];    
     this._firstRun = true;
-
+    this._rotationFixed = false;
     
     
     /**
@@ -5680,18 +5704,25 @@ window.Tweene.registerDriver('transit', 'tween', function() {
      * Fetch transform property value directly from Transit
      *
      */  
-    this._getTransformValue = function(target, name)
+    this._getTransformValue = function(target, name, raw)
     {
         var transform = target.data('transform');
         if(!transform || !(name in transform))
         {
-            if(name.indexOf('scale') === 0)
+            if(raw)
             {
-                name = 'scale';
+                return null;
             }
-            else if(name.indexOf('rotate') === 0)
+            else
             {
-                name = 'rotate';
+                if(name.indexOf('scale') === 0)
+                {
+                    name = 'scale';
+                }
+                else if(name.indexOf('rotate') === 0)
+                {
+                    name = 'rotate';
+                }
             }
         }
         return target.css(name); 
@@ -5895,10 +5926,24 @@ window.Tweene.registerDriver('transit', 'tween', function() {
             self = this, useTrans = data.duration > 0,
             method = useTrans? 'transition' : 'css',
             field = this._localFwd? 'end' : 'begin',
-            needRepaint, item, targetStyle, targetComputedStyle, posValue,
+            name, needRepaint, item, targetStyle, targetComputedStyle, posValue,
             posNames = ['left', 'top', 'right', 'bottom'], pos,
             i, end, j, endj, values, nop,
-            onComplete = function() { Tw.ticker.addCallback(-1, '-' + self._id, self._runHandlers, self, ['_end']); };
+            onComplete = function(event) { 
+                //event.stopPropagation();
+                //event.preventDefault();
+//                if(this == event.target)
+//                {
+                    self._target.css('transition', 'none');
+                    self._runHandlers('_end');
+//                    Tw.ticker.addCallback(-1, '-' + self._id, self._runHandlers, self, ['_end']); 
+//                }
+//                else
+//                {
+//                    console.log('parent!');                    
+//                }
+                return false; 
+            };
         
         for(i = 0, end = this._target.length; i < end; i++)
         {
@@ -5910,6 +5955,7 @@ window.Tweene.registerDriver('transit', 'tween', function() {
             }            
                         
             values = this._getTweenValues(tween, field, false);
+            
             // use transitions only if duration > 0
             if(useTrans)
             {
@@ -5957,20 +6003,14 @@ window.Tweene.registerDriver('transit', 'tween', function() {
             }
             if(useTrans && i == end - 1)
             {   
-                // when display = none, css transitions does not raise complete event, need to emulate it with ticker
-                var display = getProperty(this._getTargetStyle(i, false), 'display')[1];
-                if(display == 'none')
-                {
-                    target.transition(values);                    
-                    this._emulatingComplete = true;                    
-                    Tw.ticker.addCallback(data.realDuration, '-emulate' + this._id, this._runHandlers, this, ['_end']);
-                }
-                else
-                {
-                    this._emulatingComplete = false;
-                    target.transition(values, onComplete);                    
-                }
-            }
+                // transit complete callback is not passing the event object needed to stop propagation in nested contexts
+                // also when display = none, css transitions does not raise complete event
+                // we need to emulate the event
+                this._emulatingComplete = true;                    
+                Tw.ticker.addCallback(data.realDuration, '-emulate' + this._id, onComplete);
+                target.transition(values);                    
+                target.unbind('transitionend');
+            }                       
             else
             {
                 target[method](values);                
@@ -5979,7 +6019,7 @@ window.Tweene.registerDriver('transit', 'tween', function() {
             if(!this._endReady)
             {
                 this._getCurrentValues(target, tween, true, this._fetchPlayPost);
-            }                                    
+            }                        
         }
         
         this._firstRun = false;
@@ -6002,7 +6042,7 @@ window.Tweene.registerDriver('transit', 'tween', function() {
      */ 
     this._pauseTween = function()
     {
-        var easingFunc = null, transform, transformValues = null, offset, 
+        var easingFunc = null, transform, transformValues = null, offset, currentOffset,
             timeProgress, valueProgress, beginValue, endValue, current, 
             i, end, style, targetStyle, tween, target, name, prop;
         
@@ -6011,7 +6051,7 @@ window.Tweene.registerDriver('transit', 'tween', function() {
         {
             Tw.ticker.removeCallback('-emulate' + this._id);
         }
-        this._target.unbind('transitionend oTransitionEnd webkitTransitionEnd MSTransitionEnd');
+        this._target.unbind($.support.transitionEnd);
         
         for(i = 0, end = this._target.length; i < end; i++)
         {
@@ -6031,10 +6071,10 @@ window.Tweene.registerDriver('transit', 'tween', function() {
                         {
                             transform = getProperty(targetStyle, 'transform')[1];
                             transformValues = transform.substring(transform.indexOf('(') + 1, transform.length - 1).split(/\s*,\s*/);
-                            offset = transformValues.length - (transform.indexOf('matrix3d') === 0? 3 : 2);
-                            offset += name == 'z'? 2 : (name == 'y'? 1 : 0);
+                            offset = transform.indexOf('matrix3d') === 0? 12 : 4;
                         }
-                        style[name] = transformValues[offset];
+                        currentOffset = offset + (name == 'z'? 2 : (name == 'y'? 1 : 0));
+                        style[name] = transformValues[currentOffset];
                     }
                     else
                     {

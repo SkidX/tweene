@@ -431,7 +431,7 @@ function compoundMapping(name, value)
  */
 function transformMapping(name, value)
 {
-    var easing, dirs = ['X', 'Y', 'Z'], values = {}, parts;
+    var easing, dirs = ['X', 'Y', 'Z'], values = {}, parts, baseName;
     if(isArray(value))
     {
         value = value[0];
@@ -443,25 +443,41 @@ function transformMapping(name, value)
     }
                     
     parts = String(value).split(/\s*,\s*/);
-    name = name.indexOf('3') !== -1? name.substr(0, name.length - 2) : name;
-        
-    switch(parts.length)
-    {
-        // for rotations, a single value is passed as Z-value, while for other transforms it is applied to X and Y       
-        case 1:
-            parts = name == 'rotate' || name == 'rotation'? [null, null, parts[0]] : [parts[0], parts[0], null];
-        break;
-        
-        case 2:
-            parts = [parts[0], parts[1], null];
-        break;                
-    }
+    baseName = name.indexOf('3') !== -1? name.substr(0, name.length - 2) : name;
     
-    for(var i = 0; i < 3; i++)
+    if(name == 'rotate3d')
+    {
+        if(parts.length == 4)
+        {
+            dirs = [parts[0] == '1'? 'X' : (parts[1] == '1'? 'Y' : 'Z')];
+            parts[0] = parts[3];
+        }
+        else
+        {
+            throw 'invalid rotate 3d value';
+        }
+    }
+    else
+    {
+        switch(parts.length)
+        {
+            // for rotations, a single value is passed as Z-value, while for other transforms it is applied to X and Y       
+            case 1:
+                parts = baseName == 'rotate' || baseName == 'rotation'? [null, null, parts[0]] : [parts[0], parts[0], null];
+            break;
+
+            case 2:
+                parts = [parts[0], parts[1], null];
+            break;                
+        }
+        
+    }
+            
+    for(var i = 0; i < dirs.length; i++)
     {
         if(parts[i] !== null)
         {
-            values[name + dirs[i]] = easing? [parts[i], easing] : parts[i];
+            values[baseName + dirs[i]] = easing? [parts[i], easing] : parts[i];
         }
     }
     return values;
@@ -3072,13 +3088,17 @@ var ControlsPro = function()
             {
                 this._playAllowed = true;
                 this._reverseAllowed = true;
-                // resume progress ticker, if needed
-                this._startProgress();
             }
 
             // always true after the very first execution of resume()
             if(this._running)
             {
+                if(this._duration)
+                {
+                    // resume progress ticker, if needed
+                    this._startProgress();                    
+                }
+                
                 // when the animation library does not have native support for begin callback
                 if(this._emulatedBegin && this._hasHandlers('_begin'))
                 {
@@ -3648,6 +3668,10 @@ var TweenPro = function()
      */
     this._run = function()
     {
+        if(this._duration)
+        {
+            this._startProgress();
+        }
         // get current display and/or visibility values before starting, if needed
         if(this._hasStaticProps)
         {
@@ -4429,7 +4453,7 @@ var TimelinePro = function()
         {
             time = this._backIndex[i];
             elemList = this._backKeyframes[time][type];
-            for(var j = 0, endj = elemList.length; j < endj; j++)
+            for(var j = elemList.length - 1; j >= 0; j--)
             {
                 var child = elemList[j];
                 // disable back in children timelines 

@@ -501,7 +501,7 @@ var TimelinePro = function()
         {
             time = this._backIndex[i];
             elemList = this._backKeyframes[time][type];
-            for(var j = 0, endj = elemList.length; j < endj; j++)
+            for(var j = elemList.length - 1; j >= 0; j--)
             {
                 var child = elemList[j];
                 // disable back in children timelines 

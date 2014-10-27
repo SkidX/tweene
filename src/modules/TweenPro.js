@@ -162,6 +162,10 @@ var TweenPro = function()
      */
     this._run = function()
     {
+        if(this._duration)
+        {
+            this._startProgress();
+        }
         // get current display and/or visibility values before starting, if needed
         if(this._hasStaticProps)
         {
