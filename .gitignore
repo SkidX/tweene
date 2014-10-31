@@ -2,4 +2,4 @@
 /_dev/
 /vendor/
 /node_modules/
-/_dev/
+/coverage/

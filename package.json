@@ -3,17 +3,45 @@
     "title": "Tweene",
     "version": "0.5.0",
     "description": "JavaScript Animation Proxy",
+    "keywords": [
+        "tweene",
+        "animation",
+        "animate",
+        "proxy",
+        "tween",
+        "tweening",
+        "timeline",
+        "control",
+        "GSAP",
+        "velocity",
+        "transit",
+        "jQuery",
+        "CSS",
+        "transition",        
+        "easing",
+        "bezier",
+        "transform"        
+    ],
+    
     "license": "Artistic License 2.0",
     "homepage": "http://tweene.com",
-    "directories": {
-        "test": "test"
+    
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/SkidX/tweene.git"
     },
+    
+    "bugs": {
+        "url": "https://github.com/SkidX/tweene/issues"
+    },
+        
     "authors": [
         {
             "name": "Federico Orrù",
             "url": "http://buzzler.com"
         }
     ],
+    
     "devDependencies": {
         "gsap": "^1.13.2",
         "gulp": "^3.8.8",
@@ -23,11 +51,8 @@
         "gulp-jshint": "^1.8.4",
         "gulp-jshint-file-reporter": "0.0.1",
         "gulp-karma": "0.0.4",
-        "gulp-rename": "^1.2.0",
-        "gulp-rimraf": "^0.1.0",
         "gulp-size": "^1.1.0",
         "gulp-sourcemaps": "^1.2.2",
-        "gulp-strip-banner": "0.0.2",
         "gulp-uglifyjs": "^0.4.2",
         "gulp-wrapper": "^0.1.5",
         "jquery": "^2.1.1",
