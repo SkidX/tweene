@@ -90,7 +90,7 @@ var banner = [
     ' * <%= pkg.title %> - <%= pkg.description %>',
     ' * @version <%= pkg.version %>',
     ' * @link <%= pkg.homepage %>',
-    ' * Copyright (c) 2014, Federico Orrù <federico@buzzler.com>',
+    ' * Copyright (c) 2014, Federico Orru' <federico@buzzler.com>',
     ' * ', 
     ' * @license <%= pkg.license %>',
     ' * See LICENSE.txt for details',

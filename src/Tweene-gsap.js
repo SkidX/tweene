@@ -5,7 +5,7 @@
  * @version 0.5.0
  * @link http://tweene.com
  *   
- * Copyright (c) 2014, Federico Orrù   <federico@buzzler.com>
+ * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
  * 
  * @license Artistic License 2.0 
  * See LICENSE.txt for details
@@ -762,7 +762,7 @@ var Tw = window.Tweene;
  * @version 0.5.0
  * @link http://tweene.com
  *   
- * Copyright (c) 2014, Federico Orrù   <federico@buzzler.com>
+ * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
  * 
  * @license Artistic License 2.0 
  * See LICENSE.txt for details
@@ -1577,7 +1577,7 @@ var Common = function()
  * @version 0.5.0
  * @link http://tweene.com
  *   
- * Copyright (c) 2014, Federico Orrù   <federico@buzzler.com>
+ * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
  * 
  * @license Artistic License 2.0 
  * See LICENSE.txt for details
@@ -1633,7 +1633,7 @@ var Label = function(name)
  * @version 0.5.0
  * @link http://tweene.com
  *   
- * Copyright (c) 2014, Federico Orrù   <federico@buzzler.com>
+ * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
  * 
  * @license Artistic License 2.0 
  * See LICENSE.txt for details
@@ -1719,7 +1719,7 @@ var Callback = function(callback, scope, params, dir)
  * @version 0.5.0
  * @link http://tweene.com
  *   
- * Copyright (c) 2014, Federico Orrù   <federico@buzzler.com>
+ * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
  * 
  * @license Artistic License 2.0 
  * See LICENSE.txt for details
@@ -2341,7 +2341,7 @@ var TweenCommon = function()
  * @version 0.5.0
  * @link http://tweene.com
  *   
- * Copyright (c) 2014, Federico Orrù   <federico@buzzler.com>
+ * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
  * 
  * @license Artistic License 2.0 
  * See LICENSE.txt for details
@@ -2732,7 +2732,7 @@ var TimelineCommon = function()
  * @version 0.5.0
  * @link http://tweene.com
  *   
- * Copyright (c) 2014, Federico Orrù   <federico@buzzler.com>
+ * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
  * 
  * @license Artistic License 2.0 
  * See LICENSE.txt for details

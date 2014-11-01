@@ -5,7 +5,7 @@
  * @version 0.5.0
  * @link http://tweene.com
  *   
- * Copyright (c) 2014, Federico Orrù   <federico@buzzler.com>
+ * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
  * 
  * @license Artistic License 2.0 
  * See LICENSE.txt for details
@@ -762,7 +762,7 @@ var Tw = window.Tweene;
  * @version 0.5.0
  * @link http://tweene.com
  *   
- * Copyright (c) 2014, Federico Orrù   <federico@buzzler.com>
+ * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
  * 
  * @license Artistic License 2.0 
  * See LICENSE.txt for details
@@ -1577,7 +1577,7 @@ var Common = function()
  * @version 0.5.0
  * @link http://tweene.com
  *   
- * Copyright (c) 2014, Federico Orrù   <federico@buzzler.com>
+ * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
  * 
  * @license Artistic License 2.0 
  * See LICENSE.txt for details
@@ -1633,7 +1633,7 @@ var Label = function(name)
  * @version 0.5.0
  * @link http://tweene.com
  *   
- * Copyright (c) 2014, Federico Orrù   <federico@buzzler.com>
+ * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
  * 
  * @license Artistic License 2.0 
  * See LICENSE.txt for details
@@ -1719,7 +1719,7 @@ var Callback = function(callback, scope, params, dir)
  * @version 0.5.0
  * @link http://tweene.com
  *   
- * Copyright (c) 2014, Federico Orrù   <federico@buzzler.com>
+ * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
  * 
  * @license Artistic License 2.0 
  * See LICENSE.txt for details
@@ -2341,7 +2341,7 @@ var TweenCommon = function()
  * @version 0.5.0
  * @link http://tweene.com
  *   
- * Copyright (c) 2014, Federico Orrù   <federico@buzzler.com>
+ * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
  * 
  * @license Artistic License 2.0 
  * See LICENSE.txt for details
@@ -2732,7 +2732,7 @@ var TimelineCommon = function()
  * @version 0.5.0
  * @link http://tweene.com
  *   
- * Copyright (c) 2014, Federico Orrù   <federico@buzzler.com>
+ * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
  * 
  * @license Artistic License 2.0 
  * See LICENSE.txt for details
@@ -2869,7 +2869,7 @@ Tw.ticker = new Ticker();
  * @version 0.5.0
  * @link http://tweene.com
  *   
- * Copyright (c) 2014, Federico Orrù   <federico@buzzler.com>
+ * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
  * 
  * @license Artistic License 2.0 
  * See LICENSE.txt for details
@@ -3509,7 +3509,7 @@ var ControlsPro = function()
  * @version 0.5.0
  * @link http://tweene.com
  *   
- * Copyright (c) 2014, Federico Orrù   <federico@buzzler.com>
+ * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
  * 
  * @license Artistic License 2.0 
  * See LICENSE.txt for details
@@ -3955,7 +3955,7 @@ var TweenPro = function()
  * @version 0.5.0
  * @link http://tweene.com
  *   
- * Copyright (c) 2014, Federico Orrù   <federico@buzzler.com>
+ * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
  * 
  * @license Artistic License 2.0 
  * See LICENSE.txt for details
@@ -4511,7 +4511,7 @@ var TimelinePro = function()
  * @version 0.5.0
  * @link http://tweene.com
  *   
- * Copyright (c) 2014, Federico Orrù   <federico@buzzler.com>
+ * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
  * 
  * @license Artistic License 2.0 
  * See LICENSE.txt for details
@@ -4656,7 +4656,7 @@ window.Tweene.registerDriver('Dummy', 'tween', function() {
  * @version 0.5.0
  * @link http://tweene.com
  *   
- * Copyright (c) 2014, Federico Orrù   <federico@buzzler.com>
+ * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
  * 
  * @license Artistic License 2.0 
  * See LICENSE.txt for details
@@ -5198,7 +5198,7 @@ window.Tweene.defaultDriver = 'gsap';
  * @version 0.5.0
  * @link http://tweene.com
  *   
- * Copyright (c) 2014, Federico Orrù   <federico@buzzler.com>
+ * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
  * 
  * @license Artistic License 2.0 
  * See LICENSE.txt for details
@@ -5612,7 +5612,7 @@ window.Tweene.defaultDriver = 'velocity';
  * @version 0.5.0
  * @link http://tweene.com
  *   
- * Copyright (c) 2014, Federico Orrù   <federico@buzzler.com>
+ * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
  * 
  * @license Artistic License 2.0 
  * See LICENSE.txt for details
@@ -6140,7 +6140,7 @@ window.Tweene.defaultDriver = 'transit';
  * @version 0.5.0
  * @link http://tweene.com
  *   
- * Copyright (c) 2014, Federico Orrù   <federico@buzzler.com>
+ * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
  * 
  * @license Artistic License 2.0 
  * See LICENSE.txt for details
