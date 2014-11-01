@@ -6,7 +6,8 @@ Each programmer and each project have their specific requirements, so sometimes 
 Tweene is something different. It is an animation proxy: used as a wrapper of your chosen library, it may allow you to do more and better 
 and it makes easy to switch from one library to another any time you want. 
 
-Currently it can work together with GSAP, Velocity.js, Transit (CSS transitions) or jQuery.
+Currently it can work together with [GSAP](http://www.greensock.com/gsap-js/), [Velocity.js](http://julian.com/research/velocity/), 
+[Transit (CSS Transitions)](http://ricostacruz.com/jquery.transit/) or [jQuery](http://jquery.com).
 
 ## Resources
 - [Features](http://tweene.com/#features)
