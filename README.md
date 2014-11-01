@@ -1,9 +1,9 @@
-
 # Tweene - JS Animation Proxy - ver. 0.5.0
 
 There are already a lot of good JavaScript animation libraries on the market, each one with specific features, strengths and weaknesses. 
 Each programmer and each project have their specific requirements, so sometimes one library may be suitable while other times it could not. 
-Tweene is something different. It is an animation proxy: used as a wrapper of your chosen library, it may allow you to do more and better 
+
+__Tweene__ is something different. It is an animation proxy: used as a wrapper of your chosen library, it may allow you to do more and better 
 and it makes easy to switch from one library to another any time you want. 
 
 Currently it can work together with [GSAP](http://www.greensock.com/gsap-js/), [Velocity.js](http://julian.com/research/velocity/), 
@@ -18,5 +18,6 @@ Currently it can work together with [GSAP](http://www.greensock.com/gsap-js/), [
 ## License
 
 Tweene is available under Artistic License 2.0, check the LICENSE.txt inside the archive for details.
+
 Animation libraries of your choice are not included and have their own license agreement. 
 
