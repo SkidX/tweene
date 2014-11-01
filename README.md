@@ -1,5 +1,5 @@
 
-# Tweene - JS Animation Proxy
+# Tweene - JS Animation Proxy - ver. 0.5.0
 
 There are already a lot of good JavaScript animation libraries on the market, each one with specific features, strengths and weaknesses. 
 Each programmer and each project have their specific requirements, so sometimes one library may be suitable while other times it could not. 
