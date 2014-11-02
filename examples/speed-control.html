@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Speed Control :: Tweene :: JavaScript Animation Proxy</title>
+        
+        <meta name="viewport" content="width=device-width">
+        
+        <link href="http://fonts.googleapis.com/css?family=Roboto:400,300italic,300,400italic|Roboto+Condensed:400,300italic,300,400italic" rel="stylesheet" type="text/css" />        
+        <link href="css/speed-control.css" rel="stylesheet" type="text/css" />        
+        <script src="js/vendor.js"></script>
+        <script src="../src/Tweene-all.js"></script>
+    </head>
+    <body>
+        
+        <div class="all">
+
+            <div class="object rocket"></div>
+
+            <div class="object planet"></div>
+
+
+            <div class="controls">
+                <p class="intro">Select the animation library:</p>
+                <ul class="driverControls">
+                    <li class="current" data-driver="gsap">GSAP</li>
+                    <li data-driver="transit">Transit (CSS Transitions)</li>
+                    <li data-driver="velocity">Velocity.js</li>
+                </ul>
+
+                <p class="intro">Select the animation speed:</p>
+                <ul class="speedControls">
+                    <li data-speed="0.25">0.25X</li>
+                    <li data-speed="0.50">0.5X (half speed)</li>
+                    <li class="current" data-speed="1">1 (normal speed)</li>
+                    <li data-speed="2">2X (double speed)</li>
+                    <li data-speed="3">3X</li>
+                </ul>
+            </div>
+        </div>
+        <script>
+
+            window.$ = window.jQuery = require('jquery');            
+            require('velocity-animate');
+            require('jquery.transit');
+            require('gsap');
+
+            $(document).ready(function() {                            
+
+                Tweene.defaultTimeUnit = 's';
+                var $rocket = $('.rocket'),
+                    tween = null, 
+                    speed = 1;
+
+                Tweene.defaultDriver = 'gsap';
+
+                Tweene.set($rocket, {transformOrigin: '140px 25px'});
+
+                function animate(driver)
+                {
+                    if(tween)
+                    {
+                        tween.pause();
+                    }
+
+                    tween = Tweene.get($rocket, driver)
+                        .from({rotate: 0})
+                        .to({rotate: 360})
+                        .duration(3)
+                        .speed(speed)
+                        .easing('linear')
+                        .loops(-1)
+                        .play();
+                };
+
+
+
+                $('.driverControls li').on('click', function(event){
+                    var $this = $(this);
+                    if(!$this.is('.current'))
+                    {
+                        var newDriver = $this.data('driver');
+                        $this.parent().find('.current').removeClass('current');
+                        $this.addClass('current');
+                        animate(newDriver);
+                    }
+                    event.stopPropagation();
+                    event.preventDefault();
+                });
+
+                $('.speedControls li').on('click', function(event){
+                    var $this = $(this);
+                    if(!$this.is('.current'))
+                    {
+                        speed = $this.data('speed');
+                        $this.parent().find('.current').removeClass('current');
+                        $this.addClass('current');
+                        tween.speed(speed);
+                    }
+                    event.stopPropagation();
+                    event.preventDefault();
+                });
+
+                animate('gsap');
+
+            });
+
+        </script>        
+        
+    </body>
+</html>

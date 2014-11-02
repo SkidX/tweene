@@ -1,0 +1,111 @@
+
+
+@import "_example.scss";
+@import "_icon.scss";
+
+
+.controls
+{
+    position:relative;
+    width: 320px;
+    text-align: center;
+    
+    ul, li
+    {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    
+    li
+    {
+        position: relative;
+        display: inline-block;
+        font-size: 36px;
+        margin-right: 10px;
+    }
+    
+    li:last-child
+    {
+        margin-right: 0;
+    }
+    
+    span
+    {
+        display: inline-block;
+        cursor: pointer;
+    }
+    
+    span:hover 
+    {
+        color: #FFFFFF;
+    }
+
+    .reverse
+    {
+        transform: rotate(180deg);
+    }
+}
+
+
+.rocket
+{
+    width: 32px;
+    height: 41px;
+    top: 380px;
+}
+
+.rocket-01
+{
+    background-image: url('../img/rocket-01.svg');
+    left: 70px;
+}
+
+.rocket-02
+{
+    background-image: url('../img/rocket-02.svg');
+    left: 230px;
+}
+
+.label
+{
+    position: absolute;
+    top: 440px;
+}
+
+.label-01
+{
+    left: 65px;
+}
+
+.label-02
+{
+    left: 160px;
+}
+
+
+.description
+{
+    position: absolute;
+    right: 20px;
+    top: 40px;
+    width: 300px;        
+}
+
+
+
+@media screen and (max-width: 767px)
+{
+    .all
+    {
+        padding-left: 0;
+        padding-right: 0;
+    }
+    
+    .description
+    {
+        right: auto;
+        top: 500px;
+        left: 10px;
+    }
+}

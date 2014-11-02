@@ -11,6 +11,8 @@ var gulp = require('gulp'),
     browserify = require('gulp-browserify-thin'),
     header = require('gulp-header'),
     sourcemaps = require('gulp-sourcemaps'),
+    sass = require('gulp-sass'),
+    autoprefixer = require('gulp-autoprefixer'),
     pkg = require('./package.json');
 
 
@@ -90,7 +92,7 @@ var banner = [
     ' * <%= pkg.title %> - <%= pkg.description %>',
     ' * @version <%= pkg.version %>',
     ' * @link <%= pkg.homepage %>',
-    ' * Copyright (c) 2014, Federico Orru' <federico@buzzler.com>',
+    " * Copyright (c) 2014, Federico Orru' <federico@buzzler.com>",
     ' * ', 
     ' * @license <%= pkg.license %>',
     ' * See LICENSE.txt for details',
@@ -131,8 +133,22 @@ gulp.task('vendor', function()
             console.error(err.toString());
             process.exit(1);
         })
-        .pipe(gulp.dest('./vendor'));
+        .pipe(gulp.dest('./vendor'))
+        .pipe(gulp.dest('./examples/js'));
 });
+
+
+gulp.task('css', function () {
+    gulp.src('examples/scss/*.scss')
+        .pipe(sass({
+            errLogToConsole: true,
+            outputStyle: 'compressed'
+        }))
+        .pipe(autoprefixer({
+            cascade: false
+        }))
+        .pipe(gulp.dest('examples/css'));
+});    
 
 
    
@@ -158,5 +174,11 @@ gulp.task('default', ['src'], function(){
 
 var srcWatcher = gulp.watch('src/modules/*.js', ['src']);
 srcWatcher.on('change', function(event) {
+    console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
+});
+
+
+var cssWatcher = gulp.watch('examples/scss/*.scss', ['css']);
+cssWatcher.on('change', function(event) {
     console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
 });

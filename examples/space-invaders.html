@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Space Invaders :: Tweene :: JavaScript Animation Proxy</title>
+        
+        <meta name="viewport" content="width=device-width">
+        
+        <link href="http://fonts.googleapis.com/css?family=Roboto:400,300italic,300,400italic|Roboto+Condensed:400,300italic,300,400italic" rel="stylesheet" type="text/css" />        
+        <link href="css/space-invaders.css" rel="stylesheet" type="text/css" />        
+        <script src="js/vendor.js"></script>
+        <script src="../src/Tweene-all.js"></script>
+        <script src="js/space-invaders.js"></script>
+    </head>
+    <body>
+                              
+        <div class="all">
+
+            <div class="object game"></div>
+
+            <div class="driverControls">
+                <p class="intro">Select the animation library:</p>
+                <ul>
+                    <li class="current" data-driver="gsap">GSAP</li>
+                    <li data-driver="transit">Transit (CSS Transitions)</li>
+                    <li data-driver="velocity">Velocity.js</li>
+                </ul>
+
+                <p>Use Left and Right arrow keys for move and Space for shot.</p>
+            </div>
+        </div>
+        <script>            
+            window.$ = window.jQuery = require('jquery');            
+            require('velocity-animate');
+            require('jquery.transit');
+            require('gsap');
+                        
+            $(document).ready(function() {                            
+
+                Tweene.defaultTimeUnit = 's';
+
+                var game = new SpaceInvaders('.game', 'manual', 3, 3, 2, 4, 15);        
+
+                $('.driverControls li').on('click', function(event){
+                    var $this = $(this);
+                    if(!$this.is('.current'))
+                    {
+                        var newDriver = $this.data('driver');
+                        $this.parent().find('.current').removeClass('current');
+                        $this.addClass('current');
+                        game.restart(newDriver);
+                    }
+                    event.stopPropagation();
+                    event.preventDefault();
+                });
+
+                game.restart('gsap');
+            });
+
+        </script>
+            
+            
+    </body>
+</html>

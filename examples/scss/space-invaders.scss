@@ -1,0 +1,298 @@
+
+
+@import "_example.scss";
+
+
+.alien
+{
+    width: 60px;
+    height: 45px;
+    background-image: url('../img/alien.svg');
+}
+
+
+.invader
+{    
+    width: 180px;
+    height: 135px;
+    left: 50%;
+    margin-left: -90px;
+    //top: 10%;
+    bottom: 100%;
+    background-image: url('../img/alien.svg');        
+}
+
+.defender
+{
+    width: 50px;
+    height: 28px;
+    background-image: url('../img/defender.svg');                                    
+}
+
+.spaceball
+{
+    width: 9px;
+    height: 9px;
+    background-image: url('../img/space-ball.svg');                                    
+}
+
+
+
+.aliens
+{
+    left: 0px;
+    top: 0px;   
+    display: block;
+    margin: 0;
+    padding: 0;        
+    list-style: none;
+    
+    
+    ul
+    {
+        display: block;
+        margin: 0;
+        padding: 0;        
+        list-style: none;
+    }
+
+    .row
+    {
+        display: block;
+        padding: 0;
+
+        height: 30px;
+        white-space: nowrap;        
+    }
+
+    .row:last-child
+    {
+        margin-bottom: 0;
+    }
+
+    .col
+    {
+        position: relative;
+        display: inline-block;
+        padding: 0;
+        width: 40px;
+        height: 30px;
+    }
+
+    .col:last-child
+    {
+        margin-right: 0;
+    }
+    
+}
+
+
+.alien
+{
+    left: 0;
+    top: 0;       
+    width: 40px;
+    height: 30px;
+}
+
+
+.defender
+{
+    left: 0px;
+    bottom: 60px;
+    z-index: 3;
+
+    width: 40px;
+    height: 22.4px;
+}
+
+.spaceball
+{
+    left: 17px;
+    bottom: 84px;
+    z-index: 22;
+    width: 6px;
+    height: 6px;
+}
+
+.controls
+{
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 58px;
+    z-index: 20;
+    background-color: #62ABBE;
+    
+    
+    > span    
+    {
+        display: inline-block;
+        height: 34px;
+        border: 1px solid #CCCCCC;
+        border-radius: 6px;        
+        margin: 20px 0 0 6px;
+        text-align: center;
+        font-size: 18px;
+        line-height: 30px;
+        text-transform: uppercase;
+        cursor: pointer;
+    }
+
+    .left
+    {
+        width: 55px;
+    }
+
+    .right
+    {
+        width: 55px; 
+    }
+
+    .space
+    {
+        width: 186px;
+    }
+    
+}
+
+
+.win
+{
+    left: 0;
+    top: 40%;
+    width: 100%;
+    font-size: 48px;
+    text-align: center;
+    text-transform: uppercase;
+    font-family: $headingFontFamily;
+    font-weight: 300;
+    line-height: 1;
+    display: none;
+}
+
+
+.lose
+{
+    left: 0;
+    top: 50%;
+    width: 100%;
+    font-size: 48px;
+    text-align: center;
+    text-transform: uppercase;
+    font-family: $headingFontFamily;
+    font-weight: 300;
+    line-height: 1;
+    display: none;
+
+}
+
+.restart
+{
+    left: 0;
+    top: 70%;
+    width: 100%;
+    font-size: 28px;
+    text-align: center;
+    text-transform: uppercase;
+    font-family: $headingFontFamily;
+    font-weight: 300;
+    line-height: 1;
+    color: #DDDDDD;
+    cursor: pointer;
+    display: none;
+
+    &:hover
+    {
+        color: #FFFFFF;
+    }
+}
+
+
+
+.game
+{
+    position: relative; 
+    width: 320px;
+    height: 400px;
+    overflow: hidden;
+    background-color: #62ABBE;
+    
+    
+    &.auto
+    {
+        .restart, .controls, .start
+        {
+            display: none !important;
+        }
+        
+        
+        .defender
+        {
+            bottom: 0;
+        }
+
+        .spaceball
+        {
+            bottom: 24px;
+        }
+    }
+    
+}
+
+.driverControls
+{
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    width: 300px;    
+    
+    
+    .intro
+    {
+        font-family: $headingFontFamily;
+        font-weight: 300;
+        font-size: 20px;
+        text-transform: uppercase;
+    }
+    
+    ul
+    {
+        list-style: circle;
+    }
+    
+    li
+    {
+        cursor: pointer;
+    }
+    
+    li:hover
+    {
+        color: #FFFFFF;
+    }
+    
+    .current
+    {
+        color: #DDDDDD;
+        font-weight: 400;
+    }
+}
+
+
+@media screen and (max-width: 767px)
+{
+    .all
+    {
+        padding-left: 0;
+        padding-right: 0;
+    }
+    
+    .driverControls
+    {
+        right: auto;
+        top: 500px;
+        left: 10px;
+    }
+}
+

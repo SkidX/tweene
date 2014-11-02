@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>CSS Transitions Control :: Tweene :: JavaScript Animation Proxy</title>
+        
+        <meta name="viewport" content="width=device-width">
+        
+        <link href="http://fonts.googleapis.com/css?family=Roboto:400,300italic,300,400italic|Roboto+Condensed:400,300italic,300,400italic" rel="stylesheet" type="text/css" />        
+        <link href="css/css-transitions-control.css" rel="stylesheet" type="text/css" />        
+        <script src="js/vendor.js"></script>
+        <script src="../src/Tweene-all.js"></script>
+    </head>
+    <body>
+
+        <div class="all">
+
+            <div class="controls">
+                <ul>
+                    <li><span class="reverse" data-action="reverse"><i class="icon-play"></i></span></li>
+                    <li><span class="pause" data-action="pause"><i class="icon-pause"></i></span></li>
+                    <li><span class="play" data-action="play"><i class="icon-play"></i></span></li>
+                    <li><span class="restart" data-action="restart"><i class="icon-ccw"></i></span></li>
+                </ul>
+            </div>
+
+            <div class="object rocket rocket-01"></div>
+            <div class="object rocket rocket-02"></div>
+            <span class="label label-01">GSAP</span>
+            <span class="label label-02">Transit (CSS Transitions)</span>
+
+
+            <p class="description">This example shows the same tween applied to two different images: the first one
+                uses Tweene with GSAP library, that second one uses Tweene with Transit, a library that animates DOM elements 
+                with CSS Transitions technology.
+                As you can see, pause, resume and reverse actions honor the original easing function.<br />
+                You can try by yourself changing the easing function with <a href="http://tweene.com/docs/#easing">one of those supported by Tweene</a>.
+            </p>
+        </div>
+        <script>
+            window.$ = window.jQuery = require('jquery');            
+            require('velocity-animate');
+            require('jquery.transit');
+            require('gsap');
+
+        $(document).ready(function() {                            
+
+
+            Tweene.defaultTimeUnit = 's';
+            var t1 = Tweene.get('.rocket-01', 'gsap')
+                .to({y: -280})
+                .easing('easeInBack')
+                .duration(3);
+
+            var t2 = Tweene.get('.rocket-02', 'transit')
+                .to({y: -280})
+                .easing('easeInBack')
+                .duration(3);
+
+            $('.controls span').on('click', function(event){
+                var action = $(this).data('action');
+
+                t1[action]();
+                t2[action]();
+                event.stopPropagation();
+                event.preventDefault();
+            });
+        });
+
+        </script>
+        
+    </body>
+</html>

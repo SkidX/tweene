@@ -1,0 +1,83 @@
+
+
+$baseFontFamily: 'Roboto', arial, sans-serif;
+$headingFontFamily: 'Roboto Condensed', arial, sans-serif;
+
+$baseColor: #454545;
+$baseBgColor: #62ABBE;
+
+$baseLinkColor: #DDDDDD;
+$baseHoverColor: #FFFFFF;
+
+
+@import "_normalize.scss";
+@import "_main.scss";
+
+
+
+/* apply a natural box layout model to all elements */
+* { -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; }
+
+*:after, *:before { -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; }
+
+
+html, body, .all
+{
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body
+{
+    font-family: $baseFontFamily;
+    font-weight: 300;
+    font-size: 16px;
+    color: $baseColor;
+    background-color: $baseBgColor;
+    line-height: 1.9;
+}
+
+p
+{
+    margin: 0 0 0.7em 0;
+    padding: 0;
+    text-indent: 0;
+}
+
+a
+{
+    color: $baseLinkColor;
+    text-decoration: none;
+    outline: none !important;
+}
+
+a:hover
+{
+    color: $baseHoverColor;
+    text-decoration: none;
+    outline: none !important;
+}
+
+
+.all
+{
+    position: relative;
+    width: 100%;
+    max-width: 960px;
+    height: 100%;
+    margin: auto;
+    padding: 20px;
+}
+
+
+.object
+{
+    position: absolute; 
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+    transform: translate(0, 0, 0);    
+    background-size: 100% 100%;
+}
+        
+
