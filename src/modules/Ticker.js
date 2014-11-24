@@ -1,6 +1,6 @@
 /**
  * Tweene - JavaScript Animation Proxy 
- * @version 0.5.0
+ * @version 0.5.1
  * @link http://tweene.com
  *   
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
@@ -62,8 +62,7 @@ var Ticker = function()
         while(i < _callbacks.length)
         {
             var entry = _callbacks[i];
-            // as seen in tests, executing the call till 20ms earlier than expected seemed a good empirical compensation of overhead
-            var call = (!entry.time || now - entry.now - entry.time > -20);
+            var call = (!entry.time || now - entry.now - entry.time >= 0);
             if(call && entry.time)
             {
                 // remove expired callback

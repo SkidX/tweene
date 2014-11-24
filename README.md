@@ -1,4 +1,4 @@
-# Tweene - JS Animation Proxy - ver. 0.5.0
+# Tweene - JS Animation Proxy - ver. 0.5.1
 
 __Tweene__ is a JS library that helps to improve your favourite animation engine, allowing you to do more and better.
 
@@ -19,6 +19,9 @@ Currently it can work together with [GSAP](http://www.greensock.com/gsap-js/), [
 - [Documentation](http://tweene.com/docs)
 - [Examples](http://tweene.com/#examples)
 
+## History
+- __0.5.1__ Predefined transforms order: now transformations are applied always in the same order. Fixed some minor glitches with CSS transitions.
+- __0.5.0__ First public release
 
 ## License
 

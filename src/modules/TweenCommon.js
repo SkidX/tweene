@@ -1,6 +1,6 @@
 /**
  * Tweene - JavaScript Animation Proxy 
- * @version 0.5.0
+ * @version 0.5.1
  * @link http://tweene.com
  *   
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
@@ -385,8 +385,30 @@ var TweenCommon = function()
         // for each single dom target involved
         if(this._emulatedPlayhead)
         {
-            var tweens = [];
-            for(var i = 0, end = this._getTargetLength(); i < end; i++)
+            var i, end, 
+                sortedTween = {}, 
+                tweens = [],
+                name,
+                transformOrder = [
+                    'x', 'translateX', 'y', 'translateY', 'z', 'translateZ', 
+                    'rotateZ', 'rotate', 'rotation', 'rotationZ', 'rotateX', 'rotationX', 'rotateY', 'rotationY', 
+                    'scale', 'scaleX', 'scaleY', 'scaleZ' 
+                ]
+            ;
+            
+            for(i = 0, end = transformOrder.length; i < end; i++)
+            {
+                name = transformOrder[i];
+                if(name in tween)
+                {
+                    sortedTween[name] = tween[name];
+                    delete tween[name];
+                }
+            }
+            
+            tween = extendObject(sortedTween, tween);
+                                                            
+            for(i = 0, end = this._getTargetLength(); i < end; i++)
             {
                 tweens[i] = cloneObject(tween, true);
             }
@@ -394,6 +416,9 @@ var TweenCommon = function()
         }
         return tween;                
     };    
+
+
+    
 
 
     /**
