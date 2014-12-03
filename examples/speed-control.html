@@ -9,7 +9,14 @@
         <link href="http://fonts.googleapis.com/css?family=Roboto:400,300italic,300,400italic|Roboto+Condensed:400,300italic,300,400italic" rel="stylesheet" type="text/css" />        
         <link href="css/speed-control.css" rel="stylesheet" type="text/css" />        
         <script src="js/vendor.js"></script>
-        <script src="../src/Tweene-all.js"></script>
+        <script>
+            window.$ = window.jQuery = require('jquery');
+            require('velocity-animate');
+            require('jquery.transit');
+            require('gsap');
+        </script>
+        
+        <script src="../tweene.js"></script>
     </head>
     <body>
         
@@ -39,11 +46,6 @@
             </div>
         </div>
         <script>
-
-            window.$ = window.jQuery = require('jquery');            
-            require('velocity-animate');
-            require('jquery.transit');
-            require('gsap');
 
             $(document).ready(function() {                            
 

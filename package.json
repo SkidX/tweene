@@ -1,8 +1,8 @@
 {
     "name": "tweene",
     "title": "Tweene",
-    "version": "0.5.1",
-    "description": "JavaScript Animation Proxy",
+    "version": "0.5.2",
+    "description": "JavaScript Animation Proxy. It can work with GSAP, Velocity.js, Transit or jQuery.",
     "keywords": [
         "tweene",
         "animation",
@@ -41,6 +41,15 @@
             "url": "http://buzzler.com"
         }
     ],
+    
+    "main": "./tweene.js",
+    
+    "dependencies": {
+        "gsap": "^1.13.2",
+        "jquery": "^2.1.1",
+        "jquery.transit": "^0.9.12",
+        "velocity-animate": "^1.1.0"    
+    },
     
     "devDependencies": {
         "gsap": "^1.13.2",

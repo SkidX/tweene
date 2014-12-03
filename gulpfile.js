@@ -18,7 +18,7 @@ var gulp = require('gulp'),
 
 
 gulp.task('lint', function() {
-    return gulp.src('./src/modules/*.js')
+    return gulp.src('./src/*.js')
         .pipe(jshint())
         .pipe(jshint.reporter('jshint-stylish'));
 });
@@ -41,7 +41,7 @@ gulp.task('testing', function (done) {
     }, done);
 });
 
-var modulesPath = 'src/modules/';
+var modulesPath = 'src/';
    
 var commons = [
     modulesPath + 'Tweene.js',
@@ -61,29 +61,44 @@ var pro = [
 ];
    
 var drivers = {
-    all: commons.concat(pro, [
-        modulesPath + 'TweeneGsap.js',
-        modulesPath + 'TweeneVelocity.js',
-        modulesPath + 'TweeneTransit.js',
-        modulesPath + 'TweeneJquery.js'               
-    ]),
+    tweene: {
+        files: commons.concat(pro, [
+            modulesPath + 'TweeneGsap.js',
+            modulesPath + 'TweeneVelocity.js',
+            modulesPath + 'TweeneTransit.js',
+            modulesPath + 'TweeneJquery.js'               
+        ]),
+        deps: ['jquery', 'jquery.transit', 'velocity-animate', 'gsap']
+    }, 
     
-    jquery: commons.concat(pro, [
-        modulesPath + 'TweeneJquery.js'               
-    ]),
+    jquery: {
+        files: commons.concat(pro, [
+            modulesPath + 'TweeneJquery.js'               
+        ]),
+        deps: ['jquery']
+    },
     
-    transit: commons.concat(pro, [
-        modulesPath + 'TweeneTransit.js'               
-    ]),
+    transit: {
+        files: commons.concat(pro, [
+            modulesPath + 'TweeneTransit.js'               
+        ]),
+        deps: ['jquery', 'jquery.transit']
+    },
     
-    velocity: commons.concat(pro, [
-        modulesPath + 'TweeneVelocity.js'               
-    ]),
+    velocity: {
+        files: commons.concat(pro, [
+            modulesPath + 'TweeneVelocity.js'               
+        ]),
+        deps: ['jquery', 'velocity-animate']
+    },
         
-    gsap: commons.concat([
-        modulesPath + 'TweeneGsap.js'
-    ])
-    
+    gsap: {
+        files: commons.concat([
+            modulesPath + 'TweeneGsap.js'
+        ]),
+        deps: ['gsap']
+    }
+           
 };
    
    
@@ -101,23 +116,53 @@ var banner = [
     ''
 ].join('\n');      
 
+
 gulp.task('src', function(){   
-    
-    var driver, srcs, streams = [];
+
+    var header = 
+        ";(function (window) {\n" +
+        "'use strict'; \n" +
+        "var func = function(window, undef) {\n" +
+        "'use strict'; \n\n",
+        footer = '',   
+        driver, srcs, deps, streams = [];
     
     for(driver in drivers)
     {
-        srcs = drivers[driver];
+        srcs = drivers[driver].files;
+        deps = drivers[driver].deps;
+        footer =    
+            "return Tw;\n" +
+            "};\n\n" +
+            "if(typeof(define) === 'function' && define.amd) {\n" +
+            "   define(['" + deps.join("', '") + "'], func);\n" +
+            "} else if(typeof(module) !== 'undefined' && module.exports) {\n" +
+            "   var mod;\n";
+        for(var i = 0, end = deps.length; i < end; i++)
+        {
+            footer += " mod = require('" + deps[i] + "');\n";
+            if(deps[i] == 'jquery')
+            {
+                footer += " if(window) window.jQuery = window.$ = mod;\n";
+            }
+        }
+        footer += 
+            "module.exports.Tweene = func(window);\n" +
+            "} else {\n" +
+            "   func(window);\n" +
+            "}\n" +
+            "}(global? global : window));\n";
+            
         streams.push(
             gulp.src(srcs)
             .pipe(sourcemaps.init())
-            .pipe(concat('Tweene-' + driver + '.js'))
+            .pipe(concat(driver + '.js'))
             .pipe(wrapper({
-                header: "(function(window, undef){ \n  'use strict'; \n",
-                footer: "\n}(window));"
+                header: header,
+                footer: footer
             }))
             .pipe(sourcemaps.write('.'))
-            .pipe(gulp.dest('src'))
+            .pipe(gulp.dest('./'))
         );
     }
     return merge.apply(null, streams);        
@@ -154,17 +199,17 @@ gulp.task('css', function () {
    
 gulp.task('default', ['src'], function(){   
     
-    var driver, streams = [];
+    var driver, streams = [], suffix;
     
     for(driver in drivers)
     {
-        srcs = drivers[driver];
+        suffix = driver == 'tweene'? 'all' : driver;
         streams.push(
-            gulp.src('src/Tweene-' + driver + '.js')        
-            .pipe(uglify('Tweene-' + driver + '.min.js'))
-            .pipe(header(banner, {pkg: pkg}))
-            .pipe(size({gzip: true, title: driver + ': '}))            
-            .pipe(gulp.dest('.'))
+            gulp.src(driver + '.js')        
+                .pipe(uglify('Tweene-' + suffix + '.min.js'))
+                .pipe(header(banner, {pkg: pkg}))
+                .pipe(size({gzip: true, title: driver + ': '}))            
+                .pipe(gulp.dest('minified/'))
         );
     }
     return merge.apply(null, streams);    

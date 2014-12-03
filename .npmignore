@@ -1,0 +1,17 @@
+.DS_Store
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+test/
+coverage/
+_dev/
+examples/
+vendor/
+nbproject/
+karma.conf.js
+gulpfile.js
+bower.json
+.gitignore

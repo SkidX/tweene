@@ -15,21 +15,21 @@ module.exports = function(config) {
         files: [
             'vendor/vendor.js',
             'test/vendor.js',
-            'src/modules/Tweene.js',
-            'src/modules/Common.js',
-            'src/modules/Label.js',
-            'src/modules/Callback.js',
-            'src/modules/Ticker.js',                
-            'src/modules/TweenCommon.js',
-            'src/modules/TimelineCommon.js',
-            'src/modules/ControlsPro.js',
-            'src/modules/TweenPro.js',
-            'src/modules/TimelinePro.js',
-            'src/modules/TweeneDummy.js',
-            'src/modules/TweeneGsap.js',
-            'src/modules/TweeneVelocity.js',
-            'src/modules/TweeneTransit.js',
-            'src/modules/TweeneJquery.js',
+            'src/Tweene.js',
+            'src/Common.js',
+            'src/Label.js',
+            'src/Callback.js',
+            'src/Ticker.js',                
+            'src/TweenCommon.js',
+            'src/TimelineCommon.js',
+            'src/ControlsPro.js',
+            'src/TweenPro.js',
+            'src/TimelinePro.js',
+            'src/TweeneDummy.js',
+            'src/TweeneGsap.js',
+            'src/TweeneVelocity.js',
+            'src/TweeneTransit.js',
+            'src/TweeneJquery.js',
             'test/spec.js'
         ],
 
@@ -42,7 +42,7 @@ module.exports = function(config) {
         // preprocess matching files before serving them to the browser
         // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor        
         preprocessors: {
-            'src/modules/*.js': ['coverage']
+            'src/*.js': ['coverage']
         },        
 
         // test results reporter to use

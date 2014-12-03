@@ -1,4 +1,4 @@
-# Tweene - JS Animation Proxy - ver. 0.5.1
+# Tweene - JS Animation Proxy - ver. 0.5.2
 
 __Tweene__ is a JS library that helps to improve your favourite animation engine, allowing you to do more and better.
 
@@ -19,7 +19,62 @@ Currently it can work together with [GSAP](http://www.greensock.com/gsap-js/), [
 - [Documentation](http://tweene.com/docs)
 - [Examples](http://tweene.com/#examples)
 
+## Getting started
+To start using Tweene just include the script after your animation library of choice.
+
+	// use Tweene with GSAP: default time unit is 's'
+	<script src="/your/path/TweenMax.min.js"></script>;
+	<script src="/your/path/Tweene-gsap.min.js"></script>
+
+	// use Tweene with jQuery: default time unit is 'ms'
+	<script src="/your/path/jquery.min.js"></script>
+	<script src="/your/path/Tweene-jquery.min.js"></script>
+
+	// use Tweene with Transit: default time unit is 'ms'
+	<script src="/your/path/jquery.transit.js"></script>
+	<script src="/your/path/Tweene-transit.min.js"></script>
+
+	// use Tweene with Velocity.js: default time unit is 'ms'
+	<script src="/your/path/velocity.min.js"></script>
+	<script src="/your/path/Tweene-velocity.min.js"></script>
+
+	// use Tweene with more then one library
+	<script src="/your/path/TweenMax.min.js"></script>
+	<script src="/your/path/jquery.transit.js"></script>
+	<script src="/your/path/velocity.min.js"></script>
+	<script src="/your/path/Tweene-all.min.js"></script>
+	<script>
+		// set your default time unit and driver
+		Tweene.defaultTimeUnit = 's';
+		Tweene.defaultDriver = 'gsap';
+	</script>
+
+Or with package managers:
+
+    bower install tweene
+    or
+    npm install tweene
+
+	// use Tweene with more then one library
+	require('tweene');	
+	// set your default time unit and driver
+	Tweene.defaultTimeUnit = 's';
+	Tweene.defaultDriver = 'gsap';
+	
+	// use Tweene with GSAP: default time unit is 's'
+	require('tweene/gsap');
+
+	// use Tweene with jQuery: default time unit is 'ms'
+	require('tweene/jquery');
+
+	// use Tweene with Transit: default time unit is 'ms'
+	require('tweene/transit');
+
+	// use Tweene with Velocity.js: default time unit is 'ms'
+	require('tweene/velocity');
+
 ## History
+- __0.5.2__ Added support for npm and bower.
 - __0.5.1__ Predefined transforms order: now transformations are applied always in the same order. Fixed some minor glitches with CSS transitions.
 - __0.5.0__ First public release
 

@@ -1,0 +1,67 @@
+{
+    "name": "tweene",
+    "version": "0.5.2",
+    "description": "JavaScript Animation Proxy. It can work with GSAP, Velocity.js, Transit or jQuery.",
+    "keywords": [
+        "tweene",
+        "animation",
+        "animate",
+        "proxy",
+        "tween",
+        "tweening",
+        "timeline",
+        "control",
+        "GSAP",
+        "velocity",
+        "transit",
+        "jQuery",
+        "CSS",
+        "transition",        
+        "easing",
+        "bezier",
+        "transform"        
+    ],
+    
+    "main": "tweene.js",
+    
+    "homepage": "http://tweene.com",
+    "authors": [
+        {"name": "Federico Orru'", "email": "federico@buzzler.com", "homepage": "http://buzzler.com"}        
+    ],
+    
+    "moduleType": [
+        "amd",
+        "node"
+    ],
+    
+    "dependencies": {
+        "gsap": "^1.13.2",
+        "jquery": "^2.1.1",
+        "jquery.transit": "^0.9.12",
+        "velocity-animate": "^1.1.0"    
+    },
+    
+    "license": "Artistic License 2.0",
+
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/SkidX/tweene.git"
+    },
+
+    "ignore": [
+        "**/.*",
+        "node_modules",
+        "bower_components",
+        "vendor",
+        "examples",
+        "test",
+        "coverage", 
+        "_dev",
+        "gulpfile.js",
+        "Thumbs.db",
+        "ehthumbs.db",
+        "Desktop.ini",
+        "$RECYCLE.BIN"
+        
+    ]
+}
