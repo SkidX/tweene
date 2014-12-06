@@ -151,7 +151,7 @@ gulp.task('src', function(){
             "} else {\n" +
             "   func(window);\n" +
             "}\n" +
-            "}(global? global : window));\n";
+            "}(typeof(global) !== 'undefined'? global : window));\n";
             
         streams.push(
             gulp.src(srcs)

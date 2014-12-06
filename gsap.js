@@ -3312,6 +3312,6 @@ module.exports.Tweene = func(window);
 } else {
    func(window);
 }
-}(global? global : window));
+}(typeof(global) !== 'undefined'? global : window));
 
 //# sourceMappingURL=gsap.js.map
