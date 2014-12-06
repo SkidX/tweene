@@ -1,6 +1,6 @@
 /**
  * Tweene - JavaScript Animation Proxy 
- * @version 0.5.2
+ * @version 0.5.3
  * @link http://tweene.com
  *   
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
@@ -10,9 +10,7 @@
  * 
  */
 
-
 /* jshint -W008 */
-
 
 /**
  * Common data and utility functions used internally.

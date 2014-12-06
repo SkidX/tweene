@@ -5,7 +5,7 @@ var func = function(window, undef) {
 
 /**
  * Tweene - JavaScript Animation Proxy 
- * @version 0.5.2
+ * @version 0.5.3
  * @link http://tweene.com
  *   
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
@@ -15,9 +15,7 @@ var func = function(window, undef) {
  * 
  */
 
-
 /* jshint -W008 */
-
 
 /**
  * Common data and utility functions used internally.
@@ -768,7 +766,7 @@ if(window)
 
 /**
  * Tweene - JavaScript Animation Proxy 
- * @version 0.5.2
+ * 
  * @link http://tweene.com
  *   
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
@@ -1583,7 +1581,7 @@ var Common = function()
 };
 /**
  * Tweene - JavaScript Animation Proxy 
- * @version 0.5.2
+ * 
  * @link http://tweene.com
  *   
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
@@ -1639,7 +1637,7 @@ var Label = function(name)
 
 /**
  * Tweene - JavaScript Animation Proxy 
- * @version 0.5.2
+ * 
  * @link http://tweene.com
  *   
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
@@ -1725,7 +1723,7 @@ var Callback = function(callback, scope, params, dir)
 
 /**
  * Tweene - JavaScript Animation Proxy 
- * @version 0.5.2
+ * 
  * @link http://tweene.com
  *   
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
@@ -2372,7 +2370,7 @@ var TweenCommon = function()
 };
 /**
  * Tweene - JavaScript Animation Proxy 
- * @version 0.5.2
+ * 
  * @link http://tweene.com
  *   
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
@@ -2763,7 +2761,7 @@ var TimelineCommon = function()
 };
 /**
  * Tweene - JavaScript Animation Proxy 
- * @version 0.5.2
+ * 
  * @link http://tweene.com
  *   
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>

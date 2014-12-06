@@ -1,4 +1,4 @@
-# Tweene - JS Animation Proxy - ver. 0.5.2
+# Tweene - JS Animation Proxy - v0.5.3
 
 __Tweene__ is a JS library that helps to improve your favourite animation engine, allowing you to do more and better.
 
@@ -8,7 +8,7 @@ Each programmer and each project have their specific requirements, so sometimes 
 __Tweene__ is something different. It is an animation proxy: used as a wrapper of your chosen library, it may allow you to
 
 - write animations easily, thanks to its versatile interface that adapts itself to your programming style
-- gain extra features 
+- gain extra features (play, pause, reverse, resume, restart and speed control, Timelines) 
 - switch easily from one library to another any time you want. 
 
 Currently it can work together with [GSAP](http://www.greensock.com/gsap-js/), [Velocity.js](http://julian.com/research/velocity/), 
@@ -24,25 +24,25 @@ To start using Tweene just include the script after your animation library of ch
 
 	// use Tweene with GSAP: default time unit is 's'
 	<script src="/your/path/TweenMax.min.js"></script>;
-	<script src="/your/path/Tweene-gsap.min.js"></script>
+	<script src="/your/path/tweene-gsap.min.js"></script>
 
 	// use Tweene with jQuery: default time unit is 'ms'
 	<script src="/your/path/jquery.min.js"></script>
-	<script src="/your/path/Tweene-jquery.min.js"></script>
+	<script src="/your/path/tweene-jquery.min.js"></script>
 
 	// use Tweene with Transit: default time unit is 'ms'
 	<script src="/your/path/jquery.transit.js"></script>
-	<script src="/your/path/Tweene-transit.min.js"></script>
+	<script src="/your/path/tweene-transit.min.js"></script>
 
 	// use Tweene with Velocity.js: default time unit is 'ms'
 	<script src="/your/path/velocity.min.js"></script>
-	<script src="/your/path/Tweene-velocity.min.js"></script>
+	<script src="/your/path/tweene-velocity.min.js"></script>
 
 	// use Tweene with more then one library
 	<script src="/your/path/TweenMax.min.js"></script>
 	<script src="/your/path/jquery.transit.js"></script>
 	<script src="/your/path/velocity.min.js"></script>
-	<script src="/your/path/Tweene-all.min.js"></script>
+	<script src="/your/path/tweene-all.min.js"></script>
 	<script>
 		// set your default time unit and driver
 		Tweene.defaultTimeUnit = 's';
@@ -74,6 +74,7 @@ Or with package managers:
 	require('tweene/velocity');
 
 ## History
+- __0.5.3__ Renamed all files in lowercase. Fixed jQuery minimum version in package.json dependencies.
 - __0.5.2__ Added support for npm and bower.
 - __0.5.1__ Predefined transforms order: now transformations are applied always in the same order. Fixed some minor glitches with CSS transitions.
 - __0.5.0__ First public release

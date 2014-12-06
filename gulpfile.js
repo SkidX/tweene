@@ -44,57 +44,57 @@ gulp.task('testing', function (done) {
 var modulesPath = 'src/';
    
 var commons = [
-    modulesPath + 'Tweene.js',
-    modulesPath + 'Common.js',
-    modulesPath + 'Label.js',
-    modulesPath + 'Callback.js',
-    modulesPath + 'TweenCommon.js',
-    modulesPath + 'TimelineCommon.js'
+    modulesPath + 'tweene.js',
+    modulesPath + 'common.js',
+    modulesPath + 'label.js',
+    modulesPath + 'callback.js',
+    modulesPath + 'tween-common.js',
+    modulesPath + 'timeline-common.js'
 ];
 
 var pro = [
-    modulesPath + 'Ticker.js',                
-    modulesPath + 'ControlsPro.js',
-    modulesPath + 'TweenPro.js',
-    modulesPath + 'TimelinePro.js',
-    modulesPath + 'TweeneDummy.js'
+    modulesPath + 'ticker.js',                
+    modulesPath + 'controls-pro.js',
+    modulesPath + 'tween-pro.js',
+    modulesPath + 'timeline-pro.js',
+    modulesPath + 'tweene-dummy.js'
 ];
    
 var drivers = {
     tweene: {
         files: commons.concat(pro, [
-            modulesPath + 'TweeneGsap.js',
-            modulesPath + 'TweeneVelocity.js',
-            modulesPath + 'TweeneTransit.js',
-            modulesPath + 'TweeneJquery.js'               
+            modulesPath + 'tweene-gsap.js',
+            modulesPath + 'tweene-velocity.js',
+            modulesPath + 'tweene-transit.js',
+            modulesPath + 'tweene-jquery.js'               
         ]),
         deps: ['jquery', 'jquery.transit', 'velocity-animate', 'gsap']
     }, 
     
     jquery: {
         files: commons.concat(pro, [
-            modulesPath + 'TweeneJquery.js'               
+            modulesPath + 'tweene-jquery.js'               
         ]),
         deps: ['jquery']
     },
     
     transit: {
         files: commons.concat(pro, [
-            modulesPath + 'TweeneTransit.js'               
+            modulesPath + 'tweene-transit.js'               
         ]),
         deps: ['jquery', 'jquery.transit']
     },
     
     velocity: {
         files: commons.concat(pro, [
-            modulesPath + 'TweeneVelocity.js'               
+            modulesPath + 'tweene-velocity.js'               
         ]),
         deps: ['jquery', 'velocity-animate']
     },
         
     gsap: {
         files: commons.concat([
-            modulesPath + 'TweeneGsap.js'
+            modulesPath + 'tweene-gsap.js'
         ]),
         deps: ['gsap']
     }
@@ -206,7 +206,7 @@ gulp.task('default', ['src'], function(){
         suffix = driver == 'tweene'? 'all' : driver;
         streams.push(
             gulp.src(driver + '.js')        
-                .pipe(uglify('Tweene-' + suffix + '.min.js'))
+                .pipe(uglify('tweene-' + suffix + '.min.js'))
                 .pipe(header(banner, {pkg: pkg}))
                 .pipe(size({gzip: true, title: driver + ': '}))            
                 .pipe(gulp.dest('minified/'))
