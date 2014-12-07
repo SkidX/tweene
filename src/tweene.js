@@ -551,7 +551,8 @@ var Tweene = function()
     // internally, all time values use this unit
     this.coreTimeUnit = 'ms';   
     
-    // time unit used as default when pure numbers are passed as delay or duration values
+    // time unit used as default when pure numbers are passed as delay or duration values,
+    // to be translated into `coreTimeUnit`
     this.defaultTimeUnit = 'ms';
         
     this.macros = {};    
