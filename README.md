@@ -22,19 +22,19 @@ Currently it can work together with [GSAP](http://www.greensock.com/gsap-js/), [
 ## Getting started
 To start using Tweene just include the script after your animation library of choice.
 
-	// use Tweene with GSAP: default time unit is 's'
+	// use Tweene with GSAP: translates from their 's' time unit into 'ms'
 	<script src="/your/path/TweenMax.min.js"></script>;
 	<script src="/your/path/tweene-gsap.min.js"></script>
 
-	// use Tweene with jQuery: default time unit is 'ms'
+	// use Tweene with jQuery: keeps time unit as 'ms'
 	<script src="/your/path/jquery.min.js"></script>
 	<script src="/your/path/tweene-jquery.min.js"></script>
 
-	// use Tweene with Transit: default time unit is 'ms'
+	// use Tweene with Transit: keeps time unit as 'ms'
 	<script src="/your/path/jquery.transit.js"></script>
 	<script src="/your/path/tweene-transit.min.js"></script>
 
-	// use Tweene with Velocity.js: default time unit is 'ms'
+	// use Tweene with Velocity.js: keeps time unit as 'ms'
 	<script src="/your/path/velocity.min.js"></script>
 	<script src="/your/path/tweene-velocity.min.js"></script>
 
