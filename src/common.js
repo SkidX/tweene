@@ -20,8 +20,8 @@
 var Common = function()
 {
     // unique identifier
-    this._id = ++ Tw.idCounter;
-    this._coreTimeUnit = Tw.coreTimeUnit;
+    this._id = ++ Tw._idCounter;
+    this._coreTimeUnit = Tw._coreTimeUnit;
     this._timeUnit = Tw.defaultTimeUnit;
     
     this._parent = null;

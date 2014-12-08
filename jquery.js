@@ -5,7 +5,7 @@ var func = function(window, undef) {
 
 /**
  * Tweene - JavaScript Animation Proxy 
- * @version 0.5.3
+ * @version 0.5.4
  * @link http://tweene.com
  *   
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
@@ -551,15 +551,16 @@ var Tweene = function()
     var _self = this;
     
     // used for generate unique identifier for any tweene object (tweens, timelines, callbacks and labels)
-    this.idCounter = 0;
+    this._idCounter = 0;
     
     // internally, all time values use this unit
-    this.coreTimeUnit = 'ms';   
+    this._coreTimeUnit = 'ms';   
     
-    // time unit used as default when pure numbers are passed as delay or duration values
+    // time unit used when pure numbers are passed as delay or duration values. Users can change this value any time
+    // when the user requires only GSAP driver, it defaults to 's' in order to mimic the library native API
     this.defaultTimeUnit = 'ms';
         
-    this.macros = {};    
+    this._macros = {};    
                         
     this.easings = easings;
 
@@ -653,7 +654,7 @@ var Tweene = function()
      */
     this.registerMacro = function(name, macro)
     {
-        this.macros[name] = macro;
+        this._macros[name] = macro;
         return this;
     };
            
@@ -786,8 +787,8 @@ if(window)
 var Common = function()
 {
     // unique identifier
-    this._id = ++ Tw.idCounter;
-    this._coreTimeUnit = Tw.coreTimeUnit;
+    this._id = ++ Tw._idCounter;
+    this._coreTimeUnit = Tw._coreTimeUnit;
     this._timeUnit = Tw.defaultTimeUnit;
     
     this._parent = null;
@@ -1601,7 +1602,7 @@ var Common = function()
 var Label = function(name)
 {
     this.type = 'label';
-    this._id = ++ Tw.idCounter;
+    this._id = ++ Tw._idCounter;
     this._name = name;
     this._position = null;
     
@@ -1661,7 +1662,7 @@ var Callback = function(callback, scope, params, dir)
 {
     this.type = 'callback';    
     // unique id
-    this._id = ++ Tw.idCounter;
+    this._id = ++ Tw._idCounter;
     dir = dir === 1? true : (dir === -1? false : null);
     var parent = null;
     
@@ -1803,9 +1804,9 @@ var TweenCommon = function()
     {
         // all arguments but the first will be passed to the macro
         var args = toArray(arguments, 1);
-        if(name && name in Tw.macros)
+        if(name && name in Tw._macros)
         {
-            Tw.macros[name].apply(this, args);
+            Tw._macros[name].apply(this, args);
         }
 
         return this;

@@ -1,4 +1,4 @@
-# Tweene - JS Animation Proxy - v0.5.3
+# Tweene - JS Animation Proxy - v0.5.4
 
 __Tweene__ is a JS library that helps to improve your favourite animation engine, allowing you to do more and better.
 
@@ -22,19 +22,19 @@ Currently it can work together with [GSAP](http://www.greensock.com/gsap-js/), [
 ## Getting started
 To start using Tweene just include the script after your animation library of choice.
 
-	// use Tweene with GSAP: default time unit is 's'
+	// use Tweene with GSAP
 	<script src="/your/path/TweenMax.min.js"></script>;
 	<script src="/your/path/tweene-gsap.min.js"></script>
 
-	// use Tweene with jQuery: default time unit is 'ms'
+	// use Tweene with jQuery
 	<script src="/your/path/jquery.min.js"></script>
 	<script src="/your/path/tweene-jquery.min.js"></script>
 
-	// use Tweene with Transit: default time unit is 'ms'
+	// use Tweene with Transit
 	<script src="/your/path/jquery.transit.js"></script>
 	<script src="/your/path/tweene-transit.min.js"></script>
 
-	// use Tweene with Velocity.js: default time unit is 'ms'
+	// use Tweene with Velocity.js
 	<script src="/your/path/velocity.min.js"></script>
 	<script src="/your/path/tweene-velocity.min.js"></script>
 
@@ -44,9 +44,11 @@ To start using Tweene just include the script after your animation library of ch
 	<script src="/your/path/velocity.min.js"></script>
 	<script src="/your/path/tweene-all.min.js"></script>
 	<script>
-		// set your default time unit and driver
-		Tweene.defaultTimeUnit = 's';
-		Tweene.defaultDriver = 'gsap';
+	// set the default time unit you want to use
+	Tweene.defaultTimeUnit = 'ms'; // or 's'
+	
+	// set the default driver you want to use
+	Tweene.defaultDriver = 'gsap'; // or one of 'transit', 'velocity', 'jquery'
 	</script>
 
 Or with package managers:
@@ -57,23 +59,27 @@ Or with package managers:
 
 	// use Tweene with more then one library
 	require('tweene');	
-	// set your default time unit and driver
-	Tweene.defaultTimeUnit = 's';
-	Tweene.defaultDriver = 'gsap';
 	
-	// use Tweene with GSAP: default time unit is 's'
+	// use Tweene with GSAP
 	require('tweene/gsap');
 
-	// use Tweene with jQuery: default time unit is 'ms'
+	// use Tweene with jQuery
 	require('tweene/jquery');
 
-	// use Tweene with Transit: default time unit is 'ms'
+	// use Tweene with Transit
 	require('tweene/transit');
 
-	// use Tweene with Velocity.js: default time unit is 'ms'
+	// use Tweene with Velocity.js
 	require('tweene/velocity');
 
+## Time unit
+Tweene tries to accommodate your current programming habits, not to force you to change them. For this reason, you can configure the default time unit used to indicate durations and delays of your tweens, by changing the value of Tweene.defaultTimeUnit (accepted value: 's' or 'ms').
+Since the GSAP library uses natively seconds as time unit, when you will use only that specific driver through tweene-gsap.min.js or require('tweene/gsap') please note that the predefined value of Tweene.defaultTimeUnit will be 's'. In all other cases, it defaults to 'ms'.
+However, you can change it any time you want and also on a single call basis.
+Check http://tweene.com/docs/#duration for more details.
+
 ## History
+- __0.5.4__ Renamed some internal vars. Added more details in README and comments.
 - __0.5.3__ Renamed all files in lowercase. Fixed jQuery minimum version in package.json dependencies.
 - __0.5.2__ Added support for npm and bower.
 - __0.5.1__ Predefined transforms order: now transformations are applied always in the same order. Fixed some minor glitches with CSS transitions.

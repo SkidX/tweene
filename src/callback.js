@@ -24,7 +24,7 @@ var Callback = function(callback, scope, params, dir)
 {
     this.type = 'callback';    
     // unique id
-    this._id = ++ Tw.idCounter;
+    this._id = ++ Tw._idCounter;
     dir = dir === 1? true : (dir === -1? false : null);
     var parent = null;
     

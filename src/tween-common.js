@@ -80,9 +80,9 @@ var TweenCommon = function()
     {
         // all arguments but the first will be passed to the macro
         var args = toArray(arguments, 1);
-        if(name && name in Tw.macros)
+        if(name && name in Tw._macros)
         {
-            Tw.macros[name].apply(this, args);
+            Tw._macros[name].apply(this, args);
         }
 
         return this;

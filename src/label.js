@@ -20,7 +20,7 @@
 var Label = function(name)
 {
     this.type = 'label';
-    this._id = ++ Tw.idCounter;
+    this._id = ++ Tw._idCounter;
     this._name = name;
     this._position = null;
     
