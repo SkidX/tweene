@@ -28,11 +28,12 @@ You can simply replace the script URL with one of the minified files on jsDelivr
 <script src="//cdn.jsdelivr.net/tweene/VERSION_HERE/tweene-velocity.min.js"></script>
 ```
 For more details, like version aliasing, please visit the [README](https://github.com/jsdelivr/jsdelivr#usage).
+
 Alternatively, you can download the repository and host the files locally.
 
 ```html
 // use Tweene with GSAP
-<script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.15.0/TweenMax.min.js"></script>;
+<script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.15.0/TweenMax.min.js"></script>
 <script src="//cdn.jsdelivr.net/tweene/latest/tweene-gsap.min.js"></script>
 
 // use Tweene with jQuery
@@ -43,7 +44,7 @@ Alternatively, you can download the repository and host the files locally.
 
 // use Tweene with Transit
 <script src="//cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>;
-<script src="//cdn.jsdelivr.net/jquery.transit/0.9.12/jquery.transit.min.js"></script>;
+<script src="//cdn.jsdelivr.net/jquery.transit/0.9.12/jquery.transit.min.js"></script>
 <script src="//cdn.jsdelivr.net/tweene/latest/tweene-transit.min.js"></script>
 // or fetch all with a single HTTP request
 <script src="//cdn.jsdelivr.net/g/jquery,jquery.transit@0.9.12,tweene(tweene-transit.min.js)"></script>
@@ -56,9 +57,9 @@ Alternatively, you can download the repository and host the files locally.
 <script src="//cdn.jsdelivr.net/g/jquery,velocity@1.1,tweene(tweene-velocity.min.js)"></script>
 
 // use Tweene with more then one library
-<script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.15.0/TweenMax.min.js"></script>;
-<script src="//cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>;
-<script src="//cdn.jsdelivr.net/jquery.transit/0.9.12/jquery.transit.min.js"></script>;
+<script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.15.0/TweenMax.min.js"></script>
+<script src="//cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+<script src="//cdn.jsdelivr.net/jquery.transit/0.9.12/jquery.transit.min.js"></script>
 <script src="//cdn.jsdelivr.net/velocity/1.1/velocity.min.js"></script>
 <script src="//cdn.jsdelivr.net/tweene/latest/tweene-all.min.js"></script>
 
