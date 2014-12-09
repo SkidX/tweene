@@ -1,4 +1,4 @@
-# Tweene - JS Animation Proxy - v0.5.4
+# Tweene - JS Animation Proxy - v0.5.5
 
 __Tweene__ is a JS library that helps to improve your favourite animation engine, allowing you to do more and better.
 
@@ -22,55 +22,77 @@ Currently it can work together with [GSAP](http://www.greensock.com/gsap-js/), [
 ## Getting started
 To start using Tweene just include the script after your animation library of choice.
 
-	// use Tweene with GSAP
-	<script src="/your/path/TweenMax.min.js"></script>;
-	<script src="/your/path/tweene-gsap.min.js"></script>
+[jsDelivr CDN](http://www.jsdelivr.com/#!tweene) provides free hosting for Tweene.
+You can simply replace the script URL with one of the minified files on jsDelivr like this:
+```html
+<script src="//cdn.jsdelivr.net/tweene/VERSION_HERE/tweene-velocity.min.js"></script>
+```
+For more details, like version aliasing, please visit the [README](https://github.com/jsdelivr/jsdelivr#usage).
+Alternatively, you can download the repository and host the files locally.
 
-	// use Tweene with jQuery
-	<script src="/your/path/jquery.min.js"></script>
-	<script src="/your/path/tweene-jquery.min.js"></script>
+```html
+// use Tweene with GSAP
+<script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.15.0/TweenMax.min.js"></script>;
+<script src="//cdn.jsdelivr.net/tweene/latest/tweene-gsap.min.js"></script>
 
-	// use Tweene with Transit
-	<script src="/your/path/jquery.transit.js"></script>
-	<script src="/your/path/tweene-transit.min.js"></script>
+// use Tweene with jQuery
+<script src="//cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>;
+<script src="//cdn.jsdelivr.net/tweene/latest/tweene-jquery.min.js"></script>
+// or fetch all with a single HTTP request
+<script src="//cdn.jsdelivr.net/g/jquery,tweene(tweene-jquery.min.js)"></script>
 
-	// use Tweene with Velocity.js
-	<script src="/your/path/velocity.min.js"></script>
-	<script src="/your/path/tweene-velocity.min.js"></script>
+// use Tweene with Transit
+<script src="//cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>;
+<script src="//cdn.jsdelivr.net/jquery.transit/0.9.12/jquery.transit.min.js"></script>;
+<script src="//cdn.jsdelivr.net/tweene/latest/tweene-transit.min.js"></script>
+// or fetch all with a single HTTP request
+<script src="//cdn.jsdelivr.net/g/jquery,jquery.transit@0.9.12,tweene(tweene-transit.min.js)"></script>
 
-	// use Tweene with more then one library
-	<script src="/your/path/TweenMax.min.js"></script>
-	<script src="/your/path/jquery.transit.js"></script>
-	<script src="/your/path/velocity.min.js"></script>
-	<script src="/your/path/tweene-all.min.js"></script>
-	<script>
-	// set the default time unit you want to use
-	Tweene.defaultTimeUnit = 'ms'; // or 's'
-	
-	// set the default driver you want to use
-	Tweene.defaultDriver = 'gsap'; // or one of 'transit', 'velocity', 'jquery'
-	</script>
+// use Tweene with Velocity.js
+<script src="//cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>;
+<script src="//cdn.jsdelivr.net/velocity/1.1/velocity.min.js"></script>
+<script src="//cdn.jsdelivr.net/tweene/latest/tweene-velocity.min.js"></script>
+// or fetch all with a single HTTP request
+<script src="//cdn.jsdelivr.net/g/jquery,velocity@1.1,tweene(tweene-velocity.min.js)"></script>
 
-Or with package managers:
+// use Tweene with more then one library
+<script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.15.0/TweenMax.min.js"></script>;
+<script src="//cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>;
+<script src="//cdn.jsdelivr.net/jquery.transit/0.9.12/jquery.transit.min.js"></script>;
+<script src="//cdn.jsdelivr.net/velocity/1.1/velocity.min.js"></script>
+<script src="//cdn.jsdelivr.net/tweene/latest/tweene-all.min.js"></script>
 
-    bower install tweene
-    or
-    npm install tweene
+<script>
+// set the default time unit you want to use
+Tweene.defaultTimeUnit = 'ms'; // or 's'
 
-	// use Tweene with more then one library
-	require('tweene');	
-	
-	// use Tweene with GSAP
-	require('tweene/gsap');
+// set the default driver you want to use
+Tweene.defaultDriver = 'gsap'; // or one of 'transit', 'velocity', 'jquery'
+</script>
+```
 
-	// use Tweene with jQuery
-	require('tweene/jquery');
+### Package managers
 
-	// use Tweene with Transit
-	require('tweene/transit');
+`bower install tweene`<br>
+  or<br>
+`npm install tweene`
 
-	// use Tweene with Velocity.js
-	require('tweene/velocity');
+```js
+// use Tweene with more then one library
+require('tweene');
+
+// use Tweene with GSAP
+require('tweene/gsap');
+
+// use Tweene with jQuery
+require('tweene/jquery');
+
+// use Tweene with Transit
+require('tweene/transit');
+
+// use Tweene with Velocity.js
+require('tweene/velocity');
+```
 
 ## Time unit
 Tweene tries to accommodate your current programming habits, not to force you to change them. For this reason, you can configure the default time unit used to indicate durations and delays of your tweens, by changing the value of Tweene.defaultTimeUnit (accepted value: 's' or 'ms').
@@ -78,7 +100,8 @@ Since the GSAP library uses natively seconds as time unit, when you will use onl
 However, you can change it any time you want and also on a single call basis.
 Check http://tweene.com/docs/#duration for more details.
 
-## History
+## Changelog
+- __0.5.5__ Added references for CDN hosting support.
 - __0.5.4__ Renamed some internal vars. Added more details in README and comments.
 - __0.5.3__ Renamed all files in lowercase. Fixed jQuery minimum version in package.json dependencies.
 - __0.5.2__ Added support for npm and bower.
