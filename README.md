@@ -22,55 +22,76 @@ Currently it can work together with [GSAP](http://www.greensock.com/gsap-js/), [
 ## Getting started
 To start using Tweene just include the script after your animation library of choice.
 
-	// use Tweene with GSAP
-	<script src="/your/path/TweenMax.min.js"></script>;
-	<script src="/your/path/tweene-gsap.min.js"></script>
+```html
+// use Tweene with GSAP
+<script src="/your/path/TweenMax.min.js"></script>;
+<script src="/your/path/tweene-gsap.min.js"></script>
 
-	// use Tweene with jQuery
-	<script src="/your/path/jquery.min.js"></script>
-	<script src="/your/path/tweene-jquery.min.js"></script>
+// use Tweene with jQuery
+<script src="/your/path/jquery.min.js"></script>
+<script src="/your/path/tweene-jquery.min.js"></script>
 
-	// use Tweene with Transit
-	<script src="/your/path/jquery.transit.js"></script>
-	<script src="/your/path/tweene-transit.min.js"></script>
+// use Tweene with Transit
+<script src="/your/path/jquery.transit.js"></script>
+<script src="/your/path/tweene-transit.min.js"></script>
 
-	// use Tweene with Velocity.js
-	<script src="/your/path/velocity.min.js"></script>
-	<script src="/your/path/tweene-velocity.min.js"></script>
+// use Tweene with Velocity.js
+<script src="/your/path/velocity.min.js"></script>
+<script src="/your/path/tweene-velocity.min.js"></script>
 
-	// use Tweene with more then one library
-	<script src="/your/path/TweenMax.min.js"></script>
-	<script src="/your/path/jquery.transit.js"></script>
-	<script src="/your/path/velocity.min.js"></script>
-	<script src="/your/path/tweene-all.min.js"></script>
-	<script>
-	// set the default time unit you want to use
-	Tweene.defaultTimeUnit = 'ms'; // or 's'
-	
-	// set the default driver you want to use
-	Tweene.defaultDriver = 'gsap'; // or one of 'transit', 'velocity', 'jquery'
-	</script>
+// use Tweene with more then one library
+<script src="/your/path/TweenMax.min.js"></script>
+<script src="/your/path/jquery.transit.js"></script>
+<script src="/your/path/velocity.min.js"></script>
+<script src="/your/path/tweene-all.min.js"></script>
+<script>
+// set the default time unit you want to use
+Tweene.defaultTimeUnit = 'ms'; // or 's'
 
-Or with package managers:
+// set the default driver you want to use
+Tweene.defaultDriver = 'gsap'; // or one of 'transit', 'velocity', 'jquery'
+</script>
+```
 
-    bower install tweene
-    or
-    npm install tweene
+#### CDN hosting
 
-	// use Tweene with more then one library
-	require('tweene');	
-	
-	// use Tweene with GSAP
-	require('tweene/gsap');
+[jsDelivr CDN](http://www.jsdelivr.com/#!tweene) provides free hosting for Tweene.
+You can simply replace the script URL with one of the minified files on jsDelivr like this:
+```html
+<script src="//cdn.jsdelivr.net/tweene/VERSION_HERE/tweene-jquery.min.js"></script>
+```
 
-	// use Tweene with jQuery
-	require('tweene/jquery');
+Two or more JS files may be concocted in jsDelivr's servers.  This saves a HTTP request & a few bytes from compression:
+```html
+<!-- Load tweene-velocity v0.5.4 with the Velocity dependancy v1.1.0 -->
+<script src="//cdn.jsdelivr.net/g/velocity@1.1.0,tweene@0.5.4(tweene-velocity.min.js)"></script>
+```
 
-	// use Tweene with Transit
-	require('tweene/transit');
+jsDelivr CDN hosts [jQuery](http://www.jsdelivr.com/#!jquery), [Transit](http://www.jsdelivr.com/#!jquery.transit), and [Velocity](http://www.jsdelivr.com/#!velocity), so you can concoct any of those.  Sorry, since [GASP](http://greensock.com/standard-license) requires payment for commertial-use, TweenMax is unavailable there.
+For more details, like version aliasing, please visit the [README](https://github.com/jsdelivr/jsdelivr#usage).
 
-	// use Tweene with Velocity.js
-	require('tweene/velocity');
+### Package managers
+
+`bower install tweene`<br>
+  or<br>
+`npm install tweene`
+
+```js
+// use Tweene with more then one library
+require('tweene');
+
+// use Tweene with GSAP
+require('tweene/gsap');
+
+// use Tweene with jQuery
+require('tweene/jquery');
+
+// use Tweene with Transit
+require('tweene/transit');
+
+// use Tweene with Velocity.js
+require('tweene/velocity');
+```
 
 ## Time unit
 Tweene tries to accommodate your current programming habits, not to force you to change them. For this reason, you can configure the default time unit used to indicate durations and delays of your tweens, by changing the value of Tweene.defaultTimeUnit (accepted value: 's' or 'ms').
