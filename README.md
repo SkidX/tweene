@@ -1,4 +1,4 @@
-# Tweene - JS Animation Proxy - v0.5.5
+# Tweene - JS Animation Proxy - v0.5.6
 
 __Tweene__ is a JS library that helps to improve your favourite animation engine, allowing you to do more and better.
 
@@ -18,6 +18,16 @@ Currently it can work together with [GSAP](http://www.greensock.com/gsap-js/), [
 - [Features](http://tweene.com/#features)
 - [Documentation](http://tweene.com/docs)
 - [Examples](http://tweene.com/#examples)
+
+
+## Roadmap
+Changes and new features planned for next releases
+
+- __0.6.0__: Add support for stagger tweens 
+- __0.7.0__: Remove dependencies on jQuery and Transit, CSS Transitions will be supported without external libraries
+- __0.8.0__: Add new Driver for [Web Animations Spec.](http://updates.html5rocks.com/2014/12/web-animation-playback)
+- __0.9.0__: Add support for scrubbing animation’s currentTime position on all supported driver
+- __1.0.0__: Add support for Keyframe based syntax. API stability.
 
 ## Getting started
 To start using Tweene just include the script after your animation library of choice.
@@ -102,6 +112,7 @@ However, you can change it any time you want and also on a single call basis.
 Check http://tweene.com/docs/#duration for more details.
 
 ## Changelog
+- __0.5.6__ Fixed require() return value. Roadmap added.
 - __0.5.5__ Added references for CDN hosting support.
 - __0.5.4__ Renamed some internal vars. Added more details in README and comments.
 - __0.5.3__ Renamed all files in lowercase. Fixed jQuery minimum version in package.json dependencies.

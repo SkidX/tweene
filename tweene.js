@@ -5,7 +5,7 @@ var func = function(window, undef) {
 
 /**
  * Tweene - JavaScript Animation Proxy 
- * @version 0.5.5
+ * @version 0.5.6
  * @link http://tweene.com
  *   
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
@@ -6567,7 +6567,7 @@ if(typeof(define) === 'function' && define.amd) {
  mod = require('jquery.transit');
  mod = require('velocity-animate');
  mod = require('gsap');
-module.exports.Tweene = func(window);
+module.exports = func(window);
 } else {
    func(window);
 }

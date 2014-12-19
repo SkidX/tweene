@@ -147,7 +147,7 @@ gulp.task('src', function(){
             }
         }
         footer += 
-            "module.exports.Tweene = func(window);\n" +
+            "module.exports = func(window);\n" +
             "} else {\n" +
             "   func(window);\n" +
             "}\n" +
