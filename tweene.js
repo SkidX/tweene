@@ -5,7 +5,7 @@ var func = function(window, undef) {
 
 /**
  * Tweene - JavaScript Animation Proxy 
- * @version 0.5.6
+ * @version 0.5.7
  * @link http://tweene.com
  *   
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
@@ -5246,7 +5246,7 @@ var velocitySetPendings = [];
 /**
  * Velocity Tween Driver 
  * 
- * @link http://ricostacruz.com/jquery.transit/ * 
+ * @link http://julian.com/research/velocity/ 
  * @mixes Common, TweenCommon, ControlsPro, TweenPro
  *  
  */

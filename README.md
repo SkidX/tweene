@@ -1,4 +1,4 @@
-# Tweene - JS Animation Proxy - v0.5.6
+# Tweene - JS Animation Proxy - v0.5.7
 
 __Tweene__ is a JS library that helps to improve your favourite animation engine, allowing you to do more and better.
 
@@ -112,6 +112,7 @@ However, you can change it any time you want and also on a single call basis.
 Check http://tweene.com/docs/#duration for more details.
 
 ## Changelog
+- __0.5.7__ Fixed wrong link to Velocity.js homepage
 - __0.5.6__ Fixed require() return value. Roadmap added.
 - __0.5.5__ Added references for CDN hosting support.
 - __0.5.4__ Renamed some internal vars. Added more details in README and comments.

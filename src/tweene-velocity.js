@@ -19,7 +19,7 @@ var velocitySetPendings = [];
 /**
  * Velocity Tween Driver 
  * 
- * @link http://ricostacruz.com/jquery.transit/ * 
+ * @link http://julian.com/research/velocity/ 
  * @mixes Common, TweenCommon, ControlsPro, TweenPro
  *  
  */
