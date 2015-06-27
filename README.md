@@ -112,6 +112,7 @@ However, you can change it any time you want and also on a single call basis.
 Check http://tweene.com/docs/#duration for more details.
 
 ## Changelog
+- __0.5.8__ Added addPause() method. Fixed events call order.
 - __0.5.7__ Fixed wrong link to Velocity.js homepage
 - __0.5.6__ Fixed require() return value. Roadmap added.
 - __0.5.5__ Added references for CDN hosting support.

@@ -162,6 +162,7 @@ var ControlsPro = function()
      */
     this.pause = function()
     {
+//        console.log(this._id, 'pause');
         // if not ready, it means that is not yet started, so no need to perform a pause
         if(this._ready)
         {
@@ -178,6 +179,7 @@ var ControlsPro = function()
 
             if(!this._paused)
             {
+//                console.log(this._id, 'pausing');
                 this._paused = true;
 
                 this._pauseTime = Tw.ticker.now();
@@ -196,7 +198,12 @@ var ControlsPro = function()
      * 
      */
     this.resume = function()
-    {        
+    {   
+//        if(this._parent && this._parent.paused())
+//        {
+//            return this;        
+//        }
+//        console.log(this._id, 'resume', (this._parent && this._parent.paused()? 'parent paused': 'parent running'));
         if(this._paused && (this._fwd && this._playAllowed || !this._fwd && this._reverseAllowed))
         {           
             this._paused = false;

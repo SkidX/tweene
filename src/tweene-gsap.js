@@ -272,7 +272,7 @@ Tw.registerDriver('Gsap', 'tween', function(){
         })
             .pause()
             .timeScale(this._speed);
-             
+                          
         // with Gsap we do per-property easing with overlapping tweens of the same targets
         data.tween = this._hasMultipleEasing? this._splitEasing(data.tween) : [{tween: data.tween, easing: data.easing}];
         
@@ -347,6 +347,7 @@ Tw.registerDriver('Gsap', 'tween', function(){
                 }                
             }
 
+            var duration = Math.max(0, data.duration - 0.000001);
             if(fromCount)
             {
                 if(this._display.begin)
@@ -360,20 +361,20 @@ Tw.registerDriver('Gsap', 'tween', function(){
                 
                 if(toCount)
                 {
-                    elem = TweenMax.fromTo(this._target, data.duration, from, to);
+                    elem = TweenMax.fromTo(this._target, duration, from, to);
                 }
                 else
                 {
-                    elem = TweenMax.from(this._target, data.duration, from);
+                    elem = TweenMax.from(this._target, duration, from);
                 }
             }
             else if(toCount)
             {
-                elem = TweenMax.to(this._target, data.duration, to);
+                elem = TweenMax.to(this._target, duration, to);
             }
             else
             {
-                elem = TweenMax.to(this._target, data.duration, {opacity: '+=0'});
+                elem = TweenMax.to(this._target, duration, {opacity: '+=0'});
             }
             
 
@@ -404,6 +405,8 @@ Tw.registerDriver('Gsap', 'tween', function(){
         {
             this._native.to(this._target, 0, then, data.duration);
         }
+        
+        this._setupEvents();
         
         return this._getTotalDuration();
     };
@@ -460,7 +463,7 @@ Tw.registerDriver('Gsap', 'timeline', function(){
         else
         {        
             this._native = new TimelineMax({paused: true, delay: convertTime(this._delay, this._coreTimeUnit, this._driverTimeUnit)})           
-                .add(_native, 0);
+                .add(_native);
             _native.paused(false);
         }
         
@@ -528,7 +531,14 @@ Tw.registerDriver('Gsap', 'timeline', function(){
     {
         if(begin != Infinity)
         {
-            this._innerNative.call(child.resume, [], child, convertTime(begin, this._coreTimeUnit, this._driverTimeUnit));
+            if(child.isPause)
+            {
+                this._native.addPause(convertTime(begin + this._delay, this._coreTimeUnit, this._driverTimeUnit), child.resume, [], child);                                
+            }
+            else
+            {
+                this._innerNative.call(child.resume, [], child, convertTime(begin, this._coreTimeUnit, this._driverTimeUnit));                
+            }            
         }
     };
             

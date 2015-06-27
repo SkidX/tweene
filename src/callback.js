@@ -20,14 +20,17 @@
  * @param {array} params
  * @param {number} dir - values: 1 | -1 | 0
  */
-var Callback = function(callback, scope, params, dir)
+var Callback = function(callback, scope, params, dir, isPause)
 {
     this.type = 'callback';    
     // unique id
     this._id = ++ Tw._idCounter;
+    
+    this.isPause = !!isPause;
+    
     dir = dir === 1? true : (dir === -1? false : null);
     var parent = null;
-    
+            
     /**
      * Get or set the parent timeline object
      * 
@@ -74,12 +77,14 @@ var Callback = function(callback, scope, params, dir)
      */
     this.resume = function()
     {
-        if(dir === null || dir != parent.reversed())
+        if(callback && (dir === null || dir != parent.reversed()))
         {
             callback.apply(scope || parent, params);
         }
         return this;
     };
+    
+    
     
 };
 

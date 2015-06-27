@@ -638,9 +638,17 @@ var Common = function()
      * @param {string} name
      */
     this._runHandlers = function(name)
-    {                  
+    {                    
         var i, end, entry;
-        // internal handlers are executed first
+        
+        // run external events first to guarantee correct events order inside timelines
+        if(name in this._handlers && this._handlers[name] !== null)
+        {
+            entry = this._handlers[name];
+            entry.callback.apply(entry.scope, entry.params);
+        }        
+        
+        // internal handlers
         if(this._coreHandlers[name].length)
         {
             for(i = 0, end = this._coreHandlers[name].length; i < end; i++)
@@ -649,12 +657,8 @@ var Common = function()
                 entry = this._coreHandlers[name][i];                
                 entry.callback.apply(entry.scope, entry.params);                    
             }
-        }
-        if(name in this._handlers && this._handlers[name] !== null)
-        {
-            entry = this._handlers[name];
-            entry.callback.apply(entry.scope, entry.params);
-        }
+        }                       
+        
     };
 
 

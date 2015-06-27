@@ -363,7 +363,9 @@ Tw.registerDriver('velocity', 'tween', function() {
      */ 
     this._pauseTween = function()
     {
+//        console.log('pausing velocity tween');
         this._target.velocity('stop', 'tweene_' + this._id);            
+//        this._pendings = [];
         return this;
     };
       
@@ -371,6 +373,7 @@ Tw.registerDriver('velocity', 'tween', function() {
         
     this._resumeTween = function()
     {
+//        console.log('resuming velocity tween');
         return this._playTween();
     };
 

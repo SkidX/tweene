@@ -77,7 +77,7 @@ var TimelineCommon = function()
                 i ++;
                 // callback scope object expected after callback params
                 var scope = arguments.length > i? arguments[i] : null;
-                child = new Callback(child, scope, params, dir);
+                child = new Callback(child, scope, params, dir, false);
             }
 
             child.parent(this);            
@@ -92,6 +92,84 @@ var TimelineCommon = function()
         this.invalidate();
         return this;
     };
+
+
+    /**
+     * Add pause, with an optional callback
+     * @link http://tweene.com/docs/#addPause
+     * 
+     * @param {string|number} [startPosition]
+     * @param {string|number} [callbackDirection]
+     * @param {function} [callback] - callback 
+     * @param {array} [params] - callback params
+     * @param {object} [scope] - callback scope
+     * @returns {this}
+     */
+    this.addPause = function()
+    {                
+        var args = toArray(arguments),
+            startPosition = null,
+            dir = 0,
+            callback = null, 
+            params = [],
+            scope = null, 
+            arg, 
+            child;
+        
+        if(args.length)
+        {
+            arg = args.shift();            
+            if(isFunction(arg))
+            {
+                callback = arg;
+            }
+            else
+            {
+                startPosition = arg;
+            }                
+            
+            if(args.length)
+            {            
+                arg = args.shift();            
+                if(!callback)
+                {
+                    if(isNumber(arg))
+                    {
+                        dir = arg;
+                        if(args.length)
+                        {
+                            callback = args.shift();
+                        }
+                    }
+                    else
+                    {
+                        callback = arg;
+                    }
+                }
+                
+                if(callback && args.length)
+                {
+                    params = args.shift();
+                    if(!isArray(params))
+                    {
+                        params = [params];
+                    }
+                    
+                    if(args.length)
+                    {
+                        scope = args.shift();
+                    }
+                }
+            }            
+        }
+        
+        child = new Callback(callback, scope, params, dir, true);
+        child.parent(this);            
+        this._children.push({id: child.id(), child: child, start: startPosition});
+        this.invalidate();
+        return this;
+    };
+
 
 
     /**

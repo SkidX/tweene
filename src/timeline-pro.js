@@ -41,6 +41,10 @@ var TimelinePro = function()
 
     this._backEnabled = true;
 
+    this._keyTime = null;
+    this._keyDirection = null;
+    this._keyCurrentIndex = null;
+
 
     
     /**
@@ -250,10 +254,17 @@ var TimelinePro = function()
 
         if(!(begin in keyframes))
         {
-            keyframes[begin] = {f: [], b: [], fTrigger: null, bTrigger: null};                            
+            keyframes[begin] = {f: [], b: [], fc: [], bc: [], fTrigger: null, bTrigger: null};                            
             index.push(begin);
         }
-        keyframes[begin].f.push(tween);
+        if(tween.type == 'callback')
+        {
+            keyframes[begin].fc.push(tween);                        
+        }
+        else
+        {
+            keyframes[begin].f.push(tween);            
+        }
         // use only one child for each keyframe trigger in forward direction
         firstBegin = fTriggering && !this._keyframes[begin].fTrigger;
         if(firstBegin)
@@ -265,10 +276,17 @@ var TimelinePro = function()
         {
             if(!(end in keyframes))
             {
-                keyframes[end] = {f: [], b: [], fTrigger: null, bTrigger: null};                            
+                keyframes[end] = {f: [], b: [], fc: [], bc: [], fTrigger: null, bTrigger: null};                            
                 index.push(end);
             }
-            keyframes[end].b.push(tween);
+            if(tween.type == 'callback')
+            {
+                keyframes[end].bc.push(tween);                        
+            }
+            else
+            {
+                keyframes[end].b.push(tween);            
+            }
             // use only one child for each keyframe trigger in backward direction
             firstEnd = bTriggering && !this._keyframes[end].bTrigger;
             if(firstEnd)
@@ -364,22 +382,71 @@ var TimelinePro = function()
             delete this._runningList[id];
             this._runningCount--;
         }
-        
+                
         if(isKeyChild)
         {
             if(time in this._keyframes)
             {
-                var elemList = this._keyframes[time][direction];
-                for(var i = 0, end = elemList.length; i < end; i++)
+                this._processKeyframe(time, direction, null);
+            }
+        }
+    };  
+    
+    
+    
+    this._processKeyframe = function(time, direction, currentIndex)
+    {
+        this._keyCurrentIndex = null;
+        
+        var cDirection = direction + 'c', cList = this._keyframes[time][cDirection], tList = this._keyframes[time][direction], 
+            i, end, offset, item, paused = false;
+        
+        if(cList.length)
+        {
+            if(direction == 'f')
+            {
+                i = currentIndex !== null? currentIndex + 1 : 0;
+                end = cList.length;
+                offset = 1;
+            }
+            else
+            {
+                i = currentIndex !== null? currentIndex - 1 : cList.length - 1;
+                end = -1;
+                offset = -1;           
+            }
+
+            for(; i != end; i += offset)
+            {
+                item = cList[i];
+                if(item.isPause)
                 {
-                    // add to runningList
-                    if(elemList[i].type != 'callback')
-                    {
-                        this._addToRun(elemList[i]);
-                    }
-                    // also callback are executed by resume()
-                    elemList[i].resume(); 
+                    paused = true;
+                    this._keyTime = time;
+                    this._keyDirection = direction;
+                    this._keyCurrentIndex = i;
+                    this.pause();
                 }
+                
+                // also callback are executed by resume()
+                item.resume(); 
+                if(paused)
+                {
+                    break;
+                }            
+            }                          
+        }
+        
+        if(!paused)
+        {
+            if(tList.length)
+            {
+                for(i = 0, end = tList.length; i < end; i++)
+                {
+                    item = tList[i];
+                    this._addToRun(item);
+                    item.resume(); 
+                }                
             }
             // emulate end / reverse events
             if((direction == 'b' && time === 0) || (direction == 'f' && time == this._index[this._index.length - 1]))
@@ -387,7 +454,9 @@ var TimelinePro = function()
                 this._runHandlers('_end');
             }
         }
-    };  
+        
+        return paused;        
+    };
 
 
     /**
@@ -437,28 +506,39 @@ var TimelinePro = function()
      */
     this._resumeTween = function()
     {      
+        var runningCount = this._runningCount, paused = false;
         this._startProgress();
-        if(this._runningCount)
-        {        
-            this._propagate('resume');  
-        }
-        else
+        
+        if(this._keyCurrentIndex !== null)
         {
-            var args = false, direction = this._localFwd;
-
-            if(direction && this._position === 0)
-            {
-                args = ['f', 0, -1, true];
+            this._keyDirection = this._localFwd? 'f' : 'b';
+            paused = this._processKeyframe(this._keyTime, this._keyDirection, this._keyCurrentIndex);
+        }                
+        
+        if(!paused)
+        {
+            if(runningCount)
+            {        
+                this._propagate('resume');  
             }
-            else if(!direction && this._position == this._duration)
+            else
             {
-                args = ['b', this._index.length? this._index[this._index.length - 1] : 0, -1, true];
-            }
+                var args = false, direction = this._localFwd;
 
-            if(args)
-            {
-                this._childCallback.apply(this, args);
-            }            
+                if(direction && this._position === 0)
+                {
+                    args = ['f', 0, -1, true];
+                }
+                else if(!direction && this._position == this._duration)
+                {
+                    args = ['b', this._index.length? this._index[this._index.length - 1] : 0, -1, true];
+                }
+
+                if(args)
+                {
+                    this._childCallback.apply(this, args);
+                }            
+            }
         }
     };
     

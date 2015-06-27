@@ -1,14 +1,14 @@
 require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({"gsap":[function(require,module,exports){
 (function (global){
 /*!
- * VERSION: 1.13.2
- * DATE: 2014-08-23
- * UPDATES AND DOCS AT: http://www.greensock.com
+ * VERSION: 1.17.0
+ * DATE: 2015-05-27
+ * UPDATES AND DOCS AT: http://greensock.com
  * 
  * Includes all of the following: TweenLite, TweenMax, TimelineLite, TimelineMax, EasePack, CSSPlugin, RoundPropsPlugin, BezierPlugin, AttrPlugin, DirectionalRotationPlugin
  *
- * @license Copyright (c) 2008-2014, GreenSock. All rights reserved.
- * This work is subject to the terms at http://www.greensock.com/terms_of_use.html or for
+ * @license Copyright (c) 2008-2015, GreenSock. All rights reserved.
+ * This work is subject to the terms at http://greensock.com/standard-license or for
  * Club GreenSock members, the software agreement that was issued with your membership.
  * 
  * @author: Jack Doyle, jack@greensock.com
@@ -43,7 +43,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 			p = TweenMax.prototype = TweenLite.to({}, 0.1, {}),
 			_blankArray = [];
 
-		TweenMax.version = "1.13.2";
+		TweenMax.version = "1.17.0";
 		p.constructor = TweenMax;
 		p.kill()._gc = false;
 		TweenMax.killTweensOf = TweenMax.killDelayedCallsTo = TweenLite.killTweensOf;
@@ -61,7 +61,9 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 		};
 		
 		p.updateTo = function(vars, resetDuration) {
-			var curRatio = this.ratio, p;
+			var curRatio = this.ratio,
+				immediate = this.vars.immediateRender || vars.immediateRender,
+				p;
 			if (resetDuration && this._startTime < this._timeline._time) {
 				this._startTime = this._timeline._time;
 				this._uncache(false);
@@ -74,9 +76,12 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 			for (p in vars) {
 				this.vars[p] = vars[p];
 			}
-			if (this._initted) {
+			if (this._initted || immediate) {
 				if (resetDuration) {
 					this._initted = false;
+					if (immediate) {
+						this.render(0, true, true);
+					}
 				} else {
 					if (this._gc) {
 						this._enabled(true, false);
@@ -89,7 +94,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 						this.render(0, true, false);
 						this._initted = false;
 						this.render(prevTime, true, false);
-					} else if (this._time > 0) {
+					} else if (this._time > 0 || immediate) {
 						this._initted = false;
 						this._init();
 						var inv = 1 / (1 - curRatio),
@@ -116,7 +121,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 				prevCycle = this._cycle,
 				duration = this._duration,
 				prevRawPrevTime = this._rawPrevTime,
-				isComplete, callback, pt, cycleDuration, r, type, pow, rawPrevTime, i;
+				isComplete, callback, pt, cycleDuration, r, type, pow, rawPrevTime;
 			if (time >= totalDur) {
 				this._totalTime = totalDur;
 				this._cycle = this._repeat;
@@ -130,6 +135,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 				if (!this._reversed) {
 					isComplete = true;
 					callback = "onComplete";
+					force = (force || this._timeline.autoRemoveChildren); //otherwise, if the animation is unpaused/activated after it's already finished, it doesn't get removed from the parent timeline.
 				}
 				if (duration === 0) if (this._initted || !this.vars.lazy || force) { //zero-duration tweens are tricky because we must discern the momentum/direction of time in order to determine whether the starting values should be rendered or the ending values. If the "playhead" of its timeline goes past the zero-duration tween in the forward direction or lands directly on it, the end values should be rendered, but if the timeline's "playhead" moves past it in the backward direction (from a postitive time to a negative time), the starting values must be rendered.
 					if (this._startTime === this._timeline._duration) { //if a zero-duration tween is at the VERY end of a timeline and that timeline renders at its end, it will typically add a tiny bit of cushion to the render time to prevent rounding errors from getting in the way of tweens rendering their VERY end. If we then reverse() that timeline, the zero-duration tween will trigger its onReverseComplete even though technically the playhead didn't pass over it again. It's a very specific edge case we must accommodate.
@@ -147,7 +153,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 			} else if (time < 0.0000001) { //to work around occasional floating point math artifacts, round super small values to 0.
 				this._totalTime = this._time = this._cycle = 0;
 				this.ratio = this._ease._calcEnd ? this._ease.getRatio(0) : 0;
-				if (prevTotalTime !== 0 || (duration === 0 && prevRawPrevTime > 0 && prevRawPrevTime !== _tinyNum)) {
+				if (prevTotalTime !== 0 || (duration === 0 && prevRawPrevTime > 0)) {
 					callback = "onReverseComplete";
 					isComplete = this._reversed;
 				}
@@ -221,7 +227,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 				
 			if (prevTime === this._time && !force && prevCycle === this._cycle) {
 				if (prevTotalTime !== this._totalTime) if (this._onUpdate) if (!suppressEvents) { //so that onUpdate fires even during the repeatDelay - as long as the totalTime changed, we should trigger onUpdate.
-					this._onUpdate.apply(this.vars.onUpdateScope || this, this.vars.onUpdateParams || _blankArray);
+					this._callback("onUpdate");
 				}
 				return;
 			} else if (!this._initted) {
@@ -264,7 +270,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 					}
 				}
 				if (this.vars.onStart) if (this._totalTime !== 0 || duration === 0) if (!suppressEvents) {
-					this.vars.onStart.apply(this.vars.onStartScope || this, this.vars.onStartParams || _blankArray);
+					this._callback("onStart");
 				}
 			}
 			
@@ -283,11 +289,11 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 					this._startAt.render(time, suppressEvents, force); //note: for performance reasons, we tuck this conditional logic inside less traveled areas (most tweens don't have an onUpdate). We'd just have it at the end before the onComplete, but the values should be updated before any onUpdate is called, so we ALSO put it here and then if it's not called, we do so later near the onComplete.
 				}
 				if (!suppressEvents) if (this._totalTime !== prevTotalTime || isComplete) {
-					this._onUpdate.apply(this.vars.onUpdateScope || this, this.vars.onUpdateParams || _blankArray);
+					this._callback("onUpdate");
 				}
 			}
 			if (this._cycle !== prevCycle) if (!suppressEvents) if (!this._gc) if (this.vars.onRepeat) {
-				this.vars.onRepeat.apply(this.vars.onRepeatScope || this, this.vars.onRepeatParams || _blankArray);
+				this._callback("onRepeat");
 			}
 			if (callback) if (!this._gc || force) { //check gc because there's a chance that kill() could be called in an onUpdate
 				if (time < 0 && this._startAt && !this._onUpdate && this._startTime) { //if the tween is positioned at the VERY beginning (_startTime 0) of its parent timeline, it's illegal for the playhead to go back further, so we should not render the recorded startAt values.
@@ -300,7 +306,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 					this._active = false;
 				}
 				if (!suppressEvents && this.vars[callback]) {
-					this.vars[callback].apply(this.vars[callback + "Scope"] || this, this.vars[callback + "Params"] || _blankArray);
+					this._callback(callback);
 				}
 				if (duration === 0 && this._rawPrevTime === _tinyNum && rawPrevTime !== _tinyNum) { //the onComplete or onReverseComplete could trigger movement of the playhead and for zero-duration tweens (which must discern direction) that land directly back on their start time, we don't want to fire again on the next render. Think of several addPause()'s in a timeline that forces the playhead to a certain spot, but what if it's already paused and another tween is tweening the "time" of the timeline? Each time it moves [forward] past that spot, it would move back, and since suppressEvents is true, it'd reset _rawPrevTime to _tinyNum so that when it begins again, the callback would fire (so ultimately it could bounce back and forth during that tween). Again, this is a very uncommon scenario, but possible nonetheless.
 					this._rawPrevTime = 0;
@@ -334,7 +340,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 					if (vars.onComplete) {
 						vars.onComplete.apply(vars.onCompleteScope || this, arguments);
 					}
-					onCompleteAll.apply(onCompleteAllScope || this, onCompleteAllParams || _blankArray);
+					onCompleteAll.apply(onCompleteAllScope || vars.callbackScope || this, onCompleteAllParams || _blankArray);
 				},
 				l, copy, i, p;
 			if (!_isArray(targets)) {
@@ -345,14 +351,20 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 					targets = _slice(targets);
 				}
 			}
-			l = targets.length;
-			for (i = 0; i < l; i++) {
+			targets = targets || [];
+			if (stagger < 0) {
+				targets = _slice(targets);
+				targets.reverse();
+				stagger *= -1;
+			}
+			l = targets.length - 1;
+			for (i = 0; i <= l; i++) {
 				copy = {};
 				for (p in vars) {
 					copy[p] = vars[p];
 				}
 				copy.delay = delay;
-				if (i === l - 1 && onCompleteAll) {
+				if (i === l && onCompleteAll) {
 					copy.onComplete = finalComplete;
 				}
 				a[i] = new TweenMax(targets[i], duration, copy);
@@ -374,7 +386,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 		};
 				
 		TweenMax.delayedCall = function(delay, callback, params, scope, useFrames) {
-			return new TweenMax(callback, 0, {delay:delay, onComplete:callback, onCompleteParams:params, onCompleteScope:scope, onReverseComplete:callback, onReverseCompleteParams:params, onReverseCompleteScope:scope, immediateRender:false, useFrames:useFrames, overwrite:0});
+			return new TweenMax(callback, 0, {delay:delay, onComplete:callback, onCompleteParams:params, callbackScope:scope, onReverseComplete:callback, onReverseCompleteParams:params, immediateRender:false, useFrames:useFrames, overwrite:0});
 		};
 		
 		TweenMax.set = function(target, vars) {
@@ -619,6 +631,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 			},
 			_tinyNum = 0.0000000001,
 			TweenLiteInternals = TweenLite._internals,
+			_internals = TimelineLite._internals = {},
 			_isSelector = TweenLiteInternals.isSelector,
 			_isArray = TweenLiteInternals.isArray,
 			_lazyTweens = TweenLiteInternals.lazyTweens,
@@ -632,15 +645,32 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 				}
 				return copy;
 			},
-			_pauseCallback = function(tween, callback, params, scope) {
-				var time = tween._timeline._totalTime;
+			_pauseCallback = _internals.pauseCallback = function(tween, callback, params, scope) {
+				var tl = tween._timeline,
+					time = tl._totalTime,
+					startTime = tween._startTime,
+					reversed = (tween._rawPrevTime < 0 || (tween._rawPrevTime === 0 && tl._reversed)),//don't use tween.ratio because if the playhead lands exactly on top of the addPause(), ratio will be 1 even if the master timeline was reversed (which is correct). The key here is to sense the direction of the playhead.
+					next = reversed ? 0 : _tinyNum,
+					prev = reversed ? _tinyNum : 0,
+					sibling;
 				if (callback || !this._forcingPlayhead) { //if the user calls a method that moves the playhead (like progress() or time()), it should honor that and skip any pauses (although if there's a callback positioned at that pause, it must jump there and make the call to ensure the time is EXACTLY what it is supposed to be, and then proceed to where the playhead is being forced). Otherwise, imagine placing a pause in the middle of a timeline and then doing timeline.progress(0.9) - it would get stuck where the pause is.
-					tween._timeline.pause(tween._startTime);
-					if (callback) {
-						callback.apply(scope || tween._timeline, params || _blankArray);
+					tl.pause(startTime);
+					//now find sibling tweens that are EXACTLY at the same spot on the timeline and adjust the _rawPrevTime so that they fire (or don't fire) correctly on the next render. This is primarily to accommodate zero-duration tweens/callbacks that are positioned right on top of a pause. For example, tl.to(...).call(...).addPause(...).call(...) - notice that there's a call() on each side of the pause, so when it's running forward it should call the first one and then pause, and then when resumed, call the other. Zero-duration tweens use _rawPrevTime to sense momentum figure out if events were suppressed when arriving directly on top of that time.
+					sibling = tween._prev;
+					while (sibling && sibling._startTime === startTime) {
+						sibling._rawPrevTime = prev;
+						sibling = sibling._prev;
 					}
-					if (this._forcingPlayhead) {
-						tween._timeline.seek(time);
+					sibling = tween._next;
+					while (sibling && sibling._startTime === startTime) {
+						sibling._rawPrevTime = next;
+						sibling = sibling._next;
+					}
+					if (callback) {
+						callback.apply(scope || tl.vars.callbackScope || tl, params || _blankArray);
+					}
+					if (this._forcingPlayhead || !tl._paused) { //the callback could have called resume().
+						tl.seek(time);
 					}
 				}
 			},
@@ -653,7 +683,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 			},
 			p = TimelineLite.prototype = new SimpleTimeline();
 
-		TimelineLite.version = "1.13.2";
+		TimelineLite.version = "1.17.0";
 		p.constructor = TimelineLite;
 		p.kill()._gc = p._forcingPlayhead = false;
 
@@ -694,15 +724,21 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 		};
 
 		p.staggerTo = function(targets, duration, vars, stagger, position, onCompleteAll, onCompleteAllParams, onCompleteAllScope) {
-			var tl = new TimelineLite({onComplete:onCompleteAll, onCompleteParams:onCompleteAllParams, onCompleteScope:onCompleteAllScope, smoothChildTiming:this.smoothChildTiming}),
+			var tl = new TimelineLite({onComplete:onCompleteAll, onCompleteParams:onCompleteAllParams, callbackScope:onCompleteAllScope, smoothChildTiming:this.smoothChildTiming}),
 				i;
 			if (typeof(targets) === "string") {
 				targets = TweenLite.selector(targets) || targets;
 			}
+			targets = targets || [];
 			if (_isSelector(targets)) { //senses if the targets object is a selector. If it is, we should translate it into an array.
 				targets = _slice(targets);
 			}
 			stagger = stagger || 0;
+			if (stagger < 0) {
+				targets = _slice(targets);
+				targets.reverse();
+				stagger *= -1;
+			}
 			for (i = 0; i < targets.length; i++) {
 				if (vars.startAt) {
 					vars.startAt = _copy(vars.startAt);
@@ -862,7 +898,9 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 		};
 
 		p.addPause = function(position, callback, params, scope) {
-			return this.call(_pauseCallback, ["{self}", callback, params, scope], this, position);
+			var t = TweenLite.delayedCall(0, _pauseCallback, ["{self}", callback, params, scope], this);
+			t.data = "isPause"; // we use this flag in TweenLite's render() method to identify it as a special case that shouldn't be triggered when the virtual playhead is LEAVING the exact position where the pause is, otherwise timeline.addPause(1).play(1) would end up paused on the very next tick.
+			return this.add(t, position);
 		};
 
 		p.removeLabel = function(label) {
@@ -938,6 +976,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 				if (!this._reversed) if (!this._hasPausedChild()) {
 					isComplete = true;
 					callback = "onComplete";
+					internalForce = !!this._timeline.autoRemoveChildren; //otherwise, if the animation is unpaused/activated after it's already finished, it doesn't get removed from the parent timeline.
 					if (this._duration === 0) if (time === 0 || this._rawPrevTime < 0 || this._rawPrevTime === _tinyNum) if (this._rawPrevTime !== time && this._first) {
 						internalForce = true;
 						if (this._rawPrevTime > _tinyNum) {
@@ -956,13 +995,24 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 				}
 				if (time < 0) {
 					this._active = false;
-					if (this._rawPrevTime >= 0 && this._first) { //when going back beyond the start, force a render so that zero-duration tweens that sit at the very beginning render their start values properly. Otherwise, if the parent timeline's playhead lands exactly at this timeline's startTime, and then moves backwards, the zero-duration tweens at the beginning would still be at their end state.
+					if (this._timeline.autoRemoveChildren && this._reversed) { //ensures proper GC if a timeline is resumed after it's finished reversing.
+						internalForce = isComplete = true;
+						callback = "onReverseComplete";
+					} else if (this._rawPrevTime >= 0 && this._first) { //when going back beyond the start, force a render so that zero-duration tweens that sit at the very beginning render their start values properly. Otherwise, if the parent timeline's playhead lands exactly at this timeline's startTime, and then moves backwards, the zero-duration tweens at the beginning would still be at their end state.
 						internalForce = true;
 					}
 					this._rawPrevTime = time;
 				} else {
 					this._rawPrevTime = (this._duration || !suppressEvents || time || this._rawPrevTime === time) ? time : _tinyNum; //when the playhead arrives at EXACTLY time 0 (right on top) of a zero-duration timeline or tween, we need to discern if events are suppressed so that when the playhead moves again (next time), it'll trigger the callback. If events are NOT suppressed, obviously the callback would be triggered in this render. Basically, the callback should fire either when the playhead ARRIVES or LEAVES this exact spot, not both. Imagine doing a timeline.seek(0) and there's a callback that sits at 0. Since events are suppressed on that seek() by default, nothing will fire, but when the playhead moves off of that position, the callback should fire. This behavior is what people intuitively expect. We set the _rawPrevTime to be a precise tiny number to indicate this scenario rather than using another property/variable which would increase memory usage. This technique is less readable, but more efficient.
-
+					if (time === 0 && isComplete) { //if there's a zero-duration tween at the very beginning of a timeline and the playhead lands EXACTLY at time 0, that tween will correctly render its end values, but we need to keep the timeline alive for one more render so that the beginning values render properly as the parent's playhead keeps moving beyond the begining. Imagine obj.x starts at 0 and then we do tl.set(obj, {x:100}).to(obj, 1, {x:200}) and then later we tl.reverse()...the goal is to have obj.x revert to 0. If the playhead happens to land on exactly 0, without this chunk of code, it'd complete the timeline and remove it from the rendering queue (not good).
+						tween = this._first;
+						while (tween && tween._startTime === 0) {
+							if (!tween._duration) {
+								isComplete = false;
+							}
+							tween = tween._next;
+						}
+					}
 					time = 0; //to avoid occasional floating point rounding errors (could cause problems especially with zero-duration tweens at the very beginning of the timeline)
 					if (!this._initted) {
 						internalForce = true;
@@ -983,7 +1033,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 			}
 
 			if (prevTime === 0) if (this.vars.onStart) if (this._time !== 0) if (!suppressEvents) {
-				this.vars.onStart.apply(this.vars.onStartScope || this, this.vars.onStartParams || _blankArray);
+				this._callback("onStart");
 			}
 
 			if (this._time >= prevTime) {
@@ -1022,7 +1072,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 				if (_lazyTweens.length) { //in case rendering caused any tweens to lazy-init, we should render them because typically when a timeline finishes, users expect things to have rendered fully. Imagine an onUpdate on a timeline that reports/checks tweened values.
 					_lazyRender();
 				}
-				this._onUpdate.apply(this.vars.onUpdateScope || this, this.vars.onUpdateParams || _blankArray);
+				this._callback("onUpdate");
 			}
 
 			if (callback) if (!this._gc) if (prevStart === this._startTime || prevTimeScale !== this._timeScale) if (this._time === 0 || totalDur >= this.totalDuration()) { //if one of the tweens that was rendered altered this timeline's startTime (like if an onComplete reversed the timeline), it probably isn't complete. If it is, don't worry, because whatever call altered the startTime would complete if it was necessary at the new time. The only exception is the timeScale property. Also check _gc because there's a chance that kill() could be called in an onUpdate
@@ -1036,7 +1086,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 					this._active = false;
 				}
 				if (!suppressEvents && this.vars[callback]) {
-					this.vars[callback].apply(this.vars[callback + "Scope"] || this, this.vars[callback + "Params"] || _blankArray);
+					this._callback(callback);
 				}
 			}
 		};
@@ -1097,6 +1147,10 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 				this._enabled(false, true);
 			}
 			return a;
+		};
+
+		p.recent = function() {
+			return this._recent;
 		};
 
 		p._contains = function(tween) {
@@ -1241,6 +1295,20 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 			return this;
 		};
 
+		p.paused = function(value) {
+			if (!value) { //if there's a pause directly at the spot from where we're unpausing, skip it.
+				var tween = this._first,
+					time = this._time;
+				while (tween) {
+					if (tween._startTime === time && tween.data === "isPause") {
+						tween._rawPrevTime = 0; //remember, _rawPrevTime is how zero-duration tweens/callbacks sense directionality and determine whether or not to fire. If _rawPrevTime is the same as _startTime on the next render, it won't fire.
+					}
+					tween = tween._next;
+				}
+			}
+			return Animation.prototype.paused.apply(this, arguments);
+		};
+
 		p.usesFrames = function() {
 			var tl = this._timeline;
 			while (tl._timeline) {
@@ -1285,7 +1353,6 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 				this._dirty = true;
 			},
 			_tinyNum = 0.0000000001,
-			_blankArray = [],
 			TweenLiteInternals = TweenLite._internals,
 			_lazyTweens = TweenLiteInternals.lazyTweens,
 			_lazyRender = TweenLiteInternals.lazyRender,
@@ -1294,7 +1361,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 
 		p.constructor = TimelineMax;
 		p.kill()._gc = false;
-		TimelineMax.version = "1.13.2";
+		TimelineMax.version = "1.17.0";
 
 		p.invalidate = function() {
 			this._yoyo = (this.vars.yoyo === true);
@@ -1326,9 +1393,13 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 			return this;
 		};
 
+		p.removePause = function(position) {
+			return this.removeCallback(TimelineLite._internals.pauseCallback, position);
+		};
+
 		p.tweenTo = function(position, vars) {
 			vars = vars || {};
-			var copy = {ease:_easeNone, overwrite:(vars.delay ? 2 : 1), useFrames:this.usesFrames(), immediateRender:false},//note: set overwrite to 1 (true/all) by default unless there's a delay so that we avoid a racing situation that could happen if, for example, an onmousemove creates the same tweenTo() over and over again.
+			var copy = {ease:_easeNone, useFrames:this.usesFrames(), immediateRender:false},
 				duration, p, t;
 			for (p in vars) {
 				copy[p] = vars[p];
@@ -1342,7 +1413,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 					t.duration( Math.abs( t.vars.time - t.target.time()) / t.target._timeScale );
 				}
 				if (vars.onStart) { //in case the user had an onStart in the vars - we don't want to overwrite it.
-					vars.onStart.apply(vars.onStartScope || t, vars.onStartParams || _blankArray);
+					t._callback("onStart");
 				}
 			};
 			return t;
@@ -1351,7 +1422,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 		p.tweenFromTo = function(fromPosition, toPosition, vars) {
 			vars = vars || {};
 			fromPosition = this._parseTimeOrLabel(fromPosition);
-			vars.startAt = {onComplete:this.seek, onCompleteParams:[fromPosition], onCompleteScope:this};
+			vars.startAt = {onComplete:this.seek, onCompleteParams:[fromPosition], callbackScope:this};
 			vars.immediateRender = (vars.immediateRender !== false);
 			var t = this.tweenTo(toPosition, vars);
 			return t.duration((Math.abs( t.vars.time - fromPosition) / this._timeScale) || 0.001);
@@ -1379,6 +1450,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 				if (!this._reversed) if (!this._hasPausedChild()) {
 					isComplete = true;
 					callback = "onComplete";
+					internalForce = !!this._timeline.autoRemoveChildren; //otherwise, if the animation is unpaused/activated after it's already finished, it doesn't get removed from the parent timeline.
 					if (this._duration === 0) if (time === 0 || prevRawPrevTime < 0 || prevRawPrevTime === _tinyNum) if (prevRawPrevTime !== time && this._first) {
 						internalForce = true;
 						if (prevRawPrevTime > _tinyNum) {
@@ -1405,12 +1477,24 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 				}
 				if (time < 0) {
 					this._active = false;
-					if (prevRawPrevTime >= 0 && this._first) { //when going back beyond the start, force a render so that zero-duration tweens that sit at the very beginning render their start values properly. Otherwise, if the parent timeline's playhead lands exactly at this timeline's startTime, and then moves backwards, the zero-duration tweens at the beginning would still be at their end state.
+					if (this._timeline.autoRemoveChildren && this._reversed) {
+						internalForce = isComplete = true;
+						callback = "onReverseComplete";
+					} else if (prevRawPrevTime >= 0 && this._first) { //when going back beyond the start, force a render so that zero-duration tweens that sit at the very beginning render their start values properly. Otherwise, if the parent timeline's playhead lands exactly at this timeline's startTime, and then moves backwards, the zero-duration tweens at the beginning would still be at their end state.
 						internalForce = true;
 					}
 					this._rawPrevTime = time;
 				} else {
 					this._rawPrevTime = (dur || !suppressEvents || time || this._rawPrevTime === time) ? time : _tinyNum; //when the playhead arrives at EXACTLY time 0 (right on top) of a zero-duration timeline or tween, we need to discern if events are suppressed so that when the playhead moves again (next time), it'll trigger the callback. If events are NOT suppressed, obviously the callback would be triggered in this render. Basically, the callback should fire either when the playhead ARRIVES or LEAVES this exact spot, not both. Imagine doing a timeline.seek(0) and there's a callback that sits at 0. Since events are suppressed on that seek() by default, nothing will fire, but when the playhead moves off of that position, the callback should fire. This behavior is what people intuitively expect. We set the _rawPrevTime to be a precise tiny number to indicate this scenario rather than using another property/variable which would increase memory usage. This technique is less readable, but more efficient.
+					if (time === 0 && isComplete) { //if there's a zero-duration tween at the very beginning of a timeline and the playhead lands EXACTLY at time 0, that tween will correctly render its end values, but we need to keep the timeline alive for one more render so that the beginning values render properly as the parent's playhead keeps moving beyond the begining. Imagine obj.x starts at 0 and then we do tl.set(obj, {x:100}).to(obj, 1, {x:200}) and then later we tl.reverse()...the goal is to have obj.x revert to 0. If the playhead happens to land on exactly 0, without this chunk of code, it'd complete the timeline and remove it from the rendering queue (not good).
+						tween = this._first;
+						while (tween && tween._startTime === 0) {
+							if (!tween._duration) {
+								isComplete = false;
+							}
+							tween = tween._next;
+						}
+					}
 					time = 0; //to avoid occasional floating point rounding errors (could cause problems especially with zero-duration tweens at the very beginning of the timeline)
 					if (!this._initted) {
 						internalForce = true;
@@ -1477,7 +1561,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 				this.render(prevTime, suppressEvents, (dur === 0));
 				if (!suppressEvents) if (!this._gc) {
 					if (this.vars.onRepeat) {
-						this.vars.onRepeat.apply(this.vars.onRepeatScope || this, this.vars.onRepeatParams || _blankArray);
+						this._callback("onRepeat");
 					}
 				}
 				if (wrap) {
@@ -1496,7 +1580,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 
 			if ((this._time === prevTime || !this._first) && !force && !internalForce) {
 				if (prevTotalTime !== this._totalTime) if (this._onUpdate) if (!suppressEvents) { //so that onUpdate fires even during the repeatDelay - as long as the totalTime changed, we should trigger onUpdate.
-					this._onUpdate.apply(this.vars.onUpdateScope || this, this.vars.onUpdateParams || _blankArray);
+					this._callback("onUpdate");
 				}
 				return;
 			} else if (!this._initted) {
@@ -1508,7 +1592,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 			}
 
 			if (prevTotalTime === 0) if (this.vars.onStart) if (this._totalTime !== 0) if (!suppressEvents) {
-				this.vars.onStart.apply(this.vars.onStartScope || this, this.vars.onStartParams || _blankArray);
+				this._callback("onStart");
 			}
 
 			if (this._time >= prevTime) {
@@ -1548,7 +1632,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 				if (_lazyTweens.length) { //in case rendering caused any tweens to lazy-init, we should render them because typically when a timeline finishes, users expect things to have rendered fully. Imagine an onUpdate on a timeline that reports/checks tweened values.
 					_lazyRender();
 				}
-				this._onUpdate.apply(this.vars.onUpdateScope || this, this.vars.onUpdateParams || _blankArray);
+				this._callback("onUpdate");
 			}
 			if (callback) if (!this._locked) if (!this._gc) if (prevStart === this._startTime || prevTimeScale !== this._timeScale) if (this._time === 0 || totalDur >= this.totalDuration()) { //if one of the tweens that was rendered altered this timeline's startTime (like if an onComplete reversed the timeline), it probably isn't complete. If it is, don't worry, because whatever call altered the startTime would complete if it was necessary at the new time. The only exception is the timeScale property. Also check _gc because there's a chance that kill() could be called in an onUpdate
 				if (isComplete) {
@@ -1561,7 +1645,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 					this._active = false;
 				}
 				if (!suppressEvents && this.vars[callback]) {
-					this.vars[callback].apply(this.vars[callback + "Scope"] || this, this.vars[callback + "Params"] || _blankArray);
+					this._callback(callback);
 				}
 			}
 		};
@@ -1732,6 +1816,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 			_r2 = [],
 			_r3 = [],
 			_corProps = {},
+			_globals = _gsScope._gsDefine.globals,
 			Segment = function(a, b, c, d) {
 				this.a = a;
 				this.b = b;
@@ -2020,7 +2105,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 			BezierPlugin = _gsScope._gsDefine.plugin({
 					propName: "bezier",
 					priority: -1,
-					version: "1.3.3",
+					version: "1.3.4",
 					API: 2,
 					global:true,
 
@@ -2212,7 +2297,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 		};
 
 		BezierPlugin._cssRegister = function() {
-			var CSSPlugin = _gsScope._gsDefine.globals.CSSPlugin;
+			var CSSPlugin = _globals.CSSPlugin;
 			if (!CSSPlugin) {
 				return;
 			}
@@ -2319,6 +2404,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 				this._overwriteProps.length = 0;
 				this.setRatio = CSSPlugin.prototype.setRatio; //speed optimization (avoid prototype lookup on this "hot" method)
 			},
+			_globals = _gsScope._gsDefine.globals,
 			_hasPriority, //turns true whenever a CSSPropTween instance is created that has a priority other than 0. This helps us discern whether or not we should spend the time organizing the linked list or not after a CSSPlugin's _onInitTween() method is called.
 			_suffixMap, //we set this in _onInitTween() each time as a way to have a persistent variable we can use in other methods like _parse() without having to pass it around as a parameter and we keep _parse() decoupled from a particular CSSPlugin instance
 			_cs, //computed style (we store this in a shared variable to conserve memory and make minification tighter
@@ -2327,10 +2413,11 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 			p = CSSPlugin.prototype = new TweenPlugin("css");
 
 		p.constructor = CSSPlugin;
-		CSSPlugin.version = "1.13.2";
+		CSSPlugin.version = "1.17.0";
 		CSSPlugin.API = 2;
 		CSSPlugin.defaultTransformPerspective = 0;
 		CSSPlugin.defaultSkewType = "compensated";
+		CSSPlugin.defaultSmoothOrigin = true;
 		p = "px"; //we'll reuse the "p" variable to keep file size down
 		CSSPlugin.suffixMap = {top:p, right:p, bottom:p, left:p, width:p, height:p, fontSize:p, padding:p, margin:p, perspective:p, lineHeight:""};
 
@@ -2338,7 +2425,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 		var _numExp = /(?:\d|\-\d|\.\d|\-\.\d)+/g,
 			_relNumExp = /(?:\d|\-\d|\.\d|\-\.\d|\+=\d|\-=\d|\+=.\d|\-=\.\d)+/g,
 			_valuesExp = /(?:\+=|\-=|\-|\b)[\d\-\.]+[a-zA-Z0-9]*(?:%|\b)/gi, //finds all the values that begin with numbers or += or -= and then a number. Includes suffixes. We use this to split complex values apart like "1px 5px 20px rgb(255,102,51)"
-			_NaNExp = /[^\d\-\.]/g,
+			_NaNExp = /(?![+-]?\d*\.?\d+|[+-]|e[+-]\d+)[^0-9]/g, //also allows scientific notation and doesn't kill the leading -/+ in -= and +=
 			_suffixExp = /(?:\d|\-|\+|=|#|\.)*/g,
 			_opacityExp = /opacity *= *([^)]*)/i,
 			_opacityValExp = /opacity:([^;]*)/i,
@@ -2356,8 +2443,11 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 			_RAD2DEG = 180 / Math.PI,
 			_forcePT = {},
 			_doc = document,
-			_tempDiv = _doc.createElement("div"),
-			_tempImg = _doc.createElement("img"),
+			_createElement = function(type) {
+				return _doc.createElementNS ? _doc.createElementNS("http://www.w3.org/1999/xhtml", type) : _doc.createElement(type);
+			},
+			_tempDiv = _createElement("div"),
+			_tempImg = _createElement("img"),
 			_internals = CSSPlugin._internals = {_specialProps:_specialProps}, //provides a hook to a few internal methods that we need to access from inside other plugins
 			_agent = navigator.userAgent,
 			_autoRound,
@@ -2369,19 +2459,18 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 			_ieVers,
 			_supportsOpacity = (function() { //we set _isSafari, _ieVers, _isFirefox, and _supportsOpacity all in one function here to reduce file size slightly, especially in the minified version.
 				var i = _agent.indexOf("Android"),
-					d = _doc.createElement("div"), a;
-
+					a = _createElement("a");
 				_isSafari = (_agent.indexOf("Safari") !== -1 && _agent.indexOf("Chrome") === -1 && (i === -1 || Number(_agent.substr(i+8, 1)) > 3));
 				_isSafariLT6 = (_isSafari && (Number(_agent.substr(_agent.indexOf("Version/")+8, 1)) < 6));
 				_isFirefox = (_agent.indexOf("Firefox") !== -1);
-
-				if ((/MSIE ([0-9]{1,}[\.0-9]{0,})/).exec(_agent)) {
+				if ((/MSIE ([0-9]{1,}[\.0-9]{0,})/).exec(_agent) || (/Trident\/.*rv:([0-9]{1,}[\.0-9]{0,})/).exec(_agent)) {
 					_ieVers = parseFloat( RegExp.$1 );
 				}
-
-				d.innerHTML = "<a style='top:1px;opacity:.55;'>a</a>";
-				a = d.getElementsByTagName("a")[0];
-				return a ? /^0.55/.test(a.style.opacity) : false;
+				if (!a) {
+					return false;
+				}
+				a.style.cssText = "top:1px;opacity:.55;";
+				return /^0.55/.test(a.style.opacity);
 			}()),
 			_getIEOpacity = function(v) {
 				return (_opacityExp.test( ((typeof(v) === "string") ? v : (v.currentStyle ? v.currentStyle.filter : v.style.filter) || "") ) ? ( parseFloat( RegExp.$1 ) / 100 ) : 1);
@@ -2391,6 +2480,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 					console.log(s);
 				}
 			},
+
 			_prefixCSS = "", //the non-camelCase vendor prefix like "-o-", "-moz-", "-ms-", or "-webkit-"
 			_prefix = "", //camelCase vendor prefix like "O", "ms", "Webkit", or "Moz".
 
@@ -2501,15 +2591,20 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 			// @private returns at object containing ALL of the style properties in camelCase and their associated values.
 			_getAllStyles = function(t, cs) {
 				var s = {},
-					i, tr;
+					i, tr, p;
 				if ((cs = cs || _getComputedStyle(t, null))) {
 					if ((i = cs.length)) {
 						while (--i > -1) {
-							s[cs[i].replace(_camelExp, _camelFunc)] = cs.getPropertyValue(cs[i]);
+							p = cs[i];
+							if (p.indexOf("-transform") === -1 || _transformPropCSS === p) { //Some webkit browsers duplicate transform values, one non-prefixed and one prefixed ("transform" and "WebkitTransform"), so we must weed out the extra one here.
+								s[p.replace(_camelExp, _camelFunc)] = cs.getPropertyValue(p);
+							}
 						}
-					} else { //Opera behaves differently - cs.length is always 0, so we must do a for...in loop.
+					} else { //some browsers behave differently - cs.length is always 0, so we must do a for...in loop.
 						for (i in cs) {
-							s[i] = cs[i];
+							if (i.indexOf("Transform") === -1 || _transformProp === i) { //Some webkit browsers duplicate transform values, one non-prefixed and one prefixed ("transform" and "WebkitTransform"), so we must weed out the extra one here.
+								s[i] = cs[i];
+							}
 						}
 					}
 				} else if ((cs = t.currentStyle || t.style)) {
@@ -2594,13 +2689,14 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 					x = (v.indexOf("left") !== -1) ? "0%" : (v.indexOf("right") !== -1) ? "100%" : a[0],
 					y = (v.indexOf("top") !== -1) ? "0%" : (v.indexOf("bottom") !== -1) ? "100%" : a[1];
 				if (y == null) {
-					y = "0";
+					y = (x === "center") ? "50%" : "0";
 				} else if (y === "center") {
 					y = "50%";
 				}
 				if (x === "center" || (isNaN(parseFloat(x)) && (x + "").indexOf("=") === -1)) { //remember, the user could flip-flop the values and say "bottom center" or "center bottom", etc. "center" is ambiguous because it could be used to describe horizontal or vertical, hence the isNaN(). If there's an "=" sign in the value, it's relative.
 					x = "50%";
 				}
+				v = x + " " + y + ((a.length > 2) ? " " + a[2] : "");
 				if (recObj) {
 					recObj.oxp = (x.indexOf("%") !== -1);
 					recObj.oyp = (y.indexOf("%") !== -1);
@@ -2608,8 +2704,9 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 					recObj.oyr = (y.charAt(1) === "=");
 					recObj.ox = parseFloat(x.replace(_NaNExp, ""));
 					recObj.oy = parseFloat(y.replace(_NaNExp, ""));
+					recObj.v = v;
 				}
-				return x + " " + y + ((a.length > 2) ? " " + a[2] : "");
+				return recObj || v;
 			},
 
 			/**
@@ -2629,7 +2726,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 			 * @return {number} Parsed value
 			 */
 			_parseVal = function(v, d) {
-				return (v == null) ? d : (typeof(v) === "string" && v.charAt(1) === "=") ? parseInt(v.charAt(0) + "1", 10) * Number(v.substr(2)) + d : parseFloat(v);
+				return (v == null) ? d : (typeof(v) === "string" && v.charAt(1) === "=") ? parseInt(v.charAt(0) + "1", 10) * parseFloat(v.substr(2)) + d : parseFloat(v);
 			},
 
 			/**
@@ -2642,7 +2739,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 			 */
 			_parseAngle = function(v, d, p, directionalEnd) {
 				var min = 0.000001,
-					cap, split, dif, result;
+					cap, split, dif, result, isRelative;
 				if (v == null) {
 					result = d;
 				} else if (typeof(v) === "number") {
@@ -2650,7 +2747,8 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 				} else {
 					cap = 360;
 					split = v.split("_");
-					dif = Number(split[0].replace(_NaNExp, "")) * ((v.indexOf("rad") === -1) ? 1 : _RAD2DEG) - ((v.charAt(1) === "=") ? 0 : d);
+					isRelative = (v.charAt(1) === "=");
+					dif = (isRelative ? parseInt(v.charAt(0) + "1", 10) * parseFloat(split[0].substr(2)) : parseFloat(split[0])) * ((v.indexOf("rad") === -1) ? 1 : _RAD2DEG) - (isRelative ? 0 : d);
 					if (split.length) {
 						if (directionalEnd) {
 							directionalEnd[p] = d + dif;
@@ -2706,7 +2804,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 			 * @param {(string|number)} v The value the should be parsed which could be a string like #9F0 or rgb(255,102,51) or rgba(255,0,0,0.5) or it could be a number like 0xFF00CC or even a named color like red, blue, purple, etc.
 			 * @return {Array.<number>} An array containing red, green, and blue (and optionally alpha) in that order.
 			 */
-			_parseColor = function(v) {
+			_parseColor = CSSPlugin.parseColor = function(v) {
 				var c1, c2, c3, h, s, l;
 				if (!v || v === "") {
 					return _colorLookup.black;
@@ -3016,6 +3114,13 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 				}
 			},
 
+			_addNonTweeningNumericPT = function(target, prop, start, end, next, overwriteProp) { //cleans up some code redundancies and helps minification. Just a fast way to add a NUMERIC non-tweening CSSPropTween
+				var pt = new CSSPropTween(target, prop, start, end - start, next, -1, overwriteProp);
+				pt.b = start;
+				pt.e = pt.xs0 = end;
+				return pt;
+			},
+
 			/**
 			 * Takes a target, the beginning value and ending value (as strings) and parses them into a CSSPropTween (possibly with child CSSPropTweens) that accommodates multiple numbers, colors, comma-delimited values, etc. For example:
 			 * sp.parseComplex(element, "boxShadow", "5px 10px 20px rgb(255,102,51)", "0px 0px 0px red", true, "0px 0px 0px rgb(0,0,0,0)", pt);
@@ -3060,7 +3165,6 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 					bv = ba[i];
 					ev = ea[i];
 					bn = parseFloat(bv);
-
 					//if the value begins with a number (most common). It's fine if it has a suffix like px
 					if (bn || bn === 0) {
 						pt.appendXtra("", bn, _parseChange(ev, bn), ev.replace(_relNumExp, ""), (autoRound && ev.indexOf("px") !== -1), true);
@@ -3230,7 +3334,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 				if (!_specialProps[p]) {
 					var pluginName = p.charAt(0).toUpperCase() + p.substr(1) + "Plugin";
 					_registerComplexSpecialProp(p, {parser:function(t, e, p, cssp, pt, plugin, vars) {
-						var pluginClass = (_gsScope.GreenSockGlobals || _gsScope).com.greensock.plugins[pluginName];
+						var pluginClass = _globals.com.greensock.plugins[pluginName];
 						if (!pluginClass) {
 							_log("Error: " + pluginName + " js file not loaded.");
 							return pt;
@@ -3274,8 +3378,11 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 						bi = b.indexOf(kwd);
 						ei = e.indexOf(kwd);
 						if (bi !== ei) {
-							e = (ei === -1) ? ea : ba;
-							e[i] += " " + kwd;
+							if (ei === -1) { //if the keyword isn't in the end value, remove it from the beginning one.
+								ba[i] = ba[i].split(kwd).join("");
+							} else if (bi === -1) { //if the keyword isn't in the beginning, add it.
+								ba[i] += " " + kwd;
+							}
 						}
 					}
 				}
@@ -3342,16 +3449,134 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 
 
 
-
-
 		//transform-related methods and properties
+		CSSPlugin.useSVGTransformAttr = _isSafari || _isFirefox; //Safari and Firefox both have some rendering bugs when applying CSS transforms to SVG elements, so default to using the "transform" attribute instead (users can override this).
 		var _transformProps = ("scaleX,scaleY,scaleZ,x,y,z,skewX,skewY,rotation,rotationX,rotationY,perspective,xPercent,yPercent").split(","),
 			_transformProp = _checkPropPrefix("transform"), //the Javascript (camelCase) transform property, like msTransform, WebkitTransform, MozTransform, or OTransform.
 			_transformPropCSS = _prefixCSS + "transform",
 			_transformOriginProp = _checkPropPrefix("transformOrigin"),
 			_supports3D = (_checkPropPrefix("perspective") !== null),
 			Transform = _internals.Transform = function() {
-				this.skewY = 0;
+				this.perspective = parseFloat(CSSPlugin.defaultTransformPerspective) || 0;
+				this.force3D = (CSSPlugin.defaultForce3D === false || !_supports3D) ? false : CSSPlugin.defaultForce3D || "auto";
+			},
+			_SVGElement = window.SVGElement,
+			_useSVGTransformAttr,
+			//Some browsers (like Firefox and IE) don't honor transform-origin properly in SVG elements, so we need to manually adjust the matrix accordingly. We feature detect here rather than always doing the conversion for certain browsers because they may fix the problem at some point in the future.
+
+			_createSVG = function(type, container, attributes) {
+				var element = _doc.createElementNS("http://www.w3.org/2000/svg", type),
+					reg = /([a-z])([A-Z])/g,
+					p;
+				for (p in attributes) {
+					element.setAttributeNS(null, p.replace(reg, "$1-$2").toLowerCase(), attributes[p]);
+				}
+				container.appendChild(element);
+				return element;
+			},
+			_docElement = _doc.documentElement,
+			_forceSVGTransformAttr = (function() {
+				//IE and Android stock don't support CSS transforms on SVG elements, so we must write them to the "transform" attribute. We populate this variable in the _parseTransform() method, and only if/when we come across an SVG element
+				var force = _ieVers || (/Android/i.test(_agent) && !window.chrome),
+					svg, rect, width;
+				if (_doc.createElementNS && !force) { //IE8 and earlier doesn't support SVG anyway
+					svg = _createSVG("svg", _docElement);
+					rect = _createSVG("rect", svg, {width:100, height:50, x:100});
+					width = rect.getBoundingClientRect().width;
+					rect.style[_transformOriginProp] = "50% 50%";
+					rect.style[_transformProp] = "scaleX(0.5)";
+					force = (width === rect.getBoundingClientRect().width && !(_isFirefox && _supports3D)); //note: Firefox fails the test even though it does support CSS transforms in 3D. Since we can't push 3D stuff into the transform attribute, we force Firefox to pass the test here (as long as it does truly support 3D).
+					_docElement.removeChild(svg);
+				}
+				return force;
+			})(),
+			_parseSVGOrigin = function(e, local, decoratee, absolute, smoothOrigin) {
+				var tm = e._gsTransform,
+					m = _getMatrix(e, true),
+					v, x, y, xOrigin, yOrigin, a, b, c, d, tx, ty, determinant, xOriginOld, yOriginOld;
+				if (tm) {
+					xOriginOld = tm.xOrigin; //record the original values before we alter them.
+					yOriginOld = tm.yOrigin;
+				}
+				if (!absolute || (v = absolute.split(" ")).length < 2) {
+					b = e.getBBox();
+					local = _parsePosition(local).split(" ");
+					v = [(local[0].indexOf("%") !== -1 ? parseFloat(local[0]) / 100 * b.width : parseFloat(local[0])) + b.x,
+						 (local[1].indexOf("%") !== -1 ? parseFloat(local[1]) / 100 * b.height : parseFloat(local[1])) + b.y];
+				}
+				decoratee.xOrigin = xOrigin = parseFloat(v[0]);
+				decoratee.yOrigin = yOrigin = parseFloat(v[1]);
+				if (absolute && m !== _identity2DMatrix) { //if svgOrigin is being set, we must invert the matrix and determine where the absolute point is, factoring in the current transforms. Otherwise, the svgOrigin would be based on the element's non-transformed position on the canvas.
+					a = m[0];
+					b = m[1];
+					c = m[2];
+					d = m[3];
+					tx = m[4];
+					ty = m[5];
+					determinant = (a * d - b * c);
+					x = xOrigin * (d / determinant) + yOrigin * (-c / determinant) + ((c * ty - d * tx) / determinant);
+					y = xOrigin * (-b / determinant) + yOrigin * (a / determinant) - ((a * ty - b * tx) / determinant);
+					xOrigin = decoratee.xOrigin = v[0] = x;
+					yOrigin = decoratee.yOrigin = v[1] = y;
+				}
+				if (tm) { //avoid jump when transformOrigin is changed - adjust the x/y values accordingly
+					if (smoothOrigin || (smoothOrigin !== false && CSSPlugin.defaultSmoothOrigin !== false)) {
+						x = xOrigin - xOriginOld;
+						y = yOrigin - yOriginOld;
+						//originally, we simply adjusted the x and y values, but that would cause problems if, for example, you created a rotational tween part-way through an x/y tween. Managing the offset in a separate variable gives us ultimate flexibility.
+						//tm.x -= x - (x * m[0] + y * m[2]);
+						//tm.y -= y - (x * m[1] + y * m[3]);
+						tm.xOffset += (x * m[0] + y * m[2]) - x;
+						tm.yOffset += (x * m[1] + y * m[3]) - y;
+					} else {
+						tm.xOffset = tm.yOffset = 0;
+					}
+				}
+				e.setAttribute("data-svg-origin", v.join(" "));
+			},
+			_isSVG = function(e) {
+				return !!(_SVGElement && typeof(e.getBBox) === "function" && e.getCTM && (!e.parentNode || (e.parentNode.getBBox && e.parentNode.getCTM)));
+			},
+			_identity2DMatrix = [1,0,0,1,0,0],
+			_getMatrix = function(e, force2D) {
+				var tm = e._gsTransform || new Transform(),
+					rnd = 100000,
+					isDefault, s, m, n, dec;
+				if (_transformProp) {
+					s = _getStyle(e, _transformPropCSS, null, true);
+				} else if (e.currentStyle) {
+					//for older versions of IE, we need to interpret the filter portion that is in the format: progid:DXImageTransform.Microsoft.Matrix(M11=6.123233995736766e-17, M12=-1, M21=1, M22=6.123233995736766e-17, sizingMethod='auto expand') Notice that we need to swap b and c compared to a normal matrix.
+					s = e.currentStyle.filter.match(_ieGetMatrixExp);
+					s = (s && s.length === 4) ? [s[0].substr(4), Number(s[2].substr(4)), Number(s[1].substr(4)), s[3].substr(4), (tm.x || 0), (tm.y || 0)].join(",") : "";
+				}
+				isDefault = (!s || s === "none" || s === "matrix(1, 0, 0, 1, 0, 0)");
+				if (tm.svg || (e.getBBox && _isSVG(e))) {
+					if (isDefault && (e.style[_transformProp] + "").indexOf("matrix") !== -1) { //some browsers (like Chrome 40) don't correctly report transforms that are applied inline on an SVG element (they don't get included in the computed style), so we double-check here and accept matrix values
+						s = e.style[_transformProp];
+						isDefault = 0;
+					}
+					m = e.getAttribute("transform");
+					if (isDefault && m) {
+						if (m.indexOf("matrix") !== -1) { //just in case there's a "transform" value specified as an attribute instead of CSS style. Accept either a matrix() or simple translate() value though.
+							s = m;
+							isDefault = 0;
+						} else if (m.indexOf("translate") !== -1) {
+							s = "matrix(1,0,0,1," + m.match(/(?:\-|\b)[\d\-\.e]+\b/gi).join(",") + ")";
+							isDefault = 0;
+						}
+					}
+				}
+				if (isDefault) {
+					return _identity2DMatrix;
+				}
+				//split the matrix values out into an array (m for matrix)
+				m = (s || "").match(/(?:\-|\b)[\d\-\.e]+\b/gi) || [];
+				i = m.length;
+				while (--i > -1) {
+					n = Number(m[i]);
+					m[i] = (dec = n - (n |= 0)) ? ((dec * rnd + (dec < 0 ? -0.5 : 0.5)) | 0) / rnd + n : n; //convert strings to Numbers and round to 5 decimal places to avoid issues with tiny numbers. Roughly 20x faster than Number.toFixed(). We also must make sure to round before dividing so that values like 0.9999999999 become 1 to avoid glitches in browser rendering and interpretation of flipped/rotated 3D matrices. And don't just multiply the number by rnd, floor it, and then divide by rnd because the bitwise operations max out at a 32-bit signed integer, thus it could get clipped at a relatively low value (like 22,000.00000 for example).
+				}
+				return (force2D && m.length > 6) ? [m[0], m[1], m[4], m[5], m[12], m[13]] : m;
 			},
 
 			/**
@@ -3370,33 +3595,27 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 					invX = (tm.scaleX < 0), //in order to interpret things properly, we need to know if the user applied a negative scaleX previously so that we can adjust the rotation and skewX accordingly. Otherwise, if we always interpret a flipped matrix as affecting scaleY and the user only wants to tween the scaleX on multiple sequential tweens, it would keep the negative scaleY without that being the user's intent.
 					min = 0.00002,
 					rnd = 100000,
-					minAngle = 179.99,
-					minPI = minAngle * _DEG2RAD,
 					zOrigin = _supports3D ? parseFloat(_getStyle(t, _transformOriginProp, cs, false, "0 0 0").split(" ")[2]) || tm.zOrigin  || 0 : 0,
 					defaultTransformPerspective = parseFloat(CSSPlugin.defaultTransformPerspective) || 0,
-					s, m, i, n, dec, scaleX, scaleY, rotation, skewX, difX, difY, difR, difS;
-				if (_transformProp) {
-					s = _getStyle(t, _transformPropCSS, cs, true);
-				} else if (t.currentStyle) {
-					//for older versions of IE, we need to interpret the filter portion that is in the format: progid:DXImageTransform.Microsoft.Matrix(M11=6.123233995736766e-17, M12=-1, M21=1, M22=6.123233995736766e-17, sizingMethod='auto expand') Notice that we need to swap b and c compared to a normal matrix.
-					s = t.currentStyle.filter.match(_ieGetMatrixExp);
-					s = (s && s.length === 4) ? [s[0].substr(4), Number(s[2].substr(4)), Number(s[1].substr(4)), s[3].substr(4), (tm.x || 0), (tm.y || 0)].join(",") : "";
-				}
-				if (!s || s === "none" || s === "matrix(1, 0, 0, 1, 0, 0)") { //if no transforms are applied, just use the defaults to optimize performance (no need to parse).
-					tm = {x:0, y:0, z:0, scaleX:1, scaleY:1, scaleZ:1, skewX:0, perspective:defaultTransformPerspective, rotation:0, rotationX:0, rotationY:0, zOrigin:0};
-				} else {
-					//split the matrix values out into an array (m for matrix)
-					m = (s || "").match(/(?:\-|\b)[\d\-\.e]+\b/gi) || [];
-					i = m.length;
-					while (--i > -1) {
-						n = Number(m[i]);
-						m[i] = (dec = n - (n |= 0)) ? ((dec * rnd + (dec < 0 ? -0.5 : 0.5)) | 0) / rnd + n : n; //convert strings to Numbers and round to 5 decimal places to avoid issues with tiny numbers. Roughly 20x faster than Number.toFixed(). We also must make sure to round before dividing so that values like 0.9999999999 become 1 to avoid glitches in browser rendering and interpretation of flipped/rotated 3D matrices. And don't just multiply the number by rnd, floor it, and then divide by rnd because the bitwise operations max out at a 32-bit signed integer, thus it could get clipped at a relatively low value (like 22,000.00000 for example).
-					}
-					if (m.length === 16) {
+					m, i, scaleX, scaleY, rotation, skewX;
 
+				tm.svg = !!(t.getBBox && _isSVG(t));
+				if (tm.svg) {
+					_parseSVGOrigin(t, _getStyle(t, _transformOriginProp, _cs, false, "50% 50%") + "", tm, t.getAttribute("data-svg-origin"));
+					_useSVGTransformAttr = CSSPlugin.useSVGTransformAttr || _forceSVGTransformAttr;
+				}
+				m = _getMatrix(t);
+				if (m !== _identity2DMatrix) {
+
+					if (m.length === 16) {
 						//we'll only look at these position-related 6 variables first because if x/y/z all match, it's relatively safe to assume we don't need to re-parse everything which risks losing important rotational information (like rotationX:180 plus rotationY:180 would look the same as rotation:180 - there's no way to know for sure which direction was taken based solely on the matrix3d() values)
-						var a13 = m[8], a23 = m[9], a33 = m[10],
-							a14 = m[12], a24 = m[13], a34 = m[14];
+						var a11 = m[0], a21 = m[1], a31 = m[2], a41 = m[3],
+							a12 = m[4], a22 = m[5], a32 = m[6], a42 = m[7],
+							a13 = m[8], a23 = m[9], a33 = m[10],
+							a14 = m[12], a24 = m[13], a34 = m[14],
+							a43 = m[11],
+							angle = Math.atan2(a32, a33),
+							t1, t2, t3, t4, cos, sin;
 
 						//we manually compensate for non-zero z component of transformOrigin to work around bugs in Safari
 						if (tm.zOrigin) {
@@ -3405,78 +3624,67 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 							a24 = a23*a34-m[13];
 							a34 = a33*a34+tm.zOrigin-m[14];
 						}
+						tm.rotationX = angle * _RAD2DEG;
+						//rotationX
+						if (angle) {
+							cos = Math.cos(-angle);
+							sin = Math.sin(-angle);
+							t1 = a12*cos+a13*sin;
+							t2 = a22*cos+a23*sin;
+							t3 = a32*cos+a33*sin;
+							a13 = a12*-sin+a13*cos;
+							a23 = a22*-sin+a23*cos;
+							a33 = a32*-sin+a33*cos;
+							a43 = a42*-sin+a43*cos;
+							a12 = t1;
+							a22 = t2;
+							a32 = t3;
+						}
+						//rotationY
+						angle = Math.atan2(a13, a33);
+						tm.rotationY = angle * _RAD2DEG;
+						if (angle) {
+							cos = Math.cos(-angle);
+							sin = Math.sin(-angle);
+							t1 = a11*cos-a13*sin;
+							t2 = a21*cos-a23*sin;
+							t3 = a31*cos-a33*sin;
+							a23 = a21*sin+a23*cos;
+							a33 = a31*sin+a33*cos;
+							a43 = a41*sin+a43*cos;
+							a11 = t1;
+							a21 = t2;
+							a31 = t3;
+						}
+						//rotationZ
+						angle = Math.atan2(a21, a11);
+						tm.rotation = angle * _RAD2DEG;
+						if (angle) {
+							cos = Math.cos(-angle);
+							sin = Math.sin(-angle);
+							a11 = a11*cos+a12*sin;
+							t2 = a21*cos+a22*sin;
+							a22 = a21*-sin+a22*cos;
+							a32 = a31*-sin+a32*cos;
+							a21 = t2;
+						}
 
-						//only parse from the matrix if we MUST because not only is it usually unnecessary due to the fact that we store the values in the _gsTransform object, but also because it's impossible to accurately interpret rotationX, rotationY, rotationZ, scaleX, and scaleY if all are applied, so it's much better to rely on what we store. However, we must parse the first time that an object is tweened. We also assume that if the position has changed, the user must have done some styling changes outside of CSSPlugin, thus we force a parse in that scenario.
-						if (!rec || parse || tm.rotationX == null) {
-							var a11 = m[0], a21 = m[1], a31 = m[2], a41 = m[3],
-								a12 = m[4], a22 = m[5], a32 = m[6], a42 = m[7],
-								a43 = m[11],
-								angle = Math.atan2(a32, a33),
-								xFlip = (angle < -minPI || angle > minPI),
-								t1, t2, t3, cos, sin, yFlip, zFlip;
-							tm.rotationX = angle * _RAD2DEG;
-							//rotationX
-							if (angle) {
-								cos = Math.cos(-angle);
-								sin = Math.sin(-angle);
-								t1 = a12*cos+a13*sin;
-								t2 = a22*cos+a23*sin;
-								t3 = a32*cos+a33*sin;
-								a13 = a12*-sin+a13*cos;
-								a23 = a22*-sin+a23*cos;
-								a33 = a32*-sin+a33*cos;
-								a43 = a42*-sin+a43*cos;
-								a12 = t1;
-								a22 = t2;
-								a32 = t3;
-							}
-							//rotationY
-							angle = Math.atan2(a13, a11);
-							tm.rotationY = angle * _RAD2DEG;
-							if (angle) {
-								yFlip = (angle < -minPI || angle > minPI);
-								cos = Math.cos(-angle);
-								sin = Math.sin(-angle);
-								t1 = a11*cos-a13*sin;
-								t2 = a21*cos-a23*sin;
-								t3 = a31*cos-a33*sin;
-								a23 = a21*sin+a23*cos;
-								a33 = a31*sin+a33*cos;
-								a43 = a41*sin+a43*cos;
-								a11 = t1;
-								a21 = t2;
-								a31 = t3;
-							}
-							//rotationZ
-							angle = Math.atan2(a21, a22);
-							tm.rotation = angle * _RAD2DEG;
-							if (angle) {
-								zFlip = (angle < -minPI || angle > minPI);
-								cos = Math.cos(-angle);
-								sin = Math.sin(-angle);
-								a11 = a11*cos+a12*sin;
-								t2 = a21*cos+a22*sin;
-								a22 = a21*-sin+a22*cos;
-								a32 = a31*-sin+a32*cos;
-								a21 = t2;
-							}
+						if (tm.rotationX && Math.abs(tm.rotationX) + Math.abs(tm.rotation) > 359.9) { //when rotationY is set, it will often be parsed as 180 degrees different than it should be, and rotationX and rotation both being 180 (it looks the same), so we adjust for that here.
+							tm.rotationX = tm.rotation = 0;
+							tm.rotationY += 180;
+						}
 
-							if (zFlip && xFlip) {
-								tm.rotation = tm.rotationX = 0;
-							} else if (zFlip && yFlip) {
-								tm.rotation = tm.rotationY = 0;
-							} else if (yFlip && xFlip) {
-								tm.rotationY = tm.rotationX = 0;
-							}
-
-							tm.scaleX = ((Math.sqrt(a11 * a11 + a21 * a21) * rnd + 0.5) | 0) / rnd;
-							tm.scaleY = ((Math.sqrt(a22 * a22 + a23 * a23) * rnd + 0.5) | 0) / rnd;
-							tm.scaleZ = ((Math.sqrt(a32 * a32 + a33 * a33) * rnd + 0.5) | 0) / rnd;
-							tm.skewX = 0;
-							tm.perspective = a43 ? 1 / ((a43 < 0) ? -a43 : a43) : 0;
-							tm.x = a14;
-							tm.y = a24;
-							tm.z = a34;
+						tm.scaleX = ((Math.sqrt(a11 * a11 + a21 * a21) * rnd + 0.5) | 0) / rnd;
+						tm.scaleY = ((Math.sqrt(a22 * a22 + a23 * a23) * rnd + 0.5) | 0) / rnd;
+						tm.scaleZ = ((Math.sqrt(a32 * a32 + a33 * a33) * rnd + 0.5) | 0) / rnd;
+						tm.skewX = 0;
+						tm.perspective = a43 ? 1 / ((a43 < 0) ? -a43 : a43) : 0;
+						tm.x = a14;
+						tm.y = a24;
+						tm.z = a34;
+						if (tm.svg) {
+							tm.x -= tm.xOrigin - (tm.xOrigin * a11 - tm.yOrigin * a12);
+							tm.y -= tm.yOrigin - (tm.yOrigin * a21 - tm.xOrigin * a22);
 						}
 
 					} else if ((!_supports3D || parse || !m.length || tm.x !== m[4] || tm.y !== m[5] || (!tm.rotationX && !tm.rotationY)) && !(tm.x !== undefined && _getStyle(t, "display", cs) === "none")) { //sometimes a 6-element matrix is returned even when we performed 3D transforms, like if rotationX and rotationY are 180. In cases like this, we still need to honor the 3D transforms. If we just rely on the 2D info, it could affect how the data is interpreted, like scaleY might get set to -1 or rotation could get offset by 180 degrees. For example, do a TweenLite.to(element, 1, {css:{rotationX:180, rotationY:180}}) and then later, TweenLite.to(element, 1, {css:{rotationX:0}}) and without this conditional logic in place, it'd jump to a state of being unrotated when the 2nd tween starts. Then again, we need to honor the fact that the user COULD alter the transforms outside of CSSPlugin, like by manually applying new css, so we try to sense that by looking at x and y because if those changed, we know the changes were made outside CSSPlugin and we force a reinterpretation of the matrix values. Also, in Webkit browsers, if the element's "display" is "none", its calculated style value will always return empty, so if we've already recorded the values in the _gsTransform object, we'll just rely on those.
@@ -3491,8 +3699,6 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 						scaleY = Math.sqrt(d * d + c * c);
 						rotation = (a || b) ? Math.atan2(b, a) * _RAD2DEG : tm.rotation || 0; //note: if scaleX is 0, we cannot accurately measure rotation. Same for skewX with a scaleY of 0. Therefore, we default to the previously recorded value (or zero if that doesn't exist).
 						skewX = (c || d) ? Math.atan2(c, d) * _RAD2DEG + rotation : tm.skewX || 0;
-						difX = scaleX - Math.abs(tm.scaleX || 0);
-						difY = scaleY - Math.abs(tm.scaleY || 0);
 						if (Math.abs(skewX) > 90 && Math.abs(skewX) < 270) {
 							if (invX) {
 								scaleX *= -1;
@@ -3503,23 +3709,21 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 								skewX += (skewX <= 0) ? 180 : -180;
 							}
 						}
-						difR = (rotation - tm.rotation) % 180; //note: matching ranges would be very small (+/-0.0001) or very close to 180.
-						difS = (skewX - tm.skewX) % 180;
-						//if there's already a recorded _gsTransform in place for the target, we should leave those values in place unless we know things changed for sure (beyond a super small amount). This gets around ambiguous interpretations, like if scaleX and scaleY are both -1, the matrix would be the same as if the rotation was 180 with normal scaleX/scaleY. If the user tweened to particular values, those must be prioritized to ensure animation is consistent.
-						if (tm.skewX === undefined || difX > min || difX < -min || difY > min || difY < -min || (difR > -minAngle && difR < minAngle && (difR * rnd) | 0 !== 0) || (difS > -minAngle && difS < minAngle && (difS * rnd) | 0 !== 0)) {
-							tm.scaleX = scaleX;
-							tm.scaleY = scaleY;
-							tm.rotation = rotation;
-							tm.skewX = skewX;
-						}
+						tm.scaleX = scaleX;
+						tm.scaleY = scaleY;
+						tm.rotation = rotation;
+						tm.skewX = skewX;
 						if (_supports3D) {
 							tm.rotationX = tm.rotationY = tm.z = 0;
 							tm.perspective = defaultTransformPerspective;
 							tm.scaleZ = 1;
 						}
+						if (tm.svg) {
+							tm.x -= tm.xOrigin - (tm.xOrigin * a + tm.yOrigin * c);
+							tm.y -= tm.yOrigin - (tm.xOrigin * b + tm.yOrigin * d);
+						}
 					}
 					tm.zOrigin = zOrigin;
-
 					//some browsers have a hard time with very small values like 2.4492935982947064e-16 (notice the "e-" towards the end) and would render the object slightly off. So we round to 0 in these cases. The conditional logic here is faster than calling Math.abs(). Also, browsers tend to render a SLIGHTLY rotated object in a fuzzy way, so we need to snap to exactly 0 when appropriate.
 					for (i in tm) {
 						if (tm[i] < min) if (tm[i] > -min) {
@@ -3527,11 +3731,21 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 						}
 					}
 				}
-				//DEBUG: _log("parsed rotation: "+(tm.rotationX)+", "+(tm.rotationY)+", "+(tm.rotation)+", scale: "+tm.scaleX+", "+tm.scaleY+", "+tm.scaleZ+", position: "+tm.x+", "+tm.y+", "+tm.z+", perspective: "+tm.perspective);
+				//DEBUG: _log("parsed rotation of " + t.getAttribute("id")+": "+(tm.rotationX)+", "+(tm.rotationY)+", "+(tm.rotation)+", scale: "+tm.scaleX+", "+tm.scaleY+", "+tm.scaleZ+", position: "+tm.x+", "+tm.y+", "+tm.z+", perspective: "+tm.perspective+ ", origin: "+ tm.xOrigin+ ","+ tm.yOrigin);
 				if (rec) {
 					t._gsTransform = tm; //record to the object's _gsTransform which we use so that tweens can control individual properties independently (we need all the properties to accurately recompose the matrix in the setRatio() method)
+					if (tm.svg) { //if we're supposed to apply transforms to the SVG element's "transform" attribute, make sure there aren't any CSS transforms applied or they'll override the attribute ones. Also clear the transform attribute if we're using CSS, just to be clean.
+						if (_useSVGTransformAttr && t.style[_transformProp]) {
+							TweenLite.delayedCall(0.001, function(){ //if we apply this right away (before anything has rendered), we risk there being no transforms for a brief moment and it also interferes with adjusting the transformOrigin in a tween with immediateRender:true (it'd try reading the matrix and it wouldn't have the appropriate data in place because we just removed it).
+								_removeProp(t.style, _transformProp);
+							});
+						} else if (!_useSVGTransformAttr && t.getAttribute("transform")) {
+							TweenLite.delayedCall(0.001, function(){
+								t.removeAttribute("transform");
+							});
+						}
+					}
 				}
-				tm.xPercent = tm.yPercent = 0;
 				return tm;
 			},
 
@@ -3614,29 +3828,88 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 				}
 			},
 
-			_set3DTransformRatio = _internals.set3DTransformRatio = function(v) {
+			/* translates a super small decimal to a string WITHOUT scientific notation
+			_safeDecimal = function(n) {
+				var s = (n < 0 ? -n : n) + "",
+					a = s.split("e-");
+				return (n < 0 ? "-0." : "0.") + new Array(parseInt(a[1], 10) || 0).join("0") + a[0].split(".").join("");
+			},
+			*/
+
+			_setTransformRatio = _internals.set3DTransformRatio = _internals.setTransformRatio = function(v) {
 				var t = this.data, //refers to the element's _gsTransform object
 					style = this.t.style,
-					angle = t.rotation * _DEG2RAD,
+					angle = t.rotation,
+					rotationX = t.rotationX,
+					rotationY = t.rotationY,
 					sx = t.scaleX,
 					sy = t.scaleY,
 					sz = t.scaleZ,
 					x = t.x,
 					y = t.y,
 					z = t.z,
+					isSVG = t.svg,
 					perspective = t.perspective,
-					a11, a12, a13, a14,	a21, a22, a23, a24, a31, a32, a33, a34,	a41, a42, a43,
-					zOrigin, rnd, cos, sin, t1, t2, t3, t4;
-				if (v === 1 || v === 0) if (t.force3D === "auto") if (!t.rotationY && !t.rotationX && sz === 1 && !perspective && !z) { //on the final render (which could be 0 for a from tween), if there are no 3D aspects, render in 2D to free up memory and improve performance especially on mobile devices
-					_set2DTransformRatio.call(this, v);
+					force3D = t.force3D,
+					a11, a12, a13, a21, a22, a23, a31, a32, a33, a41, a42, a43,
+					zOrigin, min, cos, sin, t1, t2, transform, comma, zero, skew, rnd;
+				//check to see if we should render as 2D (and SVGs must use 2D when _useSVGTransformAttr is true)
+				if (((((v === 1 || v === 0) && force3D === "auto" && (this.tween._totalTime === this.tween._totalDuration || !this.tween._totalTime)) || !force3D) && !z && !perspective && !rotationY && !rotationX) || (_useSVGTransformAttr && isSVG) || !_supports3D) { //on the final render (which could be 0 for a from tween), if there are no 3D aspects, render in 2D to free up memory and improve performance especially on mobile devices. Check the tween's totalTime/totalDuration too in order to make sure it doesn't happen between repeats if it's a repeating tween.
+
+					//2D
+					if (angle || t.skewX || isSVG) {
+						angle *= _DEG2RAD;
+						skew = t.skewX * _DEG2RAD;
+						rnd = 100000;
+						a11 = Math.cos(angle) * sx;
+						a21 = Math.sin(angle) * sx;
+						a12 = Math.sin(angle - skew) * -sy;
+						a22 = Math.cos(angle - skew) * sy;
+						if (skew && t.skewType === "simple") { //by default, we compensate skewing on the other axis to make it look more natural, but you can set the skewType to "simple" to use the uncompensated skewing that CSS does
+							t1 = Math.tan(skew);
+							t1 = Math.sqrt(1 + t1 * t1);
+							a12 *= t1;
+							a22 *= t1;
+							if (t.skewY) {
+								a11 *= t1;
+								a21 *= t1;
+							}
+						}
+						if (isSVG) {
+							x += t.xOrigin - (t.xOrigin * a11 + t.yOrigin * a12) + t.xOffset;
+							y += t.yOrigin - (t.xOrigin * a21 + t.yOrigin * a22) + t.yOffset;
+							if (_useSVGTransformAttr && (t.xPercent || t.yPercent)) { //The SVG spec doesn't support percentage-based translation in the "transform" attribute, so we merge it into the matrix to simulate it.
+								min = this.t.getBBox();
+								x += t.xPercent * 0.01 * min.width;
+								y += t.yPercent * 0.01 * min.height;
+							}
+							min = 0.000001;
+							if (x < min) if (x > -min) {
+								x = 0;
+							}
+							if (y < min) if (y > -min) {
+								y = 0;
+							}
+						}
+						transform = (((a11 * rnd) | 0) / rnd) + "," + (((a21 * rnd) | 0) / rnd) + "," + (((a12 * rnd) | 0) / rnd) + "," + (((a22 * rnd) | 0) / rnd) + "," + x + "," + y + ")";
+						if (isSVG && _useSVGTransformAttr) {
+							this.t.setAttribute("transform", "matrix(" + transform);
+						} else {
+							//some browsers have a hard time with very small values like 2.4492935982947064e-16 (notice the "e-" towards the end) and would render the object slightly off. So we round to 5 decimal places.
+							style[_transformProp] = ((t.xPercent || t.yPercent) ? "translate(" + t.xPercent + "%," + t.yPercent + "%) matrix(" : "matrix(") + transform;
+						}
+					} else {
+						style[_transformProp] = ((t.xPercent || t.yPercent) ? "translate(" + t.xPercent + "%," + t.yPercent + "%) matrix(" : "matrix(") + sx + ",0,0," + sy + "," + x + "," + y + ")";
+					}
 					return;
+
 				}
-				if (_isFirefox) {
-					var n = 0.0001;
-					if (sx < n && sx > -n) { //Firefox has a bug (at least in v25) that causes it to render the transparent part of 32-bit PNG images as black when displayed inside an iframe and the 3D scale is very small and doesn't change sufficiently enough between renders (like if you use a Power4.easeInOut to scale from 0 to 1 where the beginning values only change a tiny amount to begin the tween before accelerating). In this case, we force the scale to be 0.00002 instead which is visually the same but works around the Firefox issue.
+				if (_isFirefox) { //Firefox has a bug (at least in v25) that causes it to render the transparent part of 32-bit PNG images as black when displayed inside an iframe and the 3D scale is very small and doesn't change sufficiently enough between renders (like if you use a Power4.easeInOut to scale from 0 to 1 where the beginning values only change a tiny amount to begin the tween before accelerating). In this case, we force the scale to be 0.00002 instead which is visually the same but works around the Firefox issue.
+					min = 0.0001;
+					if (sx < min && sx > -min) {
 						sx = sz = 0.00002;
 					}
-					if (sy < n && sy > -n) {
+					if (sy < min && sy > -min) {
 						sy = sz = 0.00002;
 					}
 					if (perspective && !t.z && !t.rotationX && !t.rotationY) { //Firefox has a bug that causes elements to have an odd super-thin, broken/dotted black border on elements that have a perspective set but aren't utilizing 3D space (no rotationX, rotationY, or z).
@@ -3644,10 +3917,9 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 					}
 				}
 				if (angle || t.skewX) {
-					cos = Math.cos(angle);
-					sin = Math.sin(angle);
-					a11 = cos;
-					a21 = sin;
+					angle *= _DEG2RAD;
+					cos = a11 = Math.cos(angle);
+					sin = a21 = Math.sin(angle);
 					if (t.skewX) {
 						angle -= t.skewX * _DEG2RAD;
 						cos = Math.cos(angle);
@@ -3657,52 +3929,76 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 							t1 = Math.sqrt(1 + t1 * t1);
 							cos *= t1;
 							sin *= t1;
+							if (t.skewY) {
+								a11 *= t1;
+								a21 *= t1;
+							}
 						}
 					}
 					a12 = -sin;
 					a22 = cos;
 
-				} else if (!t.rotationY && !t.rotationX && sz === 1 && !perspective) { //if we're only translating and/or 2D scaling, this is faster...
+				} else if (!rotationY && !rotationX && sz === 1 && !perspective && !isSVG) { //if we're only translating and/or 2D scaling, this is faster...
 					style[_transformProp] = ((t.xPercent || t.yPercent) ? "translate(" + t.xPercent + "%," + t.yPercent + "%) translate3d(" : "translate3d(") + x + "px," + y + "px," + z +"px)" + ((sx !== 1 || sy !== 1) ? " scale(" + sx + "," + sy + ")" : "");
 					return;
 				} else {
 					a11 = a22 = 1;
 					a12 = a21 = 0;
 				}
+				// KEY  INDEX   AFFECTS
+				// a11  0       rotation, rotationY, scaleX
+				// a21  1       rotation, rotationY, scaleX
+				// a31  2       rotationY, scaleX
+				// a41  3       rotationY, scaleX
+				// a12  4       rotation, skewX, rotationX, scaleY
+				// a22  5       rotation, skewX, rotationX, scaleY
+				// a32  6       rotationX, scaleY
+				// a42  7       rotationX, scaleY
+				// a13  8       rotationY, rotationX, scaleZ
+				// a23  9       rotationY, rotationX, scaleZ
+				// a33  10      rotationY, rotationX, scaleZ
+				// a43  11      rotationY, rotationX, perspective, scaleZ
+				// a14  12      x, zOrigin, svgOrigin
+				// a24  13      y, zOrigin, svgOrigin
+				// a34  14      z, zOrigin
+				// a44  15
+				// rotation: Math.atan2(a21, a11)
+				// rotationY: Math.atan2(a13, a33) (or Math.atan2(a13, a11))
+				// rotationX: Math.atan2(a32, a33)
 				a33 = 1;
-				a13 = a14 = a23 = a24 = a31 = a32 = a34 = a41 = a42 = 0;
+				a13 = a23 = a31 = a32 = a41 = a42 = 0;
 				a43 = (perspective) ? -1 / perspective : 0;
 				zOrigin = t.zOrigin;
-				rnd = 100000;
-				angle = t.rotationY * _DEG2RAD;
+				min = 0.000001; //threshold below which browsers use scientific notation which won't work.
+				comma = ",";
+				zero = "0";
+				angle = rotationY * _DEG2RAD;
 				if (angle) {
 					cos = Math.cos(angle);
 					sin = Math.sin(angle);
-					a31 = a33*-sin;
+					a31 = -sin;
 					a41 = a43*-sin;
 					a13 = a11*sin;
 					a23 = a21*sin;
-					a33 *= cos;
+					a33 = cos;
 					a43 *= cos;
 					a11 *= cos;
 					a21 *= cos;
 				}
-				angle = t.rotationX * _DEG2RAD;
+				angle = rotationX * _DEG2RAD;
 				if (angle) {
 					cos = Math.cos(angle);
 					sin = Math.sin(angle);
 					t1 = a12*cos+a13*sin;
 					t2 = a22*cos+a23*sin;
-					t3 = a32*cos+a33*sin;
-					t4 = a42*cos+a43*sin;
+					a32 = a33*sin;
+					a42 = a43*sin;
 					a13 = a12*-sin+a13*cos;
 					a23 = a22*-sin+a23*cos;
-					a33 = a32*-sin+a33*cos;
-					a43 = a42*-sin+a43*cos;
+					a33 = a33*cos;
+					a43 = a43*cos;
 					a12 = t1;
 					a22 = t2;
-					a32 = t3;
-					a42 = t4;
 				}
 				if (sz !== 1) {
 					a13*=sz;
@@ -3722,55 +4018,59 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 					a31*=sx;
 					a41*=sx;
 				}
-				if (zOrigin) {
-					a34 -= zOrigin;
-					a14 = a13*a34;
-					a24 = a23*a34;
-					a34 = a33*a34+zOrigin;
-				}
-				//we round the x, y, and z slightly differently to allow even larger values.
-				a14 = (t1 = (a14 += x) - (a14 |= 0)) ? ((t1 * rnd + (t1 < 0 ? -0.5 : 0.5)) | 0) / rnd + a14 : a14;
-				a24 = (t1 = (a24 += y) - (a24 |= 0)) ? ((t1 * rnd + (t1 < 0 ? -0.5 : 0.5)) | 0) / rnd + a24 : a24;
-				a34 = (t1 = (a34 += z) - (a34 |= 0)) ? ((t1 * rnd + (t1 < 0 ? -0.5 : 0.5)) | 0) / rnd + a34 : a34;
-				style[_transformProp] = ((t.xPercent || t.yPercent) ? "translate(" + t.xPercent + "%," + t.yPercent + "%) matrix3d(" : "matrix3d(") + [ (((a11 * rnd) | 0) / rnd), (((a21 * rnd) | 0) / rnd), (((a31 * rnd) | 0) / rnd), (((a41 * rnd) | 0) / rnd), (((a12 * rnd) | 0) / rnd), (((a22 * rnd) | 0) / rnd), (((a32 * rnd) | 0) / rnd), (((a42 * rnd) | 0) / rnd), (((a13 * rnd) | 0) / rnd), (((a23 * rnd) | 0) / rnd), (((a33 * rnd) | 0) / rnd), (((a43 * rnd) | 0) / rnd), a14, a24, a34, (perspective ? (1 + (-a34 / perspective)) : 1) ].join(",") + ")";
-			},
 
-			_set2DTransformRatio = _internals.set2DTransformRatio = function(v) {
-				var t = this.data, //refers to the element's _gsTransform object
-					targ = this.t,
-					style = targ.style,
-					x = t.x,
-					y = t.y,
-					prefix = "",
-					ang, skew, rnd, sx, sy;
-				if (t.rotationX || t.rotationY || t.z || t.force3D === true || (t.force3D === "auto" && v !== 1 && v !== 0)) { //if a 3D tween begins while a 2D one is running, we need to kick the rendering over to the 3D method. For example, imagine a yoyo-ing, infinitely repeating scale tween running, and then the object gets rotated in 3D space with a different tween.
-					this.setRatio = _set3DTransformRatio;
-					_set3DTransformRatio.call(this, v);
-					return;
+				if (zOrigin || isSVG) {
+					if (zOrigin) {
+						x += a13*-zOrigin;
+						y += a23*-zOrigin;
+						z += a33*-zOrigin+zOrigin;
+					}
+					if (isSVG) { //due to bugs in some browsers, we need to manage the transform-origin of SVG manually
+						x += t.xOrigin - (t.xOrigin * a11 + t.yOrigin * a12) + t.xOffset;
+						y += t.yOrigin - (t.xOrigin * a21 + t.yOrigin * a22) + t.yOffset;
+					}
+					if (x < min && x > -min) {
+						x = zero;
+					}
+					if (y < min && y > -min) {
+						y = zero;
+					}
+					if (z < min && z > -min) {
+						z = 0; //don't use string because we calculate perspective later and need the number.
+					}
 				}
 
-				if (!t.rotation && !t.skewX) {
-					style[_transformProp] = ((t.xPercent || t.yPercent) ? "translate(" + t.xPercent + "%," + t.yPercent + "%) matrix(" : "matrix(") + t.scaleX + ",0,0," + t.scaleY + "," + x + "," + y + ")";
+				//optimized way of concatenating all the values into a string. If we do it all in one shot, it's slower because of the way browsers have to create temp strings and the way it affects memory. If we do it piece-by-piece with +=, it's a bit slower too. We found that doing it in these sized chunks works best overall:
+				transform = ((t.xPercent || t.yPercent) ? "translate(" + t.xPercent + "%," + t.yPercent + "%) matrix3d(" : "matrix3d(");
+				transform += ((a11 < min && a11 > -min) ? zero : a11) + comma + ((a21 < min && a21 > -min) ? zero : a21) + comma + ((a31 < min && a31 > -min) ? zero : a31);
+				transform += comma + ((a41 < min && a41 > -min) ? zero : a41) + comma + ((a12 < min && a12 > -min) ? zero : a12) + comma + ((a22 < min && a22 > -min) ? zero : a22);
+				if (rotationX || rotationY) { //performance optimization (often there's no rotationX or rotationY, so we can skip these calculations)
+					transform += comma + ((a32 < min && a32 > -min) ? zero : a32) + comma + ((a42 < min && a42 > -min) ? zero : a42) + comma + ((a13 < min && a13 > -min) ? zero : a13);
+					transform += comma + ((a23 < min && a23 > -min) ? zero : a23) + comma + ((a33 < min && a33 > -min) ? zero : a33) + comma + ((a43 < min && a43 > -min) ? zero : a43) + comma;
 				} else {
-					ang = t.rotation * _DEG2RAD;
-					skew = ang - t.skewX * _DEG2RAD;
-					rnd = 100000;
-					sx = t.scaleX * rnd;
-					sy = t.scaleY * rnd;
-					//some browsers have a hard time with very small values like 2.4492935982947064e-16 (notice the "e-" towards the end) and would render the object slightly off. So we round to 5 decimal places.
-					style[_transformProp] = ((t.xPercent || t.yPercent) ? "translate(" + t.xPercent + "%," + t.yPercent + "%) matrix(" : "matrix(") + (((Math.cos(ang) * sx) | 0) / rnd) + "," + (((Math.sin(ang) * sx) | 0) / rnd) + "," + (((Math.sin(skew) * -sy) | 0) / rnd) + "," + (((Math.cos(skew) * sy) | 0) / rnd) + "," + x + "," + y + ")";
+					transform += ",0,0,0,0,1,0,";
 				}
+				transform += x + comma + y + comma + z + comma + (perspective ? (1 + (-z / perspective)) : 1) + ")";
+
+				style[_transformProp] = transform;
 			};
 
-		_registerComplexSpecialProp("transform,scale,scaleX,scaleY,scaleZ,x,y,z,rotation,rotationX,rotationY,rotationZ,skewX,skewY,shortRotation,shortRotationX,shortRotationY,shortRotationZ,transformOrigin,transformPerspective,directionalRotation,parseTransform,force3D,skewType,xPercent,yPercent", {parser:function(t, e, p, cssp, pt, plugin, vars) {
-			if (cssp._transform) { return pt; } //only need to parse the transform once, and only if the browser supports it.
-			var m1 = cssp._transform = _getTransform(t, _cs, true, vars.parseTransform),
+		p = Transform.prototype;
+		p.x = p.y = p.z = p.skewX = p.skewY = p.rotation = p.rotationX = p.rotationY = p.zOrigin = p.xPercent = p.yPercent = p.xOffset = p.yOffset = 0;
+		p.scaleX = p.scaleY = p.scaleZ = 1;
+
+		_registerComplexSpecialProp("transform,scale,scaleX,scaleY,scaleZ,x,y,z,rotation,rotationX,rotationY,rotationZ,skewX,skewY,shortRotation,shortRotationX,shortRotationY,shortRotationZ,transformOrigin,svgOrigin,transformPerspective,directionalRotation,parseTransform,force3D,skewType,xPercent,yPercent,smoothOrigin", {parser:function(t, e, p, cssp, pt, plugin, vars) {
+			if (cssp._lastParsedTransform === vars) { return pt; } //only need to parse the transform once, and only if the browser supports it.
+			cssp._lastParsedTransform = vars;
+			var originalGSTransform = t._gsTransform,
+				m1 = cssp._transform = _getTransform(t, _cs, true, vars.parseTransform),
 				style = t.style,
 				min = 0.000001,
 				i = _transformProps.length,
 				v = vars,
 				endRotations = {},
-				m2, skewY, copy, orig, has3D, hasChange, dr;
+				transformOriginString = "transformOrigin",
+				m2, skewY, copy, orig, has3D, hasChange, dr, x, y;
 			if (typeof(v.transform) === "string" && _transformProp) { //for values like transform:"rotate(60deg) scale(0.5, 0.8)"
 				copy = _tempDiv.style; //don't use the original target because it might be SVG in which case some browsers don't report computed style correctly.
 				copy[_transformProp] = v.transform;
@@ -3779,6 +4079,12 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 				_doc.body.appendChild(_tempDiv);
 				m2 = _getTransform(_tempDiv, null, false);
 				_doc.body.removeChild(_tempDiv);
+				if (v.xPercent != null) {
+					m2.xPercent = _parseVal(v.xPercent, m1.xPercent);
+				}
+				if (v.yPercent != null) {
+					m2.yPercent = _parseVal(v.yPercent, m1.yPercent);
+				}
 			} else if (typeof(v) === "object") { //for values like scaleX, scaleY, rotation, x, y, skewX, and skewY or transform:{...} (object)
 				m2 = {scaleX:_parseVal((v.scaleX != null) ? v.scaleX : v.scale, m1.scaleX),
 					scaleY:_parseVal((v.scaleY != null) ? v.scaleY : v.scale, m1.scaleY),
@@ -3822,7 +4128,6 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 					m2.rotation += skewY;
 				}
 			}
-
 			if (_supports3D && v.force3D != null) {
 				m1.force3D = v.force3D;
 				hasChange = true;
@@ -3838,7 +4143,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 			while (--i > -1) {
 				p = _transformProps[i];
 				orig = m2[p] - m1[p];
-				if (orig > min || orig < -min || _forcePT[p] != null) {
+				if (orig > min || orig < -min || v[p] != null || _forcePT[p] != null) {
 					hasChange = true;
 					pt = new CSSPropTween(m1, p, m1[p], orig, pt);
 					if (p in endRotations) {
@@ -3851,12 +4156,24 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 			}
 
 			orig = v.transformOrigin;
+			if (m1.svg && (orig || v.svgOrigin)) {
+				x = m1.xOffset; //when we change the origin, in order to prevent things from jumping we adjust the x/y so we must record those here so that we can create PropTweens for them and flip them at the same time as the origin
+				y = m1.yOffset;
+				_parseSVGOrigin(t, _parsePosition(orig), m2, v.svgOrigin, v.smoothOrigin);
+				pt = _addNonTweeningNumericPT(m1, "xOrigin", (originalGSTransform ? m1 : m2).xOrigin, m2.xOrigin, pt, transformOriginString); //note: if there wasn't a transformOrigin defined yet, just start with the destination one; it's wasteful otherwise, and it causes problems with fromTo() tweens. For example, TweenLite.to("#wheel", 3, {rotation:180, transformOrigin:"50% 50%", delay:1}); TweenLite.fromTo("#wheel", 3, {scale:0.5, transformOrigin:"50% 50%"}, {scale:1, delay:2}); would cause a jump when the from values revert at the beginning of the 2nd tween.
+				pt = _addNonTweeningNumericPT(m1, "yOrigin", (originalGSTransform ? m1 : m2).yOrigin, m2.yOrigin, pt, transformOriginString);
+				if (x !== m1.xOffset || y !== m1.yOffset) {
+					pt = _addNonTweeningNumericPT(m1, "xOffset", (originalGSTransform ? x : m1.xOffset), m1.xOffset, pt, transformOriginString);
+					pt = _addNonTweeningNumericPT(m1, "yOffset", (originalGSTransform ? y : m1.yOffset), m1.yOffset, pt, transformOriginString);
+				}
+				orig = _useSVGTransformAttr ? null : "0px 0px"; //certain browsers (like firefox) completely botch transform-origin, so we must remove it to prevent it from contaminating transforms. We manage it ourselves with xOrigin and yOrigin
+			}
 			if (orig || (_supports3D && has3D && m1.zOrigin)) { //if anything 3D is happening and there's a transformOrigin with a z component that's non-zero, we must ensure that the transformOrigin's z-component is set to 0 so that we can manually do those calculations to get around Safari bugs. Even if the user didn't specifically define a "transformOrigin" in this particular tween (maybe they did it via css directly).
 				if (_transformProp) {
 					hasChange = true;
 					p = _transformOriginProp;
 					orig = (orig || _getStyle(t, p, _cs, false, "50% 50%")) + ""; //cast as string to avoid errors
-					pt = new CSSPropTween(style, p, 0, 0, pt, -1, "transformOrigin");
+					pt = new CSSPropTween(style, p, 0, 0, pt, -1, transformOriginString);
 					pt.b = style[p];
 					pt.plugin = plugin;
 					if (_supports3D) {
@@ -3871,14 +4188,13 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 						pt.xs0 = pt.e = orig;
 					}
 
-				//for older versions of IE (6-8), we need to manually calculate things inside the setRatio() function. We record origin x and y (ox and oy) and whether or not the values are percentages (oxp and oyp).
+					//for older versions of IE (6-8), we need to manually calculate things inside the setRatio() function. We record origin x and y (ox and oy) and whether or not the values are percentages (oxp and oyp).
 				} else {
 					_parsePosition(orig + "", m1);
 				}
 			}
-
 			if (hasChange) {
-				cssp._transformType = (has3D || this._transformType === 3) ? 3 : 2; //quicker than calling cssp._enableTransforms();
+				cssp._transformType = (!(m1.svg && _useSVGTransformAttr) && (has3D || this._transformType === 3)) ? 3 : 2; //quicker than calling cssp._enableTransforms();
 			}
 			return pt;
 		}, prefix:true});
@@ -3953,7 +4269,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 				if (src && src !== "none") {
 					ba = bs.split(" ");
 					ea = es.split(" ");
-					_tempImg.setAttribute("src", src); //set the temp <img>'s src to the background-image so that we can measure its width/height
+					_tempImg.setAttribute("src", src); //set the temp IMG's src to the background-image so that we can measure its width/height
 					i = 2;
 					while (--i > -1) {
 						bs = ba[i];
@@ -4007,7 +4323,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 		//opacity-related
 		var _setIEOpacityRatio = function(v) {
 				var t = this.t, //refers to the element's style property
-					filters = t.filter || _getStyle(this.data, "filter"),
+					filters = t.filter || _getStyle(this.data, "filter") || "",
 					val = (this.s + this.c * v) | 0,
 					skip;
 				if (val === 100) { //for older versions of IE that need to use a filter to apply opacity, we should remove the filter if opacity hits 1 in order to improve performance, but make sure there isn't a transform (matrix) or gradient in the filters.
@@ -4068,8 +4384,8 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 		var _removeProp = function(s, p) {
 				if (p) {
 					if (s.removeProperty) {
-						if (p.substr(0,2) === "ms") { //Microsoft browsers don't conform to the standard of capping the first prefix character, so we adjust so that when we prefix the caps with a dash, it's correct (otherwise it'd be "ms-transform" instead of "-ms-transform" for IE9, for example)
-							p = "M" + p.substr(1);
+						if (p.substr(0,2) === "ms" || p.substr(0,6) === "webkit") { //Microsoft and some Webkit browsers don't conform to the standard of capitalizing the first prefix character, so we adjust so that when we prefix the caps with a dash, it's correct (otherwise it'd be "ms-transform" instead of "-ms-transform" for IE9, for example)
+							p = "-" + p;
 						}
 						s.removeProperty(p.replace(_capsExp, "-$1").toLowerCase());
 					} else { //note: old versions of IE use "removeAttribute()" instead of "removeProperty()"
@@ -4121,14 +4437,12 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 			}
 			t._gsClassPT = pt;
 			pt.e = (e.charAt(1) !== "=") ? e : b.replace(new RegExp("\\s*\\b" + e.substr(2) + "\\b"), "") + ((e.charAt(0) === "+") ? " " + e.substr(2) : "");
-			if (cssp._tween._duration) { //if it's a zero-duration tween, there's no need to tween anything or parse the data. In fact, if we switch classes temporarily (which we must do for proper parsing) and the class has a transition applied, it could cause a quick flash to the end state and back again initially in some browsers.
-				t.setAttribute("class", pt.e);
-				difData = _cssDif(t, bs, _getAllStyles(t), vars, cnptLookup);
-				t.setAttribute("class", b);
-				pt.data = difData.firstMPT;
-				t.style.cssText = cssText; //we recorded cssText before we swapped classes and ran _getAllStyles() because in cases when a className tween is overwritten, we remove all the related tweening properties from that class change (otherwise class-specific stuff can't override properties we've directly set on the target's style object due to specificity).
-				pt = pt.xfirst = cssp.parse(t, difData.difs, pt, plugin); //we record the CSSPropTween as the xfirst so that we can handle overwriting propertly (if "className" gets overwritten, we must kill all the properties associated with the className part of the tween, so we can loop through from xfirst to the pt itself)
-			}
+			t.setAttribute("class", pt.e);
+			difData = _cssDif(t, bs, _getAllStyles(t), vars, cnptLookup);
+			t.setAttribute("class", b);
+			pt.data = difData.firstMPT;
+			t.style.cssText = cssText; //we recorded cssText before we swapped classes and ran _getAllStyles() because in cases when a className tween is overwritten, we remove all the related tweening properties from that class change (otherwise class-specific stuff can't override properties we've directly set on the target's style object due to specificity).
+			pt = pt.xfirst = cssp.parse(t, difData.difs, pt, plugin); //we record the CSSPropTween as the xfirst so that we can handle overwriting propertly (if "className" gets overwritten, we must kill all the properties associated with the className part of the tween, so we can loop through from xfirst to the pt itself)
 			return pt;
 		}});
 
@@ -4137,12 +4451,12 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 			if (v === 1 || v === 0) if (this.data._totalTime === this.data._totalDuration && this.data.data !== "isFromStart") { //this.data refers to the tween. Only clear at the END of the tween (remember, from() tweens make the ratio go from 1 to 0, so we can't just check that and if the tween is the zero-duration one that's created internally to render the starting values in a from() tween, ignore that because otherwise, for example, from(...{height:100, clearProps:"height", delay:1}) would wipe the height at the beginning of the tween and after 1 second, it'd kick back in).
 				var s = this.t.style,
 					transformParse = _specialProps.transform.parse,
-					a, p, i, clearTransform;
+					a, p, i, clearTransform, transform;
 				if (this.e === "all") {
 					s.cssText = "";
 					clearTransform = true;
 				} else {
-					a = this.e.split(",");
+					a = this.e.split(" ").join("").split(",");
 					i = a.length;
 					while (--i > -1) {
 						p = a[i];
@@ -4158,7 +4472,11 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 				}
 				if (clearTransform) {
 					_removeProp(s, _transformProp);
-					if (this.t._gsTransform) {
+					transform = this.t._gsTransform;
+					if (transform) {
+						if (transform.svg) {
+							this.t.removeAttribute("data-svg-origin");
+						}
 						delete this.t._gsTransform;
 					}
 				}
@@ -4189,7 +4507,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 
 
 		p = CSSPlugin.prototype;
-		p._firstPT = null;
+		p._firstPT = p._lastParsedTransform = p._transform = null;
 
 		//gets called when the tween renders for the first time. This kicks everything off, recording start/end values, etc.
 		p._onInitTween = function(target, vars, tween) {
@@ -4225,7 +4543,12 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 				vars = v;
 				style.cssText = first;
 			}
-			this._firstPT = pt = this.parse(target, vars, null);
+
+			if (vars.className) { //className tweens will combine any differences they find in the css with the vars that are passed in, so {className:"myClass", scale:0.5, left:20} would work.
+				this._firstPT = pt = _specialProps.className.parse(target, vars.className, "className", this, null, null, vars);
+			} else {
+				this._firstPT = pt = this.parse(target, vars, null);
+			}
 
 			if (this._transformType) {
 				threeD = (this._transformType === 3);
@@ -4255,8 +4578,10 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 				}
 				tpt = new CSSPropTween(target, "transform", 0, 0, null, 2);
 				this._linkCSSP(tpt, null, pt2);
-				tpt.setRatio = (threeD && _supports3D) ? _set3DTransformRatio : _transformProp ? _set2DTransformRatio : _setIETransformRatio;
+				tpt.setRatio = _transformProp ? _setTransformRatio : _setIETransformRatio;
 				tpt.data = this._transform || _getTransform(target, _cs, true);
+				tpt.tween = tween;
+				tpt.pr = -1; //ensures that the transforms get applied after the components are updated.
 				_overwriteProps.pop(); //we don't want to force the overwrite of all "transform" tweens of the target - we only care about individual transform properties like scaleX, rotation, etc. The CSSPropTween constructor automatically adds the property to _overwriteProps which is why we need to pop() here.
 			}
 
@@ -4333,7 +4658,7 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 							esfx = es.replace(_suffixExp, "");
 						} else {
 							en = parseFloat(es);
-							esfx = isStr ? es.substr((en + "").length) || "" : "";
+							esfx = isStr ? es.replace(_suffixExp, "") : "";
 						}
 
 						if (esfx === "") {
@@ -4394,12 +4719,25 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 			var pt = this._firstPT,
 				min = 0.000001,
 				val, str, i;
-
 			//at the end of the tween, we set the values to exactly what we received in order to make sure non-tweening values (like "position" or "float" or whatever) are set and so that if the beginning/ending suffixes (units) didn't match and we normalized to px, the value that the user passed in is used here. We check to see if the tween is at its beginning in case it's a from() tween in which case the ratio will actually go from 1 to 0 over the course of the tween (backwards).
 			if (v === 1 && (this._tween._time === this._tween._duration || this._tween._time === 0)) {
 				while (pt) {
 					if (pt.type !== 2) {
-						pt.t[pt.p] = pt.e;
+						if (pt.r && pt.type !== -1) {
+							val = Math.round(pt.s + pt.c);
+							if (!pt.type) {
+								pt.t[pt.p] = val + pt.xs0;
+							} else if (pt.type === 1) { //complex value (one that typically has multiple numbers inside a string, like "rect(5px,10px,20px,25px)"
+								i = pt.l;
+								str = pt.xs0 + val + pt.xs1;
+								for (i = 1; i < pt.l; i++) {
+									str += pt["xn"+i] + pt["xs"+(i+1)];
+								}
+								pt.t[pt.p] = str;
+							}
+						} else {
+							pt.t[pt.p] = pt.e;
+						}
 					} else {
 						pt.setRatio(v);
 					}
@@ -4468,8 +4806,8 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 		 * @param {boolean} threeD if true, it should apply 3D tweens (otherwise, just 2D ones are fine and typically faster)
 		 */
 		p._enableTransforms = function(threeD) {
-			this._transformType = (threeD || this._transformType === 3) ? 3 : 2;
 			this._transform = this._transform || _getTransform(this._target, _cs, true); //ensures that the element has a _gsTransform property with the appropriate values.
+			this._transformType = (!(this._transform.svg && _useSVGTransformAttr) && (threeD || this._transformType === 3)) ? 3 : 2;
 		};
 
 		var lazySet = function(v) {
@@ -4593,12 +4931,12 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 				e = [],
 				targets = [],
 				_reservedProps = TweenLite._internals.reservedProps,
-				i, difs, p;
+				i, difs, p, from;
 			target = tween._targets || tween.target;
 			_getChildStyles(target, b, targets);
-			tween.render(duration, true);
+			tween.render(duration, true, true);
 			_getChildStyles(target, e);
-			tween.render(0, true);
+			tween.render(0, true, true);
 			tween._enabled(true);
 			i = targets.length;
 			while (--i > -1) {
@@ -4610,7 +4948,11 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 							difs[p] = vars[p];
 						}
 					}
-					results.push( TweenLite.to(targets[i], duration, difs) );
+					from = {};
+					for (p in difs) {
+						from[p] = b[i][p];
+					}
+					results.push(TweenLite.fromTo(targets[i], duration, from, difs));
 				}
 			}
 			return results;
@@ -4711,44 +5053,64 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
  * AttrPlugin
  * ----------------------------------------------------------------
  */
-	_gsScope._gsDefine.plugin({
-		propName: "attr",
-		API: 2,
-		version: "0.3.3",
 
-		//called when the tween renders for the first time. This is where initial values should be recorded and any setup routines should run.
-		init: function(target, value, tween) {
-			var p, start, end;
-			if (typeof(target.setAttribute) !== "function") {
-				return false;
-			}
-			this._target = target;
-			this._proxy = {};
-			this._start = {}; // we record start and end values exactly as they are in case they're strings (not numbers) - we need to be able to revert to them cleanly.
-			this._end = {};
-			for (p in value) {
-				this._start[p] = this._proxy[p] = start = target.getAttribute(p);
-				end = this._addTween(this._proxy, p, parseFloat(start), value[p], p);
-				this._end[p] = end ? end.s + end.c : value[p];
-				this._overwriteProps.push(p);
-			}
-			return true;
-		},
+	(function() {
+		var _numExp = /(?:\d|\-|\+|=|#|\.)*/g,
+			_suffixExp = /[A-Za-z%]/g;
 
-		//called each time the values should be updated, and the ratio gets passed as the only parameter (typically it's a value between 0 and 1, but it can exceed those when using an ease like Elastic.easeOut or Back.easeOut, etc.)
-		set: function(ratio) {
-			this._super.setRatio.call(this, ratio);
-			var props = this._overwriteProps,
-				i = props.length,
-				lookup = (ratio === 1) ? this._end : ratio ? this._proxy : this._start,
-				p;
-			while (--i > -1) {
-				p = props[i];
-				this._target.setAttribute(p, lookup[p] + "");
-			}
-		}
+		_gsScope._gsDefine.plugin({
+			propName: "attr",
+			API: 2,
+			version: "0.4.0",
 
-	});
+			//called when the tween renders for the first time. This is where initial values should be recorded and any setup routines should run.
+			init: function(target, value, tween) {
+				var p, start, end, suffix, i;
+				if (typeof(target.setAttribute) !== "function") {
+					return false;
+				}
+				this._target = target;
+				this._proxy = {};
+				this._start = {}; // we record start and end values exactly as they are in case they're strings (not numbers) - we need to be able to revert to them cleanly.
+				this._end = {};
+				this._suffix = {};
+				for (p in value) {
+					this._start[p] = this._proxy[p] = start = target.getAttribute(p) + "";
+					this._end[p] = end = value[p] + "";
+					this._suffix[p] = suffix = _suffixExp.test(end) ? end.replace(_numExp, "") : _suffixExp.test(start) ? start.replace(_numExp, "") : "";
+					if (suffix) {
+						i = end.indexOf(suffix);
+						if (i !== -1) {
+							end = end.substr(0, i);
+						}
+					}
+					if(!this._addTween(this._proxy, p, parseFloat(start), end, p)) {
+						this._suffix[p] = ""; //not a valid tween - perhaps something like an <img src=""> attribute.
+					}
+					if (end.charAt(1) === "=") {
+						this._end[p] = (this._firstPT.s + this._firstPT.c) + suffix;
+					}
+					this._overwriteProps.push(p);
+				}
+				return true;
+			},
+
+			//called each time the values should be updated, and the ratio gets passed as the only parameter (typically it's a value between 0 and 1, but it can exceed those when using an ease like Elastic.easeOut or Back.easeOut, etc.)
+			set: function(ratio) {
+				this._super.setRatio.call(this, ratio);
+				var props = this._overwriteProps,
+					i = props.length,
+					lookup = (ratio === 1) ? this._end : ratio ? this._proxy : this._start,
+					useSuffix = (lookup === this._proxy),
+					p;
+				while (--i > -1) {
+					p = props[i];
+					this._target.setAttribute(p, lookup[p] + (useSuffix ? this._suffix[p] : ""));
+				}
+			}
+
+		});
+	}());
 
 
 
@@ -5103,9 +5465,10 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 		//Elastic
 		_createElastic = function(n, f, def) {
 			var C = _class("easing." + n, function(amplitude, period) {
-					this._p1 = amplitude || 1;
-					this._p2 = period || def;
+					this._p1 = (amplitude >= 1) ? amplitude : 1; //note: if amplitude is < 1, we simply adjust the period for a more natural feel. Otherwise the math doesn't work right and the curve starts at 1.
+					this._p2 = (period || def) / (amplitude < 1 ? amplitude : 1);
 					this._p3 = this._p2 / _2PI * (Math.asin(1 / this._p1) || 0);
+					this._p2 = _2PI / this._p2; //precalculate to optimize
 				}, true),
 				p = C.prototype = new Ease();
 			p.constructor = C;
@@ -5117,13 +5480,13 @@ var _gsScope = (typeof(module) !== "undefined" && module.exports && typeof(globa
 		};
 		_wrap("Elastic",
 			_createElastic("ElasticOut", function(p) {
-				return this._p1 * Math.pow(2, -10 * p) * Math.sin( (p - this._p3) * _2PI / this._p2 ) + 1;
+				return this._p1 * Math.pow(2, -10 * p) * Math.sin( (p - this._p3) * this._p2 ) + 1;
 			}, 0.3),
 			_createElastic("ElasticIn", function(p) {
-				return -(this._p1 * Math.pow(2, 10 * (p -= 1)) * Math.sin( (p - this._p3) * _2PI / this._p2 ));
+				return -(this._p1 * Math.pow(2, 10 * (p -= 1)) * Math.sin( (p - this._p3) * this._p2 ));
 			}, 0.3),
 			_createElastic("ElasticInOut", function(p) {
-				return ((p *= 2) < 1) ? -0.5 * (this._p1 * Math.pow(2, 10 * (p -= 1)) * Math.sin( (p - this._p3) * _2PI / this._p2)) : this._p1 * Math.pow(2, -10 *(p -= 1)) * Math.sin( (p - this._p3) * _2PI / this._p2 ) *0.5 + 1;
+				return ((p *= 2) < 1) ? -0.5 * (this._p1 * Math.pow(2, 10 * (p -= 1)) * Math.sin( (p - this._p3) * this._p2)) : this._p1 * Math.pow(2, -10 *(p -= 1)) * Math.sin( (p - this._p3) * this._p2 ) * 0.5 + 1;
 			}, 0.45)
 		);
 
@@ -5434,10 +5797,12 @@ if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); } //necessary in case Tween
 				t = this._eventTarget;
 				while (--i > -1) {
 					listener = list[i];
-					if (listener.up) {
-						listener.c.call(listener.s || t, {type:type, target:t});
-					} else {
-						listener.c.call(listener.s || t);
+					if (listener) {
+						if (listener.up) {
+							listener.c.call(listener.s || t, {type:type, target:t});
+						} else {
+							listener.c.call(listener.s || t);
+						}
 					}
 				}
 			}
@@ -5468,6 +5833,7 @@ if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); } //necessary in case Tween
 				_useRAF = (useRAF !== false && _reqAnimFrame),
 				_lagThreshold = 500,
 				_adjustedLag = 33,
+				_tickWord = "tick", //helps reduce gc burden
 				_fps, _req, _id, _gap, _nextTime,
 				_tick = function(manual) {
 					var elapsed = _getTime() - _lastUpdate,
@@ -5487,7 +5853,7 @@ if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); } //necessary in case Tween
 						_id = _req(_tick);
 					}
 					if (dispatch) {
-						_self.dispatchEvent("tick");
+						_self.dispatchEvent(_tickWord);
 					}
 				};
 
@@ -5553,7 +5919,7 @@ if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); } //necessary in case Tween
 
 			//a bug in iOS 6 Safari occasionally prevents the requestAnimationFrame from working initially, so we use a 1.5-second timeout that automatically falls back to setTimeout() if it senses this condition.
 			setTimeout(function() {
-				if (_useRAF && (!_id || _self.frame < 5)) {
+				if (_useRAF && _self.frame < 5) {
 					_self.useRAF(false);
 				}
 			}, 1500);
@@ -5714,6 +6080,11 @@ if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); } //necessary in case Tween
 			return copy;
 		};
 
+		p._callback = function(type) {
+			var v = this.vars;
+			v[type].apply(v[type + "Scope"] || v.callbackScope || this, v[type + "Params"] || _blankArray);
+		};
+
 //----Animation getters/setters --------------------------------------------------------
 
 		p.eventCallback = function(type, callback, params, scope) {
@@ -5839,6 +6210,10 @@ if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); } //necessary in case Tween
 			return this;
 		};
 
+		p.endTime = function(includeRepeats) {
+			return this._startTime + ((includeRepeats != false) ? this.totalDuration() : this.duration()) / this._timeScale;
+		};
+
 		p.timeScale = function(value) {
 			if (!arguments.length) {
 				return this._timeScale;
@@ -5868,13 +6243,14 @@ if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); } //necessary in case Tween
 			if (!arguments.length) {
 				return this._paused;
 			}
-			if (value != this._paused) if (this._timeline) {
+			var tl = this._timeline,
+				raw, elapsed;
+			if (value != this._paused) if (tl) {
 				if (!_tickerActive && !value) {
 					_ticker.wake();
 				}
-				var tl = this._timeline,
-					raw = tl.rawTime(),
-					elapsed = raw - this._pauseTime;
+				raw = tl.rawTime();
+				elapsed = raw - this._pauseTime;
 				if (!value && tl.smoothChildTiming) {
 					this._startTime += elapsed;
 					this._uncache(false);
@@ -5906,7 +6282,7 @@ if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); } //necessary in case Tween
 		p = SimpleTimeline.prototype = new Animation();
 		p.constructor = SimpleTimeline;
 		p.kill()._gc = false;
-		p._first = p._last = null;
+		p._first = p._last = p._recent = null;
 		p._sortChildren = false;
 
 		p.add = p.insert = function(child, position, align, stagger) {
@@ -5942,6 +6318,7 @@ if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); } //necessary in case Tween
 				this._last = child;
 			}
 			child._prev = prevTween;
+			this._recent = child;
 			if (this._timeline) {
 				this._uncache(true);
 			}
@@ -5965,6 +6342,9 @@ if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); } //necessary in case Tween
 					this._last = tween._prev;
 				}
 				tween._next = tween._prev = tween.timeline = null;
+				if (tween === this._recent) {
+					this._recent = this._last;
+				}
 
 				if (this._timeline) {
 					this._uncache(true);
@@ -6057,7 +6437,7 @@ if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); } //necessary in case Tween
 				}
 			}, true),
 			_isSelector = function(v) {
-				return (v.length && v !== window && v[0] && (v[0] === window || (v[0].nodeType && v[0].style && !v.nodeType))); //we cannot check "nodeType" if the target is window from within an iframe, otherwise it will trigger a security error in some browsers like Firefox.
+				return (v && v.length && v !== window && v[0] && (v[0] === window || (v[0].nodeType && v[0].style && !v.nodeType))); //we cannot check "nodeType" if the target is window from within an iframe, otherwise it will trigger a security error in some browsers like Firefox.
 			},
 			_autoCSS = function(vars, target) {
 				var css = {},
@@ -6081,11 +6461,11 @@ if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); } //necessary in case Tween
 		p._firstPT = p._targets = p._overwrittenProps = p._startAt = null;
 		p._notifyPluginsOfEnabled = p._lazy = false;
 
-		TweenLite.version = "1.13.2";
+		TweenLite.version = "1.17.0";
 		TweenLite.defaultEase = p._ease = new Ease(null, null, 1, 1);
 		TweenLite.defaultOverwrite = "auto";
 		TweenLite.ticker = _ticker;
-		TweenLite.autoSleep = true;
+		TweenLite.autoSleep = 120;
 		TweenLite.lagSmoothing = function(threshold, adjustedLag) {
 			_ticker.lagSmoothing(threshold, adjustedLag);
 		};
@@ -6105,18 +6485,20 @@ if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); } //necessary in case Tween
 			_plugins = TweenLite._plugins = {},
 			_tweenLookup = _internals.tweenLookup = {},
 			_tweenLookupNum = 0,
-			_reservedProps = _internals.reservedProps = {ease:1, delay:1, overwrite:1, onComplete:1, onCompleteParams:1, onCompleteScope:1, useFrames:1, runBackwards:1, startAt:1, onUpdate:1, onUpdateParams:1, onUpdateScope:1, onStart:1, onStartParams:1, onStartScope:1, onReverseComplete:1, onReverseCompleteParams:1, onReverseCompleteScope:1, onRepeat:1, onRepeatParams:1, onRepeatScope:1, easeParams:1, yoyo:1, immediateRender:1, repeat:1, repeatDelay:1, data:1, paused:1, reversed:1, autoCSS:1, lazy:1},
+			_reservedProps = _internals.reservedProps = {ease:1, delay:1, overwrite:1, onComplete:1, onCompleteParams:1, onCompleteScope:1, useFrames:1, runBackwards:1, startAt:1, onUpdate:1, onUpdateParams:1, onUpdateScope:1, onStart:1, onStartParams:1, onStartScope:1, onReverseComplete:1, onReverseCompleteParams:1, onReverseCompleteScope:1, onRepeat:1, onRepeatParams:1, onRepeatScope:1, easeParams:1, yoyo:1, immediateRender:1, repeat:1, repeatDelay:1, data:1, paused:1, reversed:1, autoCSS:1, lazy:1, onOverwrite:1, callbackScope:1},
 			_overwriteLookup = {none:0, all:1, auto:2, concurrent:3, allOnStart:4, preexisting:5, "true":1, "false":0},
 			_rootFramesTimeline = Animation._rootFramesTimeline = new SimpleTimeline(),
 			_rootTimeline = Animation._rootTimeline = new SimpleTimeline(),
+			_nextGCFrame = 30,
 			_lazyRender = _internals.lazyRender = function() {
-				var i = _lazyTweens.length;
+				var i = _lazyTweens.length,
+					tween;
 				_lazyLookup = {};
 				while (--i > -1) {
-					a = _lazyTweens[i];
-					if (a && a._lazy !== false) {
-						a.render(a._lazy[0], a._lazy[1], true);
-						a._lazy = false;
+					tween = _lazyTweens[i];
+					if (tween && tween._lazy !== false) {
+						tween.render(tween._lazy[0], tween._lazy[1], true);
+						tween._lazy = false;
 					}
 				}
 				_lazyTweens.length = 0;
@@ -6137,7 +6519,8 @@ if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); } //necessary in case Tween
 				if (_lazyTweens.length) {
 					_lazyRender();
 				}
-				if (!(_ticker.frame % 120)) { //dump garbage every 120 frames...
+				if (_ticker.frame >= _nextGCFrame) { //dump garbage every 120 frames or whatever the user sets TweenLite.autoSleep to
+					_nextGCFrame = _ticker.frame + (parseInt(TweenLite.autoSleep, 10) || 120);
 					for (p in _tweenLookup) {
 						a = _tweenLookup[p].tweens;
 						i = a.length;
@@ -6184,14 +6567,27 @@ if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); } //necessary in case Tween
 				return _tweenLookup[id].tweens;
 			},
 
+			_onOverwrite = function(overwrittenTween, overwritingTween, target, killedProps) {
+				var func = overwrittenTween.vars.onOverwrite, r1, r2;
+				if (func) {
+					r1 = func(overwrittenTween, overwritingTween, target, killedProps);
+				}
+				func = TweenLite.onOverwrite;
+				if (func) {
+					r2 = func(overwrittenTween, overwritingTween, target, killedProps);
+				}
+				return (r1 !== false && r2 !== false);
+			},
 			_applyOverwrite = function(target, tween, props, mode, siblings) {
 				var i, changed, curTween, l;
 				if (mode === 1 || mode >= 4) {
 					l = siblings.length;
 					for (i = 0; i < l; i++) {
 						if ((curTween = siblings[i]) !== tween) {
-							if (!curTween._gc) if (curTween._enabled(false, false)) {
-								changed = true;
+							if (!curTween._gc) {
+								if (curTween._kill(null, target, tween)) {
+									changed = true;
+								}
 							}
 						} else if (mode === 5) {
 							break;
@@ -6222,10 +6618,13 @@ if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); } //necessary in case Tween
 				i = oCount;
 				while (--i > -1) {
 					curTween = overlaps[i];
-					if (mode === 2) if (curTween._kill(props, target)) {
+					if (mode === 2) if (curTween._kill(props, target, tween)) {
 						changed = true;
 					}
 					if (mode !== 2 || (!curTween._firstPT && curTween._initted)) {
+						if (mode !== 2 && !_onOverwrite(curTween, tween)) {
+							continue;
+						}
 						if (curTween._enabled(false, false)) { //if all property tweens have been overwritten, kill the tween.
 							changed = true;
 						}
@@ -6426,12 +6825,13 @@ if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); } //necessary in case Tween
 				if (!this._reversed ) {
 					isComplete = true;
 					callback = "onComplete";
+					force = (force || this._timeline.autoRemoveChildren); //otherwise, if the animation is unpaused/activated after it's already finished, it doesn't get removed from the parent timeline.
 				}
 				if (duration === 0) if (this._initted || !this.vars.lazy || force) { //zero-duration tweens are tricky because we must discern the momentum/direction of time in order to determine whether the starting values should be rendered or the ending values. If the "playhead" of its timeline goes past the zero-duration tween in the forward direction or lands directly on it, the end values should be rendered, but if the timeline's "playhead" moves past it in the backward direction (from a postitive time to a negative time), the starting values must be rendered.
 					if (this._startTime === this._timeline._duration) { //if a zero-duration tween is at the VERY end of a timeline and that timeline renders at its end, it will typically add a tiny bit of cushion to the render time to prevent rounding errors from getting in the way of tweens rendering their VERY end. If we then reverse() that timeline, the zero-duration tween will trigger its onReverseComplete even though technically the playhead didn't pass over it again. It's a very specific edge case we must accommodate.
 						time = 0;
 					}
-					if (time === 0 || prevRawPrevTime < 0 || prevRawPrevTime === _tinyNum) if (prevRawPrevTime !== time) {
+					if (time === 0 || prevRawPrevTime < 0 || (prevRawPrevTime === _tinyNum && this.data !== "isPause")) if (prevRawPrevTime !== time) { //note: when this.data is "isPause", it's a callback added by addPause() on a timeline that we should not be triggered when LEAVING its exact start time. In other words, tl.addPause(1).play(1) shouldn't pause.
 						force = true;
 						if (prevRawPrevTime > _tinyNum) {
 							callback = "onReverseComplete";
@@ -6443,14 +6843,14 @@ if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); } //necessary in case Tween
 			} else if (time < 0.0000001) { //to work around occasional floating point math artifacts, round super small values to 0.
 				this._totalTime = this._time = 0;
 				this.ratio = this._ease._calcEnd ? this._ease.getRatio(0) : 0;
-				if (prevTime !== 0 || (duration === 0 && prevRawPrevTime > 0 && prevRawPrevTime !== _tinyNum)) {
+				if (prevTime !== 0 || (duration === 0 && prevRawPrevTime > 0)) {
 					callback = "onReverseComplete";
 					isComplete = this._reversed;
 				}
 				if (time < 0) {
 					this._active = false;
 					if (duration === 0) if (this._initted || !this.vars.lazy || force) { //zero-duration tweens are tricky because we must discern the momentum/direction of time in order to determine whether the starting values should be rendered or the ending values. If the "playhead" of its timeline goes past the zero-duration tween in the forward direction or lands directly on it, the end values should be rendered, but if the timeline's "playhead" moves past it in the backward direction (from a postitive time to a negative time), the starting values must be rendered.
-						if (prevRawPrevTime >= 0) {
+						if (prevRawPrevTime >= 0 && !(prevRawPrevTime === _tinyNum && this.data === "isPause")) {
 							force = true;
 						}
 						this._rawPrevTime = rawPrevTime = (!suppressEvents || time || prevRawPrevTime === time) ? time : _tinyNum; //when the playhead arrives at EXACTLY time 0 (right on top) of a zero-duration tween, we need to discern if events are suppressed so that when the playhead moves again (next time), it'll trigger the callback. If events are NOT suppressed, obviously the callback would be triggered in this render. Basically, the callback should fire either when the playhead ARRIVES or LEAVES this exact spot, not both. Imagine doing a timeline.seek(0) and there's a callback that sits at 0. Since events are suppressed on that seek() by default, nothing will fire, but when the playhead moves off of that position, the callback should fire. This behavior is what people intuitively expect. We set the _rawPrevTime to be a precise tiny number to indicate this scenario rather than using another property/variable which would increase memory usage. This technique is less readable, but more efficient.
@@ -6530,7 +6930,7 @@ if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); } //necessary in case Tween
 					}
 				}
 				if (this.vars.onStart) if (this._time !== 0 || duration === 0) if (!suppressEvents) {
-					this.vars.onStart.apply(this.vars.onStartScope || this, this.vars.onStartParams || _blankArray);
+					this._callback("onStart");
 				}
 			}
 			pt = this._firstPT;
@@ -6544,16 +6944,15 @@ if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); } //necessary in case Tween
 			}
 
 			if (this._onUpdate) {
-				if (time < 0) if (this._startAt && this._startTime) { //if the tween is positioned at the VERY beginning (_startTime 0) of its parent timeline, it's illegal for the playhead to go back further, so we should not render the recorded startAt values.
+				if (time < 0) if (this._startAt && time !== -0.0001) { //if the tween is positioned at the VERY beginning (_startTime 0) of its parent timeline, it's illegal for the playhead to go back further, so we should not render the recorded startAt values.
 					this._startAt.render(time, suppressEvents, force); //note: for performance reasons, we tuck this conditional logic inside less traveled areas (most tweens don't have an onUpdate). We'd just have it at the end before the onComplete, but the values should be updated before any onUpdate is called, so we ALSO put it here and then if it's not called, we do so later near the onComplete.
 				}
 				if (!suppressEvents) if (this._time !== prevTime || isComplete) {
-					this._onUpdate.apply(this.vars.onUpdateScope || this, this.vars.onUpdateParams || _blankArray);
+					this._callback("onUpdate");
 				}
 			}
-
 			if (callback) if (!this._gc || force) { //check _gc because there's a chance that kill() could be called in an onUpdate
-				if (time < 0 && this._startAt && !this._onUpdate && this._startTime) { //if the tween is positioned at the VERY beginning (_startTime 0) of its parent timeline, it's illegal for the playhead to go back further, so we should not render the recorded startAt values.
+				if (time < 0 && this._startAt && !this._onUpdate && time !== -0.0001) { //-0.0001 is a special value that we use when looping back to the beginning of a repeated TimelineMax, in which case we shouldn't render the _startAt values.
 					this._startAt.render(time, suppressEvents, force);
 				}
 				if (isComplete) {
@@ -6563,7 +6962,7 @@ if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); } //necessary in case Tween
 					this._active = false;
 				}
 				if (!suppressEvents && this.vars[callback]) {
-					this.vars[callback].apply(this.vars[callback + "Scope"] || this, this.vars[callback + "Params"] || _blankArray);
+					this._callback(callback);
 				}
 				if (duration === 0 && this._rawPrevTime === _tinyNum && rawPrevTime !== _tinyNum) { //the onComplete or onReverseComplete could trigger movement of the playhead and for zero-duration tweens (which must discern direction) that land directly back on their start time, we don't want to fire again on the next render. Think of several addPause()'s in a timeline that forces the playhead to a certain spot, but what if it's already paused and another tween is tweening the "time" of the timeline? Each time it moves [forward] past that spot, it would move back, and since suppressEvents is true, it'd reset _rawPrevTime to _tinyNum so that when it begins again, the callback would fire (so ultimately it could bounce back and forth during that tween). Again, this is a very uncommon scenario, but possible nonetheless.
 					this._rawPrevTime = 0;
@@ -6571,7 +6970,7 @@ if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); } //necessary in case Tween
 			}
 		};
 
-		p._kill = function(vars, target) {
+		p._kill = function(vars, target, overwritingTween) {
 			if (vars === "all") {
 				vars = null;
 			}
@@ -6580,11 +6979,12 @@ if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); } //necessary in case Tween
 				return this._enabled(false, false);
 			}
 			target = (typeof(target) !== "string") ? (target || this._targets || this.target) : TweenLite.selector(target) || target;
-			var i, overwrittenProps, p, pt, propLookup, changed, killProps, record;
+			var simultaneousOverwrite = (overwritingTween && this._time && overwritingTween._startTime === this._startTime && this._timeline === overwritingTween._timeline),
+				i, overwrittenProps, p, pt, propLookup, changed, killProps, record, killed;
 			if ((_isArray(target) || _isSelector(target)) && typeof(target[0]) !== "number") {
 				i = target.length;
 				while (--i > -1) {
-					if (this._kill(vars, target[i])) {
+					if (this._kill(vars, target[i], overwritingTween)) {
 						changed = true;
 					}
 				}
@@ -6609,8 +7009,30 @@ if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); } //necessary in case Tween
 				if (propLookup) {
 					killProps = vars || propLookup;
 					record = (vars !== overwrittenProps && overwrittenProps !== "all" && vars !== propLookup && (typeof(vars) !== "object" || !vars._tempKill)); //_tempKill is a super-secret way to delete a particular tweening property but NOT have it remembered as an official overwritten property (like in BezierPlugin)
+					if (overwritingTween && (TweenLite.onOverwrite || this.vars.onOverwrite)) {
+						for (p in killProps) {
+							if (propLookup[p]) {
+								if (!killed) {
+									killed = [];
+								}
+								killed.push(p);
+							}
+						}
+						if ((killed || !vars) && !_onOverwrite(this, overwritingTween, target, killed)) { //if the onOverwrite returned false, that means the user wants to override the overwriting (cancel it).
+							return false;
+						}
+					}
+
 					for (p in killProps) {
 						if ((pt = propLookup[p])) {
+							if (simultaneousOverwrite) { //if another tween overwrites this one and they both start at exactly the same time, yet this tween has already rendered once (for example, at 0.001) because it's first in the queue, we should revert the values to where they were at 0 so that the starting values aren't contaminated on the overwriting tween.
+								if (pt.f) {
+									pt.t[pt.p](pt.s);
+								} else {
+									pt.t[pt.p] = pt.s;
+								}
+								changed = true;
+							}
 							if (pt.pg && pt.t._kill(killProps)) {
 								changed = true; //some plugins need to be notified so they can perform cleanup tasks first
 							}
@@ -6697,7 +7119,7 @@ if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); } //necessary in case Tween
 		};
 
 		TweenLite.delayedCall = function(delay, callback, params, scope, useFrames) {
-			return new TweenLite(callback, 0, {delay:delay, onComplete:callback, onCompleteParams:params, onCompleteScope:scope, onReverseComplete:callback, onReverseCompleteParams:params, onReverseCompleteScope:scope, immediateRender:false, useFrames:useFrames, overwrite:0});
+			return new TweenLite(callback, 0, {delay:delay, onComplete:callback, onCompleteParams:params, callbackScope:scope, onReverseComplete:callback, onReverseCompleteParams:params, immediateRender:false, lazy:false, useFrames:useFrames, overwrite:0});
 		};
 
 		TweenLite.set = function(target, vars) {
@@ -6753,7 +7175,7 @@ if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); } //necessary in case Tween
 
 /*
  * ----------------------------------------------------------------
- * TweenPlugin   (could easily be split out as a separate file/class, but included for ease of use (so that people don't need to include another <script> call before loading plugins which is easy to forget)
+ * TweenPlugin   (could easily be split out as a separate file/class, but included for ease of use (so that people don't need to include another script call before loading plugins which is easy to forget)
  * ----------------------------------------------------------------
  */
 		var TweenPlugin = _class("plugins.TweenPlugin", function(props, priority) {
@@ -6770,7 +7192,7 @@ if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); } //necessary in case Tween
 
 		p._addTween = function(target, prop, start, end, overwriteProp, round) {
 			var c, pt;
-			if (end != null && (c = (typeof(end) === "number" || end.charAt(1) !== "=") ? Number(end) - start : parseInt(end.charAt(0) + "1", 10) * Number(end.substr(2)))) {
+			if (end != null && (c = (typeof(end) === "number" || end.charAt(1) !== "=") ? Number(end) - Number(start) : parseInt(end.charAt(0) + "1", 10) * Number(end.substr(2)))) {
 				this._firstPT = pt = {_next:this._firstPT, t:target, p:prop, s:start, c:c, f:(typeof(target[prop]) === "function"), n:overwriteProp || prop, r:round};
 				if (pt._next) {
 					pt._next._prev = pt;
@@ -7677,7 +8099,7 @@ if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); } //necessary in case Tween
 
 },{"jquery":undefined}],"jquery":[function(require,module,exports){
 /*!
- * jQuery JavaScript Library v2.1.1
+ * jQuery JavaScript Library v2.1.4
  * http://jquery.com/
  *
  * Includes Sizzle.js
@@ -7687,19 +8109,19 @@ if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); } //necessary in case Tween
  * Released under the MIT license
  * http://jquery.org/license
  *
- * Date: 2014-05-01T17:11Z
+ * Date: 2015-04-28T16:01Z
  */
 
 (function( global, factory ) {
 
 	if ( typeof module === "object" && typeof module.exports === "object" ) {
-		// For CommonJS and CommonJS-like environments where a proper window is present,
-		// execute the factory and get jQuery
-		// For environments that do not inherently posses a window with a document
-		// (such as Node.js), expose a jQuery-making factory as module.exports
-		// This accentuates the need for the creation of a real window
+		// For CommonJS and CommonJS-like environments where a proper `window`
+		// is present, execute the factory and get jQuery.
+		// For environments that do not have a `window` with a `document`
+		// (such as Node.js), expose a factory as module.exports.
+		// This accentuates the need for the creation of a real `window`.
 		// e.g. var jQuery = require("jquery")(window);
-		// See ticket #14549 for more info
+		// See ticket #14549 for more info.
 		module.exports = global.document ?
 			factory( global, true ) :
 			function( w ) {
@@ -7715,10 +8137,10 @@ if (_gsScope._gsDefine) { _gsScope._gsQueue.pop()(); } //necessary in case Tween
 // Pass this if window is not defined yet
 }(typeof window !== "undefined" ? window : this, function( window, noGlobal ) {
 
-// Can't do this because several apps including ASP.NET trace
+// Support: Firefox 18+
+// Can't be in strict mode, several libs including ASP.NET trace
 // the stack via arguments.caller.callee and Firefox dies if
 // you try to trace through "use strict" call chains. (#13335)
-// Support: Firefox 18+
 //
 
 var arr = [];
@@ -7745,7 +8167,7 @@ var
 	// Use the correct document accordingly with window argument (sandbox)
 	document = window.document,
 
-	version = "2.1.1",
+	version = "2.1.4",
 
 	// Define a local copy of jQuery
 	jQuery = function( selector, context ) {
@@ -7863,7 +8285,7 @@ jQuery.extend = jQuery.fn.extend = function() {
 	if ( typeof target === "boolean" ) {
 		deep = target;
 
-		// skip the boolean and the target
+		// Skip the boolean and the target
 		target = arguments[ i ] || {};
 		i++;
 	}
@@ -7873,7 +8295,7 @@ jQuery.extend = jQuery.fn.extend = function() {
 		target = {};
 	}
 
-	// extend jQuery itself if only one argument is passed
+	// Extend jQuery itself if only one argument is passed
 	if ( i === length ) {
 		target = this;
 		i--;
@@ -7930,9 +8352,6 @@ jQuery.extend({
 
 	noop: function() {},
 
-	// See test/unit/core.js for details concerning isFunction.
-	// Since version 1.3, DOM methods and functions like alert
-	// aren't supported. They return false on IE (#2968).
 	isFunction: function( obj ) {
 		return jQuery.type(obj) === "function";
 	},
@@ -7947,7 +8366,8 @@ jQuery.extend({
 		// parseFloat NaNs numeric-cast false positives (null|true|false|"")
 		// ...but misinterprets leading-number strings, particularly hex literals ("0x...")
 		// subtraction forces infinities to NaN
-		return !jQuery.isArray( obj ) && obj - parseFloat( obj ) >= 0;
+		// adding 1 corrects loss of precision from parseFloat (#15100)
+		return !jQuery.isArray( obj ) && (obj - parseFloat( obj ) + 1) >= 0;
 	},
 
 	isPlainObject: function( obj ) {
@@ -7981,7 +8401,7 @@ jQuery.extend({
 		if ( obj == null ) {
 			return obj + "";
 		}
-		// Support: Android < 4.0, iOS < 6 (functionish RegExp)
+		// Support: Android<4.0, iOS<6 (functionish RegExp)
 		return typeof obj === "object" || typeof obj === "function" ?
 			class2type[ toString.call(obj) ] || "object" :
 			typeof obj;
@@ -8011,6 +8431,7 @@ jQuery.extend({
 	},
 
 	// Convert dashed to camelCase; used by the css and data modules
+	// Support: IE9-11+
 	// Microsoft forgot to hump their vendor prefix (#9572)
 	camelCase: function( string ) {
 		return string.replace( rmsPrefix, "ms-" ).replace( rdashAlpha, fcamelCase );
@@ -8210,7 +8631,12 @@ jQuery.each("Boolean Number String Function Array Date RegExp Object Error".spli
 });
 
 function isArraylike( obj ) {
-	var length = obj.length,
+
+	// Support: iOS 8.2 (not reproducible in simulator)
+	// `in` check used to prevent JIT error (gh-2145)
+	// hasOwn isn't used here due to false negatives
+	// regarding Nodelist length in IE
+	var length = "length" in obj && obj.length,
 		type = jQuery.type( obj );
 
 	if ( type === "function" || jQuery.isWindow( obj ) ) {
@@ -8226,14 +8652,14 @@ function isArraylike( obj ) {
 }
 var Sizzle =
 /*!
- * Sizzle CSS Selector Engine v1.10.19
+ * Sizzle CSS Selector Engine v2.2.0-pre
  * http://sizzlejs.com/
  *
- * Copyright 2013 jQuery Foundation, Inc. and other contributors
+ * Copyright 2008, 2014 jQuery Foundation, Inc. and other contributors
  * Released under the MIT license
  * http://jquery.org/license
  *
- * Date: 2014-04-18
+ * Date: 2014-12-16
  */
 (function( window ) {
 
@@ -8260,7 +8686,7 @@ var i,
 	contains,
 
 	// Instance-specific data
-	expando = "sizzle" + -(new Date()),
+	expando = "sizzle" + 1 * new Date(),
 	preferredDoc = window.document,
 	dirruns = 0,
 	done = 0,
@@ -8275,7 +8701,6 @@ var i,
 	},
 
 	// General-purpose constants
-	strundefined = typeof undefined,
 	MAX_NEGATIVE = 1 << 31,
 
 	// Instance methods
@@ -8285,12 +8710,13 @@ var i,
 	push_native = arr.push,
 	push = arr.push,
 	slice = arr.slice,
-	// Use a stripped-down indexOf if we can't use a native one
-	indexOf = arr.indexOf || function( elem ) {
+	// Use a stripped-down indexOf as it's faster than native
+	// http://jsperf.com/thor-indexof-vs-for/5
+	indexOf = function( list, elem ) {
 		var i = 0,
-			len = this.length;
+			len = list.length;
 		for ( ; i < len; i++ ) {
-			if ( this[i] === elem ) {
+			if ( list[i] === elem ) {
 				return i;
 			}
 		}
@@ -8330,6 +8756,7 @@ var i,
 		")\\)|)",
 
 	// Leading and non-escaped trailing whitespace, capturing some non-whitespace characters preceding the latter
+	rwhitespace = new RegExp( whitespace + "+", "g" ),
 	rtrim = new RegExp( "^" + whitespace + "+|((?:^|[^\\\\])(?:\\\\.)*)" + whitespace + "+$", "g" ),
 
 	rcomma = new RegExp( "^" + whitespace + "*," + whitespace + "*" ),
@@ -8381,6 +8808,14 @@ var i,
 				String.fromCharCode( high + 0x10000 ) :
 				// Supplemental Plane codepoint (surrogate pair)
 				String.fromCharCode( high >> 10 | 0xD800, high & 0x3FF | 0xDC00 );
+	},
+
+	// Used for iframes
+	// See setDocument()
+	// Removing the function wrapper causes a "Permission Denied"
+	// error in IE
+	unloadHandler = function() {
+		setDocument();
 	};
 
 // Optimize for push.apply( _, NodeList )
@@ -8423,19 +8858,18 @@ function Sizzle( selector, context, results, seed ) {
 
 	context = context || document;
 	results = results || [];
+	nodeType = context.nodeType;
 
-	if ( !selector || typeof selector !== "string" ) {
+	if ( typeof selector !== "string" || !selector ||
+		nodeType !== 1 && nodeType !== 9 && nodeType !== 11 ) {
+
 		return results;
 	}
 
-	if ( (nodeType = context.nodeType) !== 1 && nodeType !== 9 ) {
-		return [];
-	}
+	if ( !seed && documentIsHTML ) {
 
-	if ( documentIsHTML && !seed ) {
-
-		// Shortcuts
-		if ( (match = rquickExpr.exec( selector )) ) {
+		// Try to shortcut find operations when possible (e.g., not under DocumentFragment)
+		if ( nodeType !== 11 && (match = rquickExpr.exec( selector )) ) {
 			// Speed-up: Sizzle("#ID")
 			if ( (m = match[1]) ) {
 				if ( nodeType === 9 ) {
@@ -8467,7 +8901,7 @@ function Sizzle( selector, context, results, seed ) {
 				return results;
 
 			// Speed-up: Sizzle(".CLASS")
-			} else if ( (m = match[3]) && support.getElementsByClassName && context.getElementsByClassName ) {
+			} else if ( (m = match[3]) && support.getElementsByClassName ) {
 				push.apply( results, context.getElementsByClassName( m ) );
 				return results;
 			}
@@ -8477,7 +8911,7 @@ function Sizzle( selector, context, results, seed ) {
 		if ( support.qsa && (!rbuggyQSA || !rbuggyQSA.test( selector )) ) {
 			nid = old = expando;
 			newContext = context;
-			newSelector = nodeType === 9 && selector;
+			newSelector = nodeType !== 1 && selector;
 
 			// qSA works strangely on Element-rooted queries
 			// We can work around this by specifying an extra ID on the root
@@ -8664,7 +9098,7 @@ function createPositionalPseudo( fn ) {
  * @returns {Element|Object|Boolean} The input node if acceptable, otherwise a falsy value
  */
 function testContext( context ) {
-	return context && typeof context.getElementsByTagName !== strundefined && context;
+	return context && typeof context.getElementsByTagName !== "undefined" && context;
 }
 
 // Expose support vars for convenience
@@ -8688,9 +9122,8 @@ isXML = Sizzle.isXML = function( elem ) {
  * @returns {Object} Returns the current document
  */
 setDocument = Sizzle.setDocument = function( node ) {
-	var hasCompare,
-		doc = node ? node.ownerDocument || node : preferredDoc,
-		parent = doc.defaultView;
+	var hasCompare, parent,
+		doc = node ? node.ownerDocument || node : preferredDoc;
 
 	// If no document and documentElement is available, return
 	if ( doc === document || doc.nodeType !== 9 || !doc.documentElement ) {
@@ -8700,9 +9133,7 @@ setDocument = Sizzle.setDocument = function( node ) {
 	// Set our document
 	document = doc;
 	docElem = doc.documentElement;
-
-	// Support tests
-	documentIsHTML = !isXML( doc );
+	parent = doc.defaultView;
 
 	// Support: IE>8
 	// If iframe document is assigned to "document" variable and if iframe has been reloaded,
@@ -8711,21 +9142,22 @@ setDocument = Sizzle.setDocument = function( node ) {
 	if ( parent && parent !== parent.top ) {
 		// IE11 does not have attachEvent, so all must suffer
 		if ( parent.addEventListener ) {
-			parent.addEventListener( "unload", function() {
-				setDocument();
-			}, false );
+			parent.addEventListener( "unload", unloadHandler, false );
 		} else if ( parent.attachEvent ) {
-			parent.attachEvent( "onunload", function() {
-				setDocument();
-			});
+			parent.attachEvent( "onunload", unloadHandler );
 		}
 	}
+
+	/* Support tests
+	---------------------------------------------------------------------- */
+	documentIsHTML = !isXML( doc );
 
 	/* Attributes
 	---------------------------------------------------------------------- */
 
 	// Support: IE<8
-	// Verify that getAttribute really returns attributes and not properties (excepting IE8 booleans)
+	// Verify that getAttribute really returns attributes and not properties
+	// (excepting IE8 booleans)
 	support.attributes = assert(function( div ) {
 		div.className = "i";
 		return !div.getAttribute("className");
@@ -8740,17 +9172,8 @@ setDocument = Sizzle.setDocument = function( node ) {
 		return !div.getElementsByTagName("*").length;
 	});
 
-	// Check if getElementsByClassName can be trusted
-	support.getElementsByClassName = rnative.test( doc.getElementsByClassName ) && assert(function( div ) {
-		div.innerHTML = "<div class='a'></div><div class='a i'></div>";
-
-		// Support: Safari<4
-		// Catch class over-caching
-		div.firstChild.className = "i";
-		// Support: Opera<10
-		// Catch gEBCN failure to find non-leading classes
-		return div.getElementsByClassName("i").length === 2;
-	});
+	// Support: IE<9
+	support.getElementsByClassName = rnative.test( doc.getElementsByClassName );
 
 	// Support: IE<10
 	// Check if getElementById returns elements by name
@@ -8764,7 +9187,7 @@ setDocument = Sizzle.setDocument = function( node ) {
 	// ID find and filter
 	if ( support.getById ) {
 		Expr.find["ID"] = function( id, context ) {
-			if ( typeof context.getElementById !== strundefined && documentIsHTML ) {
+			if ( typeof context.getElementById !== "undefined" && documentIsHTML ) {
 				var m = context.getElementById( id );
 				// Check parentNode to catch when Blackberry 4.6 returns
 				// nodes that are no longer in the document #6963
@@ -8785,7 +9208,7 @@ setDocument = Sizzle.setDocument = function( node ) {
 		Expr.filter["ID"] =  function( id ) {
 			var attrId = id.replace( runescape, funescape );
 			return function( elem ) {
-				var node = typeof elem.getAttributeNode !== strundefined && elem.getAttributeNode("id");
+				var node = typeof elem.getAttributeNode !== "undefined" && elem.getAttributeNode("id");
 				return node && node.value === attrId;
 			};
 		};
@@ -8794,14 +9217,20 @@ setDocument = Sizzle.setDocument = function( node ) {
 	// Tag
 	Expr.find["TAG"] = support.getElementsByTagName ?
 		function( tag, context ) {
-			if ( typeof context.getElementsByTagName !== strundefined ) {
+			if ( typeof context.getElementsByTagName !== "undefined" ) {
 				return context.getElementsByTagName( tag );
+
+			// DocumentFragment nodes don't have gEBTN
+			} else if ( support.qsa ) {
+				return context.querySelectorAll( tag );
 			}
 		} :
+
 		function( tag, context ) {
 			var elem,
 				tmp = [],
 				i = 0,
+				// By happy coincidence, a (broken) gEBTN appears on DocumentFragment nodes too
 				results = context.getElementsByTagName( tag );
 
 			// Filter out possible comments
@@ -8819,7 +9248,7 @@ setDocument = Sizzle.setDocument = function( node ) {
 
 	// Class
 	Expr.find["CLASS"] = support.getElementsByClassName && function( className, context ) {
-		if ( typeof context.getElementsByClassName !== strundefined && documentIsHTML ) {
+		if ( documentIsHTML ) {
 			return context.getElementsByClassName( className );
 		}
 	};
@@ -8848,13 +9277,15 @@ setDocument = Sizzle.setDocument = function( node ) {
 			// setting a boolean content attribute,
 			// since its presence should be enough
 			// http://bugs.jquery.com/ticket/12359
-			div.innerHTML = "<select msallowclip=''><option selected=''></option></select>";
+			docElem.appendChild( div ).innerHTML = "<a id='" + expando + "'></a>" +
+				"<select id='" + expando + "-\f]' msallowcapture=''>" +
+				"<option selected=''></option></select>";
 
 			// Support: IE8, Opera 11-12.16
 			// Nothing should be selected when empty strings follow ^= or $= or *=
 			// The test attribute must be unknown in Opera but "safe" for WinRT
 			// http://msdn.microsoft.com/en-us/library/ie/hh465388.aspx#attribute_section
-			if ( div.querySelectorAll("[msallowclip^='']").length ) {
+			if ( div.querySelectorAll("[msallowcapture^='']").length ) {
 				rbuggyQSA.push( "[*^$]=" + whitespace + "*(?:''|\"\")" );
 			}
 
@@ -8864,11 +9295,23 @@ setDocument = Sizzle.setDocument = function( node ) {
 				rbuggyQSA.push( "\\[" + whitespace + "*(?:value|" + booleans + ")" );
 			}
 
+			// Support: Chrome<29, Android<4.2+, Safari<7.0+, iOS<7.0+, PhantomJS<1.9.7+
+			if ( !div.querySelectorAll( "[id~=" + expando + "-]" ).length ) {
+				rbuggyQSA.push("~=");
+			}
+
 			// Webkit/Opera - :checked should return selected option elements
 			// http://www.w3.org/TR/2011/REC-css3-selectors-20110929/#checked
 			// IE8 throws error here and will not see later tests
 			if ( !div.querySelectorAll(":checked").length ) {
 				rbuggyQSA.push(":checked");
+			}
+
+			// Support: Safari 8+, iOS 8+
+			// https://bugs.webkit.org/show_bug.cgi?id=136851
+			// In-page `selector#id sibing-combinator selector` fails
+			if ( !div.querySelectorAll( "a#" + expando + "+*" ).length ) {
+				rbuggyQSA.push(".#.+[+~]");
 			}
 		});
 
@@ -8986,7 +9429,7 @@ setDocument = Sizzle.setDocument = function( node ) {
 
 			// Maintain original order
 			return sortInput ?
-				( indexOf.call( sortInput, a ) - indexOf.call( sortInput, b ) ) :
+				( indexOf( sortInput, a ) - indexOf( sortInput, b ) ) :
 				0;
 		}
 
@@ -9013,7 +9456,7 @@ setDocument = Sizzle.setDocument = function( node ) {
 				aup ? -1 :
 				bup ? 1 :
 				sortInput ?
-				( indexOf.call( sortInput, a ) - indexOf.call( sortInput, b ) ) :
+				( indexOf( sortInput, a ) - indexOf( sortInput, b ) ) :
 				0;
 
 		// If the nodes are siblings, we can do a quick check
@@ -9076,7 +9519,7 @@ Sizzle.matchesSelector = function( elem, expr ) {
 					elem.document && elem.document.nodeType !== 11 ) {
 				return ret;
 			}
-		} catch(e) {}
+		} catch (e) {}
 	}
 
 	return Sizzle( expr, document, null, [ elem ] ).length > 0;
@@ -9295,7 +9738,7 @@ Expr = Sizzle.selectors = {
 			return pattern ||
 				(pattern = new RegExp( "(^|" + whitespace + ")" + className + "(" + whitespace + "|$)" )) &&
 				classCache( className, function( elem ) {
-					return pattern.test( typeof elem.className === "string" && elem.className || typeof elem.getAttribute !== strundefined && elem.getAttribute("class") || "" );
+					return pattern.test( typeof elem.className === "string" && elem.className || typeof elem.getAttribute !== "undefined" && elem.getAttribute("class") || "" );
 				});
 		},
 
@@ -9317,7 +9760,7 @@ Expr = Sizzle.selectors = {
 					operator === "^=" ? check && result.indexOf( check ) === 0 :
 					operator === "*=" ? check && result.indexOf( check ) > -1 :
 					operator === "$=" ? check && result.slice( -check.length ) === check :
-					operator === "~=" ? ( " " + result + " " ).indexOf( check ) > -1 :
+					operator === "~=" ? ( " " + result.replace( rwhitespace, " " ) + " " ).indexOf( check ) > -1 :
 					operator === "|=" ? result === check || result.slice( 0, check.length + 1 ) === check + "-" :
 					false;
 			};
@@ -9437,7 +9880,7 @@ Expr = Sizzle.selectors = {
 							matched = fn( seed, argument ),
 							i = matched.length;
 						while ( i-- ) {
-							idx = indexOf.call( seed, matched[i] );
+							idx = indexOf( seed, matched[i] );
 							seed[ idx ] = !( matches[ idx ] = matched[i] );
 						}
 					}) :
@@ -9476,6 +9919,8 @@ Expr = Sizzle.selectors = {
 				function( elem, context, xml ) {
 					input[0] = elem;
 					matcher( input, null, xml, results );
+					// Don't keep the element (issue #299)
+					input[0] = null;
 					return !results.pop();
 				};
 		}),
@@ -9487,6 +9932,7 @@ Expr = Sizzle.selectors = {
 		}),
 
 		"contains": markFunction(function( text ) {
+			text = text.replace( runescape, funescape );
 			return function( elem ) {
 				return ( elem.textContent || elem.innerText || getText( elem ) ).indexOf( text ) > -1;
 			};
@@ -9908,7 +10354,7 @@ function setMatcher( preFilter, selector, matcher, postFilter, postFinder, postS
 				i = matcherOut.length;
 				while ( i-- ) {
 					if ( (elem = matcherOut[i]) &&
-						(temp = postFinder ? indexOf.call( seed, elem ) : preMap[i]) > -1 ) {
+						(temp = postFinder ? indexOf( seed, elem ) : preMap[i]) > -1 ) {
 
 						seed[temp] = !(results[temp] = elem);
 					}
@@ -9943,13 +10389,16 @@ function matcherFromTokens( tokens ) {
 			return elem === checkContext;
 		}, implicitRelative, true ),
 		matchAnyContext = addCombinator( function( elem ) {
-			return indexOf.call( checkContext, elem ) > -1;
+			return indexOf( checkContext, elem ) > -1;
 		}, implicitRelative, true ),
 		matchers = [ function( elem, context, xml ) {
-			return ( !leadingRelative && ( xml || context !== outermostContext ) ) || (
+			var ret = ( !leadingRelative && ( xml || context !== outermostContext ) ) || (
 				(checkContext = context).nodeType ?
 					matchContext( elem, context, xml ) :
 					matchAnyContext( elem, context, xml ) );
+			// Avoid hanging onto element (issue #299)
+			checkContext = null;
+			return ret;
 		} ];
 
 	for ( ; i < len; i++ ) {
@@ -10199,7 +10648,7 @@ select = Sizzle.select = function( selector, context, results, seed ) {
 // Sort stability
 support.sortStable = expando.split("").sort( sortOrder ).join("") === expando;
 
-// Support: Chrome<14
+// Support: Chrome 14-35+
 // Always assume duplicates if they aren't passed to the comparison function
 support.detectDuplicates = !!hasDuplicate;
 
@@ -10408,7 +10857,7 @@ var rootjQuery,
 				if ( match[1] ) {
 					context = context instanceof jQuery ? context[0] : context;
 
-					// scripts is true for back-compat
+					// Option to run scripts is true for back-compat
 					// Intentionally let the error be thrown if parseHTML is not present
 					jQuery.merge( this, jQuery.parseHTML(
 						match[1],
@@ -10436,8 +10885,8 @@ var rootjQuery,
 				} else {
 					elem = document.getElementById( match[2] );
 
-					// Check parentNode to catch when Blackberry 4.6 returns
-					// nodes that are no longer in the document #6963
+					// Support: Blackberry 4.6
+					// gEBID returns nodes no longer in the document (#6963)
 					if ( elem && elem.parentNode ) {
 						// Inject the element directly into the jQuery object
 						this.length = 1;
@@ -10490,7 +10939,7 @@ rootjQuery = jQuery( document );
 
 
 var rparentsprev = /^(?:parents|prev(?:Until|All))/,
-	// methods guaranteed to produce a unique set when starting from a unique set
+	// Methods guaranteed to produce a unique set when starting from a unique set
 	guaranteedUnique = {
 		children: true,
 		contents: true,
@@ -10570,8 +11019,7 @@ jQuery.fn.extend({
 		return this.pushStack( matched.length > 1 ? jQuery.unique( matched ) : matched );
 	},
 
-	// Determine the position of an element within
-	// the matched set of elements
+	// Determine the position of an element within the set
 	index: function( elem ) {
 
 		// No argument, return index in parent
@@ -10579,7 +11027,7 @@ jQuery.fn.extend({
 			return ( this[ 0 ] && this[ 0 ].parentNode ) ? this.first().prevAll().length : -1;
 		}
 
-		// index in selector
+		// Index in selector
 		if ( typeof elem === "string" ) {
 			return indexOf.call( jQuery( elem ), this[ 0 ] );
 		}
@@ -10995,7 +11443,7 @@ jQuery.extend({
 
 			progressValues, progressContexts, resolveContexts;
 
-		// add listeners to Deferred subordinates; treat others as resolved
+		// Add listeners to Deferred subordinates; treat others as resolved
 		if ( length > 1 ) {
 			progressValues = new Array( length );
 			progressContexts = new Array( length );
@@ -11012,7 +11460,7 @@ jQuery.extend({
 			}
 		}
 
-		// if we're not waiting on anything, resolve the master
+		// If we're not waiting on anything, resolve the master
 		if ( !remaining ) {
 			deferred.resolveWith( resolveContexts, resolveValues );
 		}
@@ -11091,7 +11539,7 @@ jQuery.ready.promise = function( obj ) {
 		readyList = jQuery.Deferred();
 
 		// Catch cases where $(document).ready() is called after the browser event has already occurred.
-		// we once tried to use readyState "interactive" here, but it caused issues like the one
+		// We once tried to use readyState "interactive" here, but it caused issues like the one
 		// discovered by ChrisS here: http://bugs.jquery.com/ticket/12282#comment:15
 		if ( document.readyState === "complete" ) {
 			// Handle it asynchronously to allow scripts the opportunity to delay ready
@@ -11185,7 +11633,7 @@ jQuery.acceptData = function( owner ) {
 
 
 function Data() {
-	// Support: Android < 4,
+	// Support: Android<4,
 	// Old WebKit does not have Object.preventExtensions/freeze method,
 	// return new empty object instead with no [[set]] accessor
 	Object.defineProperty( this.cache = {}, 0, {
@@ -11194,7 +11642,7 @@ function Data() {
 		}
 	});
 
-	this.expando = jQuery.expando + Math.random();
+	this.expando = jQuery.expando + Data.uid++;
 }
 
 Data.uid = 1;
@@ -11222,7 +11670,7 @@ Data.prototype = {
 				descriptor[ this.expando ] = { value: unlock };
 				Object.defineProperties( owner, descriptor );
 
-			// Support: Android < 4
+			// Support: Android<4
 			// Fallback to a less secure definition
 			} catch ( e ) {
 				descriptor[ this.expando ] = unlock;
@@ -11362,17 +11810,16 @@ var data_user = new Data();
 
 
 
-/*
-	Implementation Summary
+//	Implementation Summary
+//
+//	1. Enforce API surface and semantic compatibility with 1.9.x branch
+//	2. Improve the module's maintainability by reducing the storage
+//		paths to a single mechanism.
+//	3. Use the same single mechanism to support "private" and "user" data.
+//	4. _Never_ expose "private" data to user code (TODO: Drop _data, _removeData)
+//	5. Avoid exposing implementation details on user objects (eg. expando properties)
+//	6. Provide a clear path for implementation upgrade to WeakMap in 2014
 
-	1. Enforce API surface and semantic compatibility with 1.9.x branch
-	2. Improve the module's maintainability by reducing the storage
-		paths to a single mechanism.
-	3. Use the same single mechanism to support "private" and "user" data.
-	4. _Never_ expose "private" data to user code (TODO: Drop _data, _removeData)
-	5. Avoid exposing implementation details on user objects (eg. expando properties)
-	6. Provide a clear path for implementation upgrade to WeakMap in 2014
-*/
 var rbrace = /^(?:\{[\w\W]*\}|\[[\w\W]*\])$/,
 	rmultiDash = /([A-Z])/g;
 
@@ -11577,7 +12024,7 @@ jQuery.extend({
 				queue.unshift( "inprogress" );
 			}
 
-			// clear up the last queue stop function
+			// Clear up the last queue stop function
 			delete hooks.stop;
 			fn.call( elem, next, hooks );
 		}
@@ -11587,7 +12034,7 @@ jQuery.extend({
 		}
 	},
 
-	// not intended for public consumption - generates a queueHooks object, or returns the current one
+	// Not public - generate a queueHooks object, or return the current one
 	_queueHooks: function( elem, type ) {
 		var key = type + "queueHooks";
 		return data_priv.get( elem, key ) || data_priv.access( elem, key, {
@@ -11617,7 +12064,7 @@ jQuery.fn.extend({
 			this.each(function() {
 				var queue = jQuery.queue( this, type, data );
 
-				// ensure a hooks for this queue
+				// Ensure a hooks for this queue
 				jQuery._queueHooks( this, type );
 
 				if ( type === "fx" && queue[0] !== "inprogress" ) {
@@ -11684,21 +12131,22 @@ var rcheckableType = (/^(?:checkbox|radio)$/i);
 		div = fragment.appendChild( document.createElement( "div" ) ),
 		input = document.createElement( "input" );
 
-	// #11217 - WebKit loses check when the name is after the checked attribute
+	// Support: Safari<=5.1
+	// Check state lost if the name is set (#11217)
 	// Support: Windows Web Apps (WWA)
-	// `name` and `type` need .setAttribute for WWA
+	// `name` and `type` must use .setAttribute for WWA (#14901)
 	input.setAttribute( "type", "radio" );
 	input.setAttribute( "checked", "checked" );
 	input.setAttribute( "name", "t" );
 
 	div.appendChild( input );
 
-	// Support: Safari 5.1, iOS 5.1, Android 4.x, Android 2.3
-	// old WebKit doesn't clone checked state correctly in fragments
+	// Support: Safari<=5.1, Android<4.2
+	// Older WebKit doesn't clone checked state correctly in fragments
 	support.checkClone = div.cloneNode( true ).cloneNode( true ).lastChild.checked;
 
+	// Support: IE<=11+
 	// Make sure textarea (and checkbox) defaultValue is properly cloned
-	// Support: IE9-IE11+
 	div.innerHTML = "<textarea>x</textarea>";
 	support.noCloneChecked = !!div.cloneNode( true ).lastChild.defaultValue;
 })();
@@ -12076,8 +12524,8 @@ jQuery.event = {
 			j = 0;
 			while ( (handleObj = matched.handlers[ j++ ]) && !event.isImmediatePropagationStopped() ) {
 
-				// Triggered event must either 1) have no namespace, or
-				// 2) have namespace(s) a subset or equal to those in the bound event (both can have no namespace).
+				// Triggered event must either 1) have no namespace, or 2) have namespace(s)
+				// a subset or equal to those in the bound event (both can have no namespace).
 				if ( !event.namespace_re || event.namespace_re.test( handleObj.namespace ) ) {
 
 					event.handleObj = handleObj;
@@ -12227,7 +12675,7 @@ jQuery.event = {
 			event.target = document;
 		}
 
-		// Support: Safari 6.0+, Chrome < 28
+		// Support: Safari 6.0+, Chrome<28
 		// Target should not be a text node (#504, #13143)
 		if ( event.target.nodeType === 3 ) {
 			event.target = event.target.parentNode;
@@ -12332,7 +12780,7 @@ jQuery.Event = function( src, props ) {
 		// by a handler lower down the tree; reflect the correct value.
 		this.isDefaultPrevented = src.defaultPrevented ||
 				src.defaultPrevented === undefined &&
-				// Support: Android < 4.0
+				// Support: Android<4.0
 				src.returnValue === false ?
 			returnTrue :
 			returnFalse;
@@ -12422,8 +12870,8 @@ jQuery.each({
 	};
 });
 
-// Create "bubbling" focus and blur events
 // Support: Firefox, Chrome, Safari
+// Create "bubbling" focus and blur events
 if ( !support.focusinBubbles ) {
 	jQuery.each({ focus: "focusin", blur: "focusout" }, function( orig, fix ) {
 
@@ -12576,7 +13024,7 @@ var
 	// We have to close these tags to support XHTML (#13200)
 	wrapMap = {
 
-		// Support: IE 9
+		// Support: IE9
 		option: [ 1, "<select multiple='multiple'>", "</select>" ],
 
 		thead: [ 1, "<table>", "</table>" ],
@@ -12587,7 +13035,7 @@ var
 		_default: [ 0, "", "" ]
 	};
 
-// Support: IE 9
+// Support: IE9
 wrapMap.optgroup = wrapMap.option;
 
 wrapMap.tbody = wrapMap.tfoot = wrapMap.colgroup = wrapMap.caption = wrapMap.thead;
@@ -12677,7 +13125,7 @@ function getAll( context, tag ) {
 		ret;
 }
 
-// Support: IE >= 9
+// Fix IE bugs, see support tests
 function fixInput( src, dest ) {
 	var nodeName = dest.nodeName.toLowerCase();
 
@@ -12697,8 +13145,7 @@ jQuery.extend({
 			clone = elem.cloneNode( true ),
 			inPage = jQuery.contains( elem.ownerDocument, elem );
 
-		// Support: IE >= 9
-		// Fix Cloning issues
+		// Fix IE cloning issues
 		if ( !support.noCloneChecked && ( elem.nodeType === 1 || elem.nodeType === 11 ) &&
 				!jQuery.isXMLDoc( elem ) ) {
 
@@ -12749,8 +13196,8 @@ jQuery.extend({
 
 				// Add nodes directly
 				if ( jQuery.type( elem ) === "object" ) {
-					// Support: QtWebKit
-					// jQuery.merge because push.apply(_, arraylike) throws
+					// Support: QtWebKit, PhantomJS
+					// push.apply(_, arraylike) throws on ancient WebKit
 					jQuery.merge( nodes, elem.nodeType ? [ elem ] : elem );
 
 				// Convert non-html into a text node
@@ -12772,15 +13219,14 @@ jQuery.extend({
 						tmp = tmp.lastChild;
 					}
 
-					// Support: QtWebKit
-					// jQuery.merge because push.apply(_, arraylike) throws
+					// Support: QtWebKit, PhantomJS
+					// push.apply(_, arraylike) throws on ancient WebKit
 					jQuery.merge( nodes, tmp.childNodes );
 
 					// Remember the top-level container
 					tmp = fragment.firstChild;
 
-					// Fixes #12346
-					// Support: Webkit, IE
+					// Ensure the created nodes are orphaned (#12392)
 					tmp.textContent = "";
 				}
 			}
@@ -13142,7 +13588,7 @@ function actualDisplay( name, doc ) {
 		// getDefaultComputedStyle might be reliably used only on attached element
 		display = window.getDefaultComputedStyle && ( style = window.getDefaultComputedStyle( elem[ 0 ] ) ) ?
 
-			// Use of this method is a temporary fix (more like optmization) until something better comes along,
+			// Use of this method is a temporary fix (more like optimization) until something better comes along,
 			// since it was removed from specification and supported only in FF
 			style.display : jQuery.css( elem[ 0 ], "display" );
 
@@ -13192,7 +13638,14 @@ var rmargin = (/^margin/);
 var rnumnonpx = new RegExp( "^(" + pnum + ")(?!px)[a-z%]+$", "i" );
 
 var getStyles = function( elem ) {
-		return elem.ownerDocument.defaultView.getComputedStyle( elem, null );
+		// Support: IE<=11+, Firefox<=30+ (#15098, #14150)
+		// IE throws on elements created in popups
+		// FF meanwhile throws on frame elements through "defaultView.getComputedStyle"
+		if ( elem.ownerDocument.defaultView.opener ) {
+			return elem.ownerDocument.defaultView.getComputedStyle( elem, null );
+		}
+
+		return window.getComputedStyle( elem, null );
 	};
 
 
@@ -13204,7 +13657,7 @@ function curCSS( elem, name, computed ) {
 	computed = computed || getStyles( elem );
 
 	// Support: IE9
-	// getPropertyValue is only needed for .css('filter') in IE9, see #12537
+	// getPropertyValue is only needed for .css('filter') (#12537)
 	if ( computed ) {
 		ret = computed.getPropertyValue( name ) || computed[ name ];
 	}
@@ -13250,15 +13703,13 @@ function addGetHookIf( conditionFn, hookFn ) {
 	return {
 		get: function() {
 			if ( conditionFn() ) {
-				// Hook not needed (or it's not possible to use it due to missing dependency),
-				// remove it.
-				// Since there are no other hooks for marginRight, remove the whole object.
+				// Hook not needed (or it's not possible to use it due
+				// to missing dependency), remove it.
 				delete this.get;
 				return;
 			}
 
 			// Hook needed; redefine it so that the support test is not executed again.
-
 			return (this.get = hookFn).apply( this, arguments );
 		}
 	};
@@ -13275,6 +13726,8 @@ function addGetHookIf( conditionFn, hookFn ) {
 		return;
 	}
 
+	// Support: IE9-11+
+	// Style of cloned element affects source element cloned (#8908)
 	div.style.backgroundClip = "content-box";
 	div.cloneNode( true ).style.backgroundClip = "";
 	support.clearCloneStyle = div.style.backgroundClip === "content-box";
@@ -13307,6 +13760,7 @@ function addGetHookIf( conditionFn, hookFn ) {
 	if ( window.getComputedStyle ) {
 		jQuery.extend( support, {
 			pixelPosition: function() {
+
 				// This test is executed only once but we still do memoizing
 				// since we can use the boxSizingReliable pre-computing.
 				// No need to check if the test was already performed, though.
@@ -13320,6 +13774,7 @@ function addGetHookIf( conditionFn, hookFn ) {
 				return boxSizingReliableVal;
 			},
 			reliableMarginRight: function() {
+
 				// Support: Android 2.3
 				// Check if div with explicit width and no margin-right incorrectly
 				// gets computed margin-right based on width of container. (#3333)
@@ -13341,6 +13796,7 @@ function addGetHookIf( conditionFn, hookFn ) {
 				ret = !parseFloat( window.getComputedStyle( marginDiv, null ).marginRight );
 
 				docElem.removeChild( container );
+				div.removeChild( marginDiv );
 
 				return ret;
 			}
@@ -13372,8 +13828,8 @@ jQuery.swap = function( elem, options, callback, args ) {
 
 
 var
-	// swappable if display is none or starts with table except "table", "table-cell", or "table-caption"
-	// see here for display values: https://developer.mozilla.org/en-US/docs/CSS/display
+	// Swappable if display is none or starts with table except "table", "table-cell", or "table-caption"
+	// See here for display values: https://developer.mozilla.org/en-US/docs/CSS/display
 	rdisplayswap = /^(none|table(?!-c[ea]).+)/,
 	rnumsplit = new RegExp( "^(" + pnum + ")(.*)$", "i" ),
 	rrelNum = new RegExp( "^([+-])=(" + pnum + ")", "i" ),
@@ -13386,15 +13842,15 @@ var
 
 	cssPrefixes = [ "Webkit", "O", "Moz", "ms" ];
 
-// return a css property mapped to a potentially vendor prefixed property
+// Return a css property mapped to a potentially vendor prefixed property
 function vendorPropName( style, name ) {
 
-	// shortcut for names that are not vendor prefixed
+	// Shortcut for names that are not vendor prefixed
 	if ( name in style ) {
 		return name;
 	}
 
-	// check for vendor prefixed names
+	// Check for vendor prefixed names
 	var capName = name[0].toUpperCase() + name.slice(1),
 		origName = name,
 		i = cssPrefixes.length;
@@ -13427,7 +13883,7 @@ function augmentWidthOrHeight( elem, name, extra, isBorderBox, styles ) {
 		val = 0;
 
 	for ( ; i < 4; i += 2 ) {
-		// both box models exclude margin, so add it if we want it
+		// Both box models exclude margin, so add it if we want it
 		if ( extra === "margin" ) {
 			val += jQuery.css( elem, extra + cssExpand[ i ], true, styles );
 		}
@@ -13438,15 +13894,15 @@ function augmentWidthOrHeight( elem, name, extra, isBorderBox, styles ) {
 				val -= jQuery.css( elem, "padding" + cssExpand[ i ], true, styles );
 			}
 
-			// at this point, extra isn't border nor margin, so remove border
+			// At this point, extra isn't border nor margin, so remove border
 			if ( extra !== "margin" ) {
 				val -= jQuery.css( elem, "border" + cssExpand[ i ] + "Width", true, styles );
 			}
 		} else {
-			// at this point, extra isn't content, so add padding
+			// At this point, extra isn't content, so add padding
 			val += jQuery.css( elem, "padding" + cssExpand[ i ], true, styles );
 
-			// at this point, extra isn't content nor padding, so add border
+			// At this point, extra isn't content nor padding, so add border
 			if ( extra !== "padding" ) {
 				val += jQuery.css( elem, "border" + cssExpand[ i ] + "Width", true, styles );
 			}
@@ -13464,7 +13920,7 @@ function getWidthOrHeight( elem, name, extra ) {
 		styles = getStyles( elem ),
 		isBorderBox = jQuery.css( elem, "boxSizing", false, styles ) === "border-box";
 
-	// some non-html elements return undefined for offsetWidth, so check for null/undefined
+	// Some non-html elements return undefined for offsetWidth, so check for null/undefined
 	// svg - https://bugzilla.mozilla.org/show_bug.cgi?id=649285
 	// MathML - https://bugzilla.mozilla.org/show_bug.cgi?id=491668
 	if ( val <= 0 || val == null ) {
@@ -13479,7 +13935,7 @@ function getWidthOrHeight( elem, name, extra ) {
 			return val;
 		}
 
-		// we need the check for style in case a browser which returns unreliable values
+		// Check for style in case a browser which returns unreliable values
 		// for getComputedStyle silently falls back to the reliable elem.style
 		valueIsBorderBox = isBorderBox &&
 			( support.boxSizingReliable() || val === elem.style[ name ] );
@@ -13488,7 +13944,7 @@ function getWidthOrHeight( elem, name, extra ) {
 		val = parseFloat( val ) || 0;
 	}
 
-	// use the active box-sizing model to add/subtract irrelevant styles
+	// Use the active box-sizing model to add/subtract irrelevant styles
 	return ( val +
 		augmentWidthOrHeight(
 			elem,
@@ -13552,12 +14008,14 @@ function showHide( elements, show ) {
 }
 
 jQuery.extend({
+
 	// Add in style property hooks for overriding the default
 	// behavior of getting and setting a style property
 	cssHooks: {
 		opacity: {
 			get: function( elem, computed ) {
 				if ( computed ) {
+
 					// We should always get a number back from opacity
 					var ret = curCSS( elem, "opacity" );
 					return ret === "" ? "1" : ret;
@@ -13585,12 +14043,12 @@ jQuery.extend({
 	// Add in properties whose names you wish to fix before
 	// setting or getting the value
 	cssProps: {
-		// normalize float css property
 		"float": "cssFloat"
 	},
 
 	// Get and set the style property on a DOM Node
 	style: function( elem, name, value, extra ) {
+
 		// Don't set styles on text and comment nodes
 		if ( !elem || elem.nodeType === 3 || elem.nodeType === 8 || !elem.style ) {
 			return;
@@ -13603,33 +14061,32 @@ jQuery.extend({
 
 		name = jQuery.cssProps[ origName ] || ( jQuery.cssProps[ origName ] = vendorPropName( style, origName ) );
 
-		// gets hook for the prefixed version
-		// followed by the unprefixed version
+		// Gets hook for the prefixed version, then unprefixed version
 		hooks = jQuery.cssHooks[ name ] || jQuery.cssHooks[ origName ];
 
 		// Check if we're setting a value
 		if ( value !== undefined ) {
 			type = typeof value;
 
-			// convert relative number strings (+= or -=) to relative numbers. #7345
+			// Convert "+=" or "-=" to relative numbers (#7345)
 			if ( type === "string" && (ret = rrelNum.exec( value )) ) {
 				value = ( ret[1] + 1 ) * ret[2] + parseFloat( jQuery.css( elem, name ) );
 				// Fixes bug #9237
 				type = "number";
 			}
 
-			// Make sure that null and NaN values aren't set. See: #7116
+			// Make sure that null and NaN values aren't set (#7116)
 			if ( value == null || value !== value ) {
 				return;
 			}
 
-			// If a number was passed in, add 'px' to the (except for certain CSS properties)
+			// If a number, add 'px' to the (except for certain CSS properties)
 			if ( type === "number" && !jQuery.cssNumber[ origName ] ) {
 				value += "px";
 			}
 
-			// Fixes #8908, it can be done more correctly by specifying setters in cssHooks,
-			// but it would mean to define eight (for every problematic property) identical functions
+			// Support: IE9-11+
+			// background-* props affect original clone's values
 			if ( !support.clearCloneStyle && value === "" && name.indexOf( "background" ) === 0 ) {
 				style[ name ] = "inherit";
 			}
@@ -13657,8 +14114,7 @@ jQuery.extend({
 		// Make sure that we're working with the right name
 		name = jQuery.cssProps[ origName ] || ( jQuery.cssProps[ origName ] = vendorPropName( elem.style, origName ) );
 
-		// gets hook for the prefixed version
-		// followed by the unprefixed version
+		// Try prefixed name followed by the unprefixed name
 		hooks = jQuery.cssHooks[ name ] || jQuery.cssHooks[ origName ];
 
 		// If a hook was provided get the computed value from there
@@ -13671,12 +14127,12 @@ jQuery.extend({
 			val = curCSS( elem, name, styles );
 		}
 
-		//convert "normal" to computed value
+		// Convert "normal" to computed value
 		if ( val === "normal" && name in cssNormalTransform ) {
 			val = cssNormalTransform[ name ];
 		}
 
-		// Return, converting to number if forced or a qualifier was provided and val looks numeric
+		// Make numeric if forced or a qualifier was provided and val looks numeric
 		if ( extra === "" || extra ) {
 			num = parseFloat( val );
 			return extra === true || jQuery.isNumeric( num ) ? num || 0 : val;
@@ -13689,8 +14145,9 @@ jQuery.each([ "height", "width" ], function( i, name ) {
 	jQuery.cssHooks[ name ] = {
 		get: function( elem, computed, extra ) {
 			if ( computed ) {
-				// certain elements can have dimension info if we invisibly show them
-				// however, it must have a current display style that would benefit from this
+
+				// Certain elements can have dimension info if we invisibly show them
+				// but it must have a current display style that would benefit
 				return rdisplayswap.test( jQuery.css( elem, "display" ) ) && elem.offsetWidth === 0 ?
 					jQuery.swap( elem, cssShow, function() {
 						return getWidthOrHeight( elem, name, extra );
@@ -13718,8 +14175,6 @@ jQuery.each([ "height", "width" ], function( i, name ) {
 jQuery.cssHooks.marginRight = addGetHookIf( support.reliableMarginRight,
 	function( elem, computed ) {
 		if ( computed ) {
-			// WebKit Bug 13343 - getComputedStyle returns wrong value for margin-right
-			// Work around by temporarily setting element display to inline-block
 			return jQuery.swap( elem, { "display": "inline-block" },
 				curCSS, [ elem, "marginRight" ] );
 		}
@@ -13737,7 +14192,7 @@ jQuery.each({
 			var i = 0,
 				expanded = {},
 
-				// assumes a single number if not a string
+				// Assumes a single number if not a string
 				parts = typeof value === "string" ? value.split(" ") : [ value ];
 
 			for ( ; i < 4; i++ ) {
@@ -13860,17 +14315,18 @@ Tween.propHooks = {
 				return tween.elem[ tween.prop ];
 			}
 
-			// passing an empty string as a 3rd parameter to .css will automatically
-			// attempt a parseFloat and fallback to a string if the parse fails
-			// so, simple values such as "10px" are parsed to Float.
-			// complex values such as "rotate(1rad)" are returned as is.
+			// Passing an empty string as a 3rd parameter to .css will automatically
+			// attempt a parseFloat and fallback to a string if the parse fails.
+			// Simple values such as "10px" are parsed to Float;
+			// complex values such as "rotate(1rad)" are returned as-is.
 			result = jQuery.css( tween.elem, tween.prop, "" );
 			// Empty strings, null, undefined and "auto" are converted to 0.
 			return !result || result === "auto" ? 0 : result;
 		},
 		set: function( tween ) {
-			// use step hook for back compat - use cssHook if its there - use .style if its
-			// available and use plain properties where available
+			// Use step hook for back compat.
+			// Use cssHook if its there.
+			// Use .style if available and use plain properties where available.
 			if ( jQuery.fx.step[ tween.prop ] ) {
 				jQuery.fx.step[ tween.prop ]( tween );
 			} else if ( tween.elem.style && ( tween.elem.style[ jQuery.cssProps[ tween.prop ] ] != null || jQuery.cssHooks[ tween.prop ] ) ) {
@@ -13884,7 +14340,6 @@ Tween.propHooks = {
 
 // Support: IE9
 // Panic based approach to setting things on disconnected nodes
-
 Tween.propHooks.scrollTop = Tween.propHooks.scrollLeft = {
 	set: function( tween ) {
 		if ( tween.elem.nodeType && tween.elem.parentNode ) {
@@ -13940,16 +14395,16 @@ var
 				start = +target || 1;
 
 				do {
-					// If previous iteration zeroed out, double until we get *something*
-					// Use a string for doubling factor so we don't accidentally see scale as unchanged below
+					// If previous iteration zeroed out, double until we get *something*.
+					// Use string for doubling so we don't accidentally see scale as unchanged below
 					scale = scale || ".5";
 
 					// Adjust and apply
 					start = start / scale;
 					jQuery.style( tween.elem, prop, start + unit );
 
-				// Update scale, tolerating zero or NaN from tween.cur()
-				// And breaking the loop if scale is unchanged or perfect, or if we've just had enough
+				// Update scale, tolerating zero or NaN from tween.cur(),
+				// break the loop if scale is unchanged or perfect, or if we've just had enough
 				} while ( scale !== (scale = tween.cur() / target) && scale !== 1 && --maxIterations );
 			}
 
@@ -13981,8 +14436,8 @@ function genFx( type, includeWidth ) {
 		i = 0,
 		attrs = { height: type };
 
-	// if we include width, step value is 1 to do all cssExpand values,
-	// if we don't include width, step value is 2 to skip over Left and Right
+	// If we include width, step value is 1 to do all cssExpand values,
+	// otherwise step value is 2 to skip over Left and Right
 	includeWidth = includeWidth ? 1 : 0;
 	for ( ; i < 4 ; i += 2 - includeWidth ) {
 		which = cssExpand[ i ];
@@ -14004,7 +14459,7 @@ function createTween( value, prop, animation ) {
 	for ( ; index < length; index++ ) {
 		if ( (tween = collection[ index ].call( animation, prop, value )) ) {
 
-			// we're done with this property
+			// We're done with this property
 			return tween;
 		}
 	}
@@ -14019,7 +14474,7 @@ function defaultPrefilter( elem, props, opts ) {
 		hidden = elem.nodeType && isHidden( elem ),
 		dataShow = data_priv.get( elem, "fxshow" );
 
-	// handle queue: false promises
+	// Handle queue: false promises
 	if ( !opts.queue ) {
 		hooks = jQuery._queueHooks( elem, "fx" );
 		if ( hooks.unqueued == null ) {
@@ -14034,8 +14489,7 @@ function defaultPrefilter( elem, props, opts ) {
 		hooks.unqueued++;
 
 		anim.always(function() {
-			// doing this makes sure that the complete handler will be called
-			// before this completes
+			// Ensure the complete handler is called before this completes
 			anim.always(function() {
 				hooks.unqueued--;
 				if ( !jQuery.queue( elem, "fx" ).length ) {
@@ -14045,7 +14499,7 @@ function defaultPrefilter( elem, props, opts ) {
 		});
 	}
 
-	// height/width overflow pass
+	// Height/width overflow pass
 	if ( elem.nodeType === 1 && ( "height" in props || "width" in props ) ) {
 		// Make sure that nothing sneaks out
 		// Record all 3 overflow attributes because IE9-10 do not
@@ -14107,7 +14561,7 @@ function defaultPrefilter( elem, props, opts ) {
 			dataShow = data_priv.access( elem, "fxshow", {} );
 		}
 
-		// store state if its toggle - enables .stop().toggle() to "reverse"
+		// Store state if its toggle - enables .stop().toggle() to "reverse"
 		if ( toggle ) {
 			dataShow.hidden = !hidden;
 		}
@@ -14167,8 +14621,8 @@ function propFilter( props, specialEasing ) {
 			value = hooks.expand( value );
 			delete props[ name ];
 
-			// not quite $.extend, this wont overwrite keys already present.
-			// also - reusing 'index' from above because we have the correct "name"
+			// Not quite $.extend, this won't overwrite existing keys.
+			// Reusing 'index' because we have the correct "name"
 			for ( index in value ) {
 				if ( !( index in props ) ) {
 					props[ index ] = value[ index ];
@@ -14187,7 +14641,7 @@ function Animation( elem, properties, options ) {
 		index = 0,
 		length = animationPrefilters.length,
 		deferred = jQuery.Deferred().always( function() {
-			// don't match elem in the :animated selector
+			// Don't match elem in the :animated selector
 			delete tick.elem;
 		}),
 		tick = function() {
@@ -14196,7 +14650,8 @@ function Animation( elem, properties, options ) {
 			}
 			var currentTime = fxNow || createFxNow(),
 				remaining = Math.max( 0, animation.startTime + animation.duration - currentTime ),
-				// archaic crash bug won't allow us to use 1 - ( 0.5 || 0 ) (#12497)
+				// Support: Android 2.3
+				// Archaic crash bug won't allow us to use `1 - ( 0.5 || 0 )` (#12497)
 				temp = remaining / animation.duration || 0,
 				percent = 1 - temp,
 				index = 0,
@@ -14232,7 +14687,7 @@ function Animation( elem, properties, options ) {
 			},
 			stop: function( gotoEnd ) {
 				var index = 0,
-					// if we are going to the end, we want to run all the tweens
+					// If we are going to the end, we want to run all the tweens
 					// otherwise we skip this part
 					length = gotoEnd ? animation.tweens.length : 0;
 				if ( stopped ) {
@@ -14243,8 +14698,7 @@ function Animation( elem, properties, options ) {
 					animation.tweens[ index ].run( 1 );
 				}
 
-				// resolve when we played the last frame
-				// otherwise, reject
+				// Resolve when we played the last frame; otherwise, reject
 				if ( gotoEnd ) {
 					deferred.resolveWith( elem, [ animation, gotoEnd ] );
 				} else {
@@ -14326,7 +14780,7 @@ jQuery.speed = function( speed, easing, fn ) {
 	opt.duration = jQuery.fx.off ? 0 : typeof opt.duration === "number" ? opt.duration :
 		opt.duration in jQuery.fx.speeds ? jQuery.fx.speeds[ opt.duration ] : jQuery.fx.speeds._default;
 
-	// normalize opt.queue - true/undefined/null -> "fx"
+	// Normalize opt.queue - true/undefined/null -> "fx"
 	if ( opt.queue == null || opt.queue === true ) {
 		opt.queue = "fx";
 	}
@@ -14350,10 +14804,10 @@ jQuery.speed = function( speed, easing, fn ) {
 jQuery.fn.extend({
 	fadeTo: function( speed, to, easing, callback ) {
 
-		// show any hidden elements after setting opacity to 0
+		// Show any hidden elements after setting opacity to 0
 		return this.filter( isHidden ).css( "opacity", 0 ).show()
 
-			// animate to the value specified
+			// Animate to the value specified
 			.end().animate({ opacity: to }, speed, easing, callback );
 	},
 	animate: function( prop, speed, easing, callback ) {
@@ -14416,9 +14870,9 @@ jQuery.fn.extend({
 				}
 			}
 
-			// start the next in the queue if the last step wasn't forced
-			// timers currently will call their complete callbacks, which will dequeue
-			// but only if they were gotoEnd
+			// Start the next in the queue if the last step wasn't forced.
+			// Timers currently will call their complete callbacks, which
+			// will dequeue but only if they were gotoEnd.
 			if ( dequeue || !gotoEnd ) {
 				jQuery.dequeue( this, type );
 			}
@@ -14436,17 +14890,17 @@ jQuery.fn.extend({
 				timers = jQuery.timers,
 				length = queue ? queue.length : 0;
 
-			// enable finishing flag on private data
+			// Enable finishing flag on private data
 			data.finish = true;
 
-			// empty the queue first
+			// Empty the queue first
 			jQuery.queue( this, type, [] );
 
 			if ( hooks && hooks.stop ) {
 				hooks.stop.call( this, true );
 			}
 
-			// look for any active animations, and finish them
+			// Look for any active animations, and finish them
 			for ( index = timers.length; index--; ) {
 				if ( timers[ index ].elem === this && timers[ index ].queue === type ) {
 					timers[ index ].anim.stop( true );
@@ -14454,14 +14908,14 @@ jQuery.fn.extend({
 				}
 			}
 
-			// look for any animations in the old queue and finish them
+			// Look for any animations in the old queue and finish them
 			for ( index = 0; index < length; index++ ) {
 				if ( queue[ index ] && queue[ index ].finish ) {
 					queue[ index ].finish.call( this );
 				}
 			}
 
-			// turn off finishing flag
+			// Turn off finishing flag
 			delete data.finish;
 		});
 	}
@@ -14564,21 +15018,21 @@ jQuery.fn.delay = function( time, type ) {
 
 	input.type = "checkbox";
 
-	// Support: iOS 5.1, Android 4.x, Android 2.3
-	// Check the default checkbox/radio value ("" on old WebKit; "on" elsewhere)
+	// Support: iOS<=5.1, Android<=4.2+
+	// Default value for a checkbox should be "on"
 	support.checkOn = input.value !== "";
 
-	// Must access the parent to make an option select properly
-	// Support: IE9, IE10
+	// Support: IE<=11+
+	// Must access selectedIndex to make default options select
 	support.optSelected = opt.selected;
 
-	// Make sure that the options inside disabled selects aren't marked as disabled
-	// (WebKit marks them as disabled)
+	// Support: Android<=2.3
+	// Options inside disabled selects are incorrectly marked as disabled
 	select.disabled = true;
 	support.optDisabled = !opt.disabled;
 
-	// Check if an input maintains its value after becoming a radio
-	// Support: IE9, IE10
+	// Support: IE<=11+
+	// An input loses its value after becoming a radio
 	input = document.createElement( "input" );
 	input.value = "t";
 	input.type = "radio";
@@ -14675,8 +15129,6 @@ jQuery.extend({
 			set: function( elem, value ) {
 				if ( !support.radioValue && value === "radio" &&
 					jQuery.nodeName( elem, "input" ) ) {
-					// Setting the type on a radio button after the value resets the value in IE6-9
-					// Reset value to default in case type is set after value during creation
 					var val = elem.value;
 					elem.setAttribute( "type", value );
 					if ( val ) {
@@ -14746,7 +15198,7 @@ jQuery.extend({
 		var ret, hooks, notxml,
 			nType = elem.nodeType;
 
-		// don't get/set properties on text, comment and attribute nodes
+		// Don't get/set properties on text, comment and attribute nodes
 		if ( !elem || nType === 3 || nType === 8 || nType === 2 ) {
 			return;
 		}
@@ -14782,8 +15234,6 @@ jQuery.extend({
 	}
 });
 
-// Support: IE9+
-// Selectedness for an option in an optgroup can be inaccurate
 if ( !support.optSelected ) {
 	jQuery.propHooks.selected = {
 		get: function( elem ) {
@@ -14891,7 +15341,7 @@ jQuery.fn.extend({
 						}
 					}
 
-					// only assign if different to avoid unneeded rendering.
+					// Only assign if different to avoid unneeded rendering.
 					finalValue = value ? jQuery.trim( cur ) : "";
 					if ( elem.className !== finalValue ) {
 						elem.className = finalValue;
@@ -14918,14 +15368,14 @@ jQuery.fn.extend({
 
 		return this.each(function() {
 			if ( type === "string" ) {
-				// toggle individual class names
+				// Toggle individual class names
 				var className,
 					i = 0,
 					self = jQuery( this ),
 					classNames = value.match( rnotwhite ) || [];
 
 				while ( (className = classNames[ i++ ]) ) {
-					// check each className given, space separated list
+					// Check each className given, space separated list
 					if ( self.hasClass( className ) ) {
 						self.removeClass( className );
 					} else {
@@ -14940,7 +15390,7 @@ jQuery.fn.extend({
 					data_priv.set( this, "__className__", this.className );
 				}
 
-				// If the element has a class name or if we're passed "false",
+				// If the element has a class name or if we're passed `false`,
 				// then remove the whole classname (if there was one, the above saved it).
 				// Otherwise bring back whatever was previously saved (if anything),
 				// falling back to the empty string if nothing was stored.
@@ -14984,9 +15434,9 @@ jQuery.fn.extend({
 				ret = elem.value;
 
 				return typeof ret === "string" ?
-					// handle most common string cases
+					// Handle most common string cases
 					ret.replace(rreturn, "") :
-					// handle cases where value is null/undef or number
+					// Handle cases where value is null/undef or number
 					ret == null ? "" : ret;
 			}
 
@@ -15094,7 +15544,7 @@ jQuery.extend({
 					}
 				}
 
-				// force browsers to behave consistently when non-matching value is set
+				// Force browsers to behave consistently when non-matching value is set
 				if ( !optionSet ) {
 					elem.selectedIndex = -1;
 				}
@@ -15115,8 +15565,6 @@ jQuery.each([ "radio", "checkbox" ], function() {
 	};
 	if ( !support.checkOn ) {
 		jQuery.valHooks[ this ].get = function( elem ) {
-			// Support: Webkit
-			// "" is returned instead of "on" if a value isn't specified
 			return elem.getAttribute("value") === null ? "on" : elem.value;
 		};
 	}
@@ -15198,10 +15646,6 @@ jQuery.parseXML = function( data ) {
 
 
 var
-	// Document location
-	ajaxLocParts,
-	ajaxLocation,
-
 	rhash = /#.*$/,
 	rts = /([?&])_=[^&]*/,
 	rheaders = /^(.*?):[ \t]*([^\r\n]*)$/mg,
@@ -15230,22 +15674,13 @@ var
 	transports = {},
 
 	// Avoid comment-prolog char sequence (#10098); must appease lint and evade compression
-	allTypes = "*/".concat("*");
+	allTypes = "*/".concat( "*" ),
 
-// #8138, IE may throw an exception when accessing
-// a field from window.location if document.domain has been set
-try {
-	ajaxLocation = location.href;
-} catch( e ) {
-	// Use the href attribute of an A element
-	// since IE will modify it given document.location
-	ajaxLocation = document.createElement( "a" );
-	ajaxLocation.href = "";
-	ajaxLocation = ajaxLocation.href;
-}
+	// Document location
+	ajaxLocation = window.location.href,
 
-// Segment location into parts
-ajaxLocParts = rurl.exec( ajaxLocation.toLowerCase() ) || [];
+	// Segment location into parts
+	ajaxLocParts = rurl.exec( ajaxLocation.toLowerCase() ) || [];
 
 // Base "constructor" for jQuery.ajaxPrefilter and jQuery.ajaxTransport
 function addToPrefiltersOrTransports( structure ) {
@@ -15724,7 +16159,8 @@ jQuery.extend({
 		}
 
 		// We can fire global events as of now if asked to
-		fireGlobals = s.global;
+		// Don't fire events if jQuery.event is undefined in an AMD-usage scenario (#15118)
+		fireGlobals = jQuery.event && s.global;
 
 		// Watch for a new set of requests
 		if ( fireGlobals && jQuery.active++ === 0 ) {
@@ -15797,7 +16233,7 @@ jQuery.extend({
 			return jqXHR.abort();
 		}
 
-		// aborting is no longer a cancellation
+		// Aborting is no longer a cancellation
 		strAbort = "abort";
 
 		// Install callbacks on deferreds
@@ -15909,8 +16345,7 @@ jQuery.extend({
 					isSuccess = !error;
 				}
 			} else {
-				// We extract error from statusText
-				// then normalize statusText and status for non-aborts
+				// Extract error from statusText and normalize for non-aborts
 				error = statusText;
 				if ( status || !statusText ) {
 					statusText = "error";
@@ -15966,7 +16401,7 @@ jQuery.extend({
 
 jQuery.each( [ "get", "post" ], function( i, method ) {
 	jQuery[ method ] = function( url, data, callback, type ) {
-		// shift arguments if data argument was omitted
+		// Shift arguments if data argument was omitted
 		if ( jQuery.isFunction( data ) ) {
 			type = type || callback;
 			callback = data;
@@ -15980,13 +16415,6 @@ jQuery.each( [ "get", "post" ], function( i, method ) {
 			data: data,
 			success: callback
 		});
-	};
-});
-
-// Attach a bunch of functions for handling common AJAX events
-jQuery.each( [ "ajaxStart", "ajaxStop", "ajaxComplete", "ajaxError", "ajaxSuccess", "ajaxSend" ], function( i, type ) {
-	jQuery.fn[ type ] = function( fn ) {
-		return this.on( type, fn );
 	};
 });
 
@@ -16207,8 +16635,9 @@ var xhrId = 0,
 
 // Support: IE9
 // Open requests must be manually aborted on unload (#5280)
-if ( window.ActiveXObject ) {
-	jQuery( window ).on( "unload", function() {
+// See https://support.microsoft.com/kb/2856746 for more info
+if ( window.attachEvent ) {
+	window.attachEvent( "onunload", function() {
 		for ( var key in xhrCallbacks ) {
 			xhrCallbacks[ key ]();
 		}
@@ -16561,6 +16990,16 @@ jQuery.fn.load = function( url, params, callback ) {
 
 
 
+// Attach a bunch of functions for handling common AJAX events
+jQuery.each( [ "ajaxStart", "ajaxStop", "ajaxComplete", "ajaxError", "ajaxSuccess", "ajaxSend" ], function( i, type ) {
+	jQuery.fn[ type ] = function( fn ) {
+		return this.on( type, fn );
+	};
+});
+
+
+
+
 jQuery.expr.filters.animated = function( elem ) {
 	return jQuery.grep(jQuery.timers, function( fn ) {
 		return elem === fn.elem;
@@ -16597,7 +17036,8 @@ jQuery.offset = {
 		calculatePosition = ( position === "absolute" || position === "fixed" ) &&
 			( curCSSTop + curCSSLeft ).indexOf("auto") > -1;
 
-		// Need to be able to calculate position if either top or left is auto and position is either absolute or fixed
+		// Need to be able to calculate position if either
+		// top or left is auto and position is either absolute or fixed
 		if ( calculatePosition ) {
 			curPosition = curElem.position();
 			curTop = curPosition.top;
@@ -16654,8 +17094,8 @@ jQuery.fn.extend({
 			return box;
 		}
 
+		// Support: BlackBerry 5, iOS 3 (original iPhone)
 		// If we don't have gBCR, just use 0,0 rather than error
-		// BlackBerry 5, iOS 3 (original iPhone)
 		if ( typeof elem.getBoundingClientRect !== strundefined ) {
 			box = elem.getBoundingClientRect();
 		}
@@ -16677,7 +17117,7 @@ jQuery.fn.extend({
 
 		// Fixed elements are offset from window (parentOffset = {top:0, left: 0}, because it is its only offset parent
 		if ( jQuery.css( elem, "position" ) === "fixed" ) {
-			// We assume that getBoundingClientRect is available when computed position is fixed
+			// Assume getBoundingClientRect is there when computed position is fixed
 			offset = elem.getBoundingClientRect();
 
 		} else {
@@ -16740,16 +17180,18 @@ jQuery.each( { scrollLeft: "pageXOffset", scrollTop: "pageYOffset" }, function( 
 	};
 });
 
+// Support: Safari<7+, Chrome<37+
 // Add the top/left cssHooks using jQuery.fn.position
 // Webkit bug: https://bugs.webkit.org/show_bug.cgi?id=29084
-// getComputedStyle returns percent when specified for top/left/bottom/right
-// rather than make the css module depend on the offset module, we just check for it here
+// Blink bug: https://code.google.com/p/chromium/issues/detail?id=229280
+// getComputedStyle returns percent when specified for top/left/bottom/right;
+// rather than make the css module depend on the offset module, just check for it here
 jQuery.each( [ "top", "left" ], function( i, prop ) {
 	jQuery.cssHooks[ prop ] = addGetHookIf( support.pixelPosition,
 		function( elem, computed ) {
 			if ( computed ) {
 				computed = curCSS( elem, prop );
-				// if curCSS returns percentage, fallback to offset
+				// If curCSS returns percentage, fallback to offset
 				return rnumnonpx.test( computed ) ?
 					jQuery( elem ).position()[ prop ] + "px" :
 					computed;
@@ -16762,7 +17204,7 @@ jQuery.each( [ "top", "left" ], function( i, prop ) {
 // Create innerHeight, innerWidth, height, width, outerHeight and outerWidth methods
 jQuery.each( { Height: "height", Width: "width" }, function( name, type ) {
 	jQuery.each( { padding: "inner" + name, content: type, "": "outer" + name }, function( defaultExtra, funcName ) {
-		// margin is only for outerHeight, outerWidth
+		// Margin is only for outerHeight, outerWidth
 		jQuery.fn[ funcName ] = function( margin, value ) {
 			var chainable = arguments.length && ( defaultExtra || typeof margin !== "boolean" ),
 				extra = defaultExtra || ( margin === true || value === true ? "margin" : "border" );
@@ -16853,8 +17295,8 @@ jQuery.noConflict = function( deep ) {
 	return jQuery;
 };
 
-// Expose jQuery and $ identifiers, even in
-// AMD (#7102#comment:10, https://github.com/jquery/jquery/pull/557)
+// Expose jQuery and $ identifiers, even in AMD
+// (#7102#comment:10, https://github.com/jquery/jquery/pull/557)
 // and CommonJS for browser emulators (#13566)
 if ( typeof noGlobal === strundefined ) {
 	window.jQuery = window.$ = jQuery;
@@ -16868,7 +17310,7 @@ return jQuery;
 }));
 
 },{}],"velocity-animate":[function(require,module,exports){
-/*! VelocityJS.org (1.0.0). (C) 2014 Julian Shapiro. MIT @license: en.wikipedia.org/wiki/MIT_License */
+/*! VelocityJS.org (1.2.2). (C) 2014 Julian Shapiro. MIT @license: en.wikipedia.org/wiki/MIT_License */
 
 /*************************
    Velocity jQuery Shim
@@ -17447,8 +17889,6 @@ return function (global, window, document, undefined) {
         State
     *************/
 
-    /* Note: The global object also doubles as a publicly-accessible data store for the purposes of unit testing. */
-    /* Note: Alias the lowercase and uppercase variants of "velocity" to minimize user confusion due to the lowercase nature of the $.fn extension. */
     var Velocity = {
         /* Container for page-wide Velocity state data. */
         State: {
@@ -17465,7 +17905,7 @@ return function (global, window, document, undefined) {
             prefixMatches: {},
             /* Cache the anchor used for animating window scrolling. */
             scrollAnchor: null,
-            /* Cache the property names associated with the scroll anchor. */
+            /* Cache the browser-specific property names associated with the scroll anchor. */
             scrollPropertyLeft: null,
             scrollPropertyTop: null,
             /* Keep track of whether our RAF tick is running. */
@@ -17475,14 +17915,14 @@ return function (global, window, document, undefined) {
         },
         /* Velocity's custom CSS stack. Made global for unit testing. */
         CSS: { /* Defined below. */ },
-        /* Defined by Velocity's optional jQuery shim. */
+        /* A shim of the jQuery utility functions used by Velocity -- provided by Velocity's optional jQuery shim. */
         Utilities: $,
-        /* Container for the user's custom animation redirects that are referenced by name in place of a properties map object. */
+        /* Container for the user's custom animation redirects that are referenced by name in place of the properties map argument. */
         Redirects: { /* Manually registered by the user. */ },
         Easings: { /* Defined below. */ },
         /* Attempt to use ES6 Promises by default. Users can override this with a third-party promises library. */
         Promise: window.Promise,
-        /* Page-wide option defaults, which can be overriden by the user. */
+        /* Velocity option defaults, which can be overriden by the user. */
         defaults: {
             queue: "",
             duration: DURATION_DEFAULT,
@@ -17495,11 +17935,10 @@ return function (global, window, document, undefined) {
             loop: false,
             delay: false,
             mobileHA: true,
-            /* Set to false to prevent property values from being cached between consecutive Velocity-initiated chain calls. */
+            /* Advanced: Set to false to prevent property values from being cached between consecutive Velocity-initiated chain calls. */
             _cacheValues: true
         },
-        /* A design goal of Velocity is to cache data wherever possible in order to avoid DOM requerying.
-           Accordingly, each element has a data cache instantiated on it. */
+        /* A design goal of Velocity is to cache data wherever possible in order to avoid DOM requerying. Accordingly, each element has a data cache. */
         init: function (element) {
             $.data(element, "velocity", {
                 /* Store whether this is an SVG element, since its properties are retrieved and updated differently than standard HTML elements. */
@@ -17524,7 +17963,7 @@ return function (global, window, document, undefined) {
         hook: null, /* Defined below. */
         /* Velocity-wide animation time remapping for testing purposes. */
         mock: false,
-        version: { major: 1, minor: 1, patch: 0 },
+        version: { major: 1, minor: 2, patch: 2 },
         /* Set to 1 or 2 (most verbose) to output debug info to console. */
         debug: false
     };
@@ -17899,7 +18338,6 @@ return function (global, window, document, undefined) {
             /* Each template consists of the compound-value's base name, its constituent subproperty names, and those subproperties' default values. */
             templates: {
                 "textShadow": [ "Color X Y Blur", "black 0px 0px 0px" ],
-                /* Todo: Add support for inset boxShadows. (webkit places it last whereas IE places it first.) */
                 "boxShadow": [ "Color X Y Blur Spread", "black 0px 0px 0px 0px" ],
                 "clip": [ "Top Right Bottom Left", "0px 0px 0px 0px" ],
                 "backgroundPosition": [ "X Y", "0% 0%" ],
@@ -18082,7 +18520,7 @@ return function (global, window, document, undefined) {
                 blur: function(type, element, propertyValue) {
                     switch (type) {
                         case "name":
-                            return "-webkit-filter";
+                            return Velocity.State.isFirefox ? "filter" : "-webkit-filter";
                         case "extract":
                             var extracted = parseFloat(propertyValue);
 
@@ -18447,6 +18885,10 @@ return function (global, window, document, undefined) {
                     return "list-item";
                 } else if (/^(tr)$/i.test(tagName)) {
                     return "table-row";
+                } else if (/^(table)$/i.test(tagName)) {
+                    return "table";
+                } else if (/^(tbody)$/i.test(tagName)) {
+                    return "table-row-group";
                 /* Default to "block" when no match is found. */
                 } else {
                     return "block";
@@ -18541,8 +18983,9 @@ return function (global, window, document, undefined) {
                     }
 
                     /* IE and Firefox do not return a value for the generic borderColor -- they only return individual values for each border side's color.
-                       As a polyfill for querying individual border side colors, just return the top border's color. */
-                    if ((IE || Velocity.State.isFirefox) && property === "borderColor") {
+                       Also, in all browsers, when border colors aren't all the same, a compound value is returned that Velocity isn't setup to parse.
+                       So, as a polyfill for querying individual border side colors, we just return the top border's color and animate all borders from that value. */
+                    if (property === "borderColor") {
                         property = "borderTopColor";
                     }
 
@@ -18642,7 +19085,12 @@ return function (global, window, document, undefined) {
                     /* Since the height/width attribute values must be set manually, they don't reflect computed values.
                        Thus, we use use getBBox() to ensure we always get values for elements with undefined height/width attributes. */
                     if (/^(height|width)$/i.test(property)) {
-                        propertyValue = element.getBBox()[property];
+                        /* Firefox throws an error if .getBBox() is called on an SVG that isn't attached to the DOM. */
+                        try {
+                            propertyValue = element.getBBox()[property];
+                        } catch (error) {
+                            propertyValue = 0;
+                        }
                     /* Otherwise, access the attribute value directly. */
                     } else {
                         propertyValue = element.getAttribute(property);
@@ -18882,10 +19330,10 @@ return function (global, window, document, undefined) {
            Arguments Assignment
         *************************/
 
-        /* To allow for expressive CoffeeScript code, Velocity supports an alternative syntax in which "properties" and "options"
+        /* To allow for expressive CoffeeScript code, Velocity supports an alternative syntax in which "elements" (or "e"), "properties" (or "p"), and "options" (or "o")
            objects are defined on a container object that's passed in as Velocity's sole argument. */
         /* Note: Some browsers automatically populate arguments with a "properties" object. We detect it by checking for its default "names" property. */
-        var syntacticSugar = (arguments[0] && (($.isPlainObject(arguments[0].properties) && !arguments[0].properties.names) || Type.isString(arguments[0].properties))),
+        var syntacticSugar = (arguments[0] && (arguments[0].p || (($.isPlainObject(arguments[0].properties) && !arguments[0].properties.names) || Type.isString(arguments[0].properties)))),
             /* Whether Velocity was called via the utility function (as opposed to on a jQuery/Zepto object). */
             isUtility,
             /* When Velocity is called via the utility function ($.Velocity()/Velocity()), elements are explicitly
@@ -18909,7 +19357,7 @@ return function (global, window, document, undefined) {
             isUtility = true;
 
             argumentIndex = 1;
-            elements = syntacticSugar ? arguments[0].elements : arguments[0];
+            elements = syntacticSugar ? (arguments[0].elements || arguments[0].e) : arguments[0];
         }
 
         elements = sanitizeElements(elements);
@@ -18919,8 +19367,8 @@ return function (global, window, document, undefined) {
         }
 
         if (syntacticSugar) {
-            propertiesMap = arguments[0].properties;
-            options = arguments[0].options;
+            propertiesMap = arguments[0].properties || arguments[0].p;
+            options = arguments[0].options || arguments[0].o;
         } else {
             propertiesMap = arguments[argumentIndex];
             options = arguments[argumentIndex + 1];
@@ -18937,8 +19385,8 @@ return function (global, window, document, undefined) {
 
         /* Support is included for jQuery's argument overloading: $.animate(propertyMap [, duration] [, easing] [, complete]).
            Overloading is detected by checking for the absence of an object being passed into options. */
-        /* Note: The stop action does not accept animation options, and is therefore excluded from this check. */
-        if (propertiesMap !== "stop" && !$.isPlainObject(options)) {
+        /* Note: The stop and finish actions do not accept animation options, and are therefore excluded from this check. */
+        if (!/^(stop|finish)$/i.test(propertiesMap) && !$.isPlainObject(options)) {
             /* The utility function shifts all arguments one position to the right, so we adjust for that offset. */
             var startingArgumentPosition = argumentIndex + 1;
 
@@ -19003,6 +19451,7 @@ return function (global, window, document, undefined) {
                 action = "reverse";
                 break;
 
+            case "finish":
             case "stop":
                 /*******************
                     Action: Stop
@@ -19026,11 +19475,11 @@ return function (global, window, document, undefined) {
                 var callsToStop = [];
 
                 /* When the stop action is triggered, the elements' currently active call is immediately stopped. The active call might have
-                   been applied to multiple elements, in which case all of the call's elements will be subjected to stopping. When an element
+                   been applied to multiple elements, in which case all of the call's elements will be stopped. When an element
                    is stopped, the next item in its animation queue is immediately triggered. */
                 /* An additional argument may be passed in to clear an element's remaining queued calls. Either true (which defaults to the "fx" queue)
                    or a custom queue string can be passed in. */
-                /* Note: The stop command runs prior to Queueing since its behavior is intended to take effect *immediately*,
+                /* Note: The stop command runs prior to Velocity's Queueing phase since its behavior is intended to take effect *immediately*,
                    regardless of the element's current queue state. */
 
                 /* Iterate through every active call. */
@@ -19039,20 +19488,27 @@ return function (global, window, document, undefined) {
                     if (activeCall) {
                         /* Iterate through the active call's targeted elements. */
                         $.each(activeCall[1], function(k, activeElement) {
-                            var queueName = Type.isString(options) ? options : "";
+                            /* If true was passed in as a secondary argument, clear absolutely all calls on this element. Otherwise, only
+                               clear calls associated with the relevant queue. */
+                            /* Call stopping logic works as follows:
+                               - options === true --> stop current default queue calls (and queue:false calls), including remaining queued ones.
+                               - options === undefined --> stop current queue:"" call and all queue:false calls.
+                               - options === false --> stop only queue:false calls.
+                               - options === "custom" --> stop current queue:"custom" call, including remaining queued ones (there is no functionality to only clear the currently-running queue:"custom" call). */
+                            var queueName = (options === undefined) ? "" : options;
 
-                            if (options !== undefined && activeCall[2].queue !== queueName) {
+                            if (queueName !== true && (activeCall[2].queue !== queueName) && !(options === undefined && activeCall[2].queue === false)) {
                                 return true;
                             }
 
                             /* Iterate through the calls targeted by the stop command. */
-                            $.each(elements, function(l, element) {
+                            $.each(elements, function(l, element) {                                
                                 /* Check that this call was applied to the target element. */
                                 if (element === activeElement) {
                                     /* Optionally clear the remaining queued calls. */
-                                    if (options !== undefined) {
+                                    if (options === true || Type.isString(options)) {
                                         /* Iterate through the items in the element's queue. */
-                                        $.each($.queue(element, queueName), function(_, item) {
+                                        $.each($.queue(element, Type.isString(options) ? options : ""), function(_, item) {
                                             /* The queue array can contain an "inprogress" string, which we skip. */
                                             if (Type.isFunction(item)) {
                                                 /* Pass the item's callback a flag indicating that we want to abort from the queue call.
@@ -19062,33 +19518,43 @@ return function (global, window, document, undefined) {
                                         });
 
                                         /* Clearing the $.queue() array is achieved by resetting it to []. */
-                                        $.queue(element, queueName, []);
+                                        $.queue(element, Type.isString(options) ? options : "", []);
                                     }
 
-                                    if (Data(element) && queueName === "") {
-                                        /* Since "reverse" uses cached start values (the previous call's endValues),
-                                           these values must be changed to reflect the final value that the elements were actually tweened to. */
-                                        $.each(Data(element).tweensContainer, function(m, activeTween) {
-                                            activeTween.endValue = activeTween.currentValue;
-                                        });
-                                    }
+                                    if (propertiesMap === "stop") {
+                                        /* Since "reverse" uses cached start values (the previous call's endValues), these values must be
+                                           changed to reflect the final value that the elements were actually tweened to. */
+                                        /* Note: If only queue:false animations are currently running on an element, it won't have a tweensContainer
+                                           object. Also, queue:false animations can't be reversed. */
+                                        if (Data(element) && Data(element).tweensContainer && queueName !== false) {
+                                            $.each(Data(element).tweensContainer, function(m, activeTween) {
+                                                activeTween.endValue = activeTween.currentValue;
+                                            });
+                                        }
 
-                                    callsToStop.push(i);
+                                        callsToStop.push(i);
+                                    } else if (propertiesMap === "finish") {
+                                        /* To get active tweens to finish immediately, we forcefully shorten their durations to 1ms so that
+                                        they finish upon the next rAf tick then proceed with normal call completion logic. */
+                                        activeCall[2].duration = 1;
+                                    }
                                 }
                             });
                         });
                     }
                 });
 
-                /* Prematurely call completeCall() on each matched active call, passing an additional flag to indicate
+                /* Prematurely call completeCall() on each matched active call. Pass an additional flag for "stop" to indicate
                    that the complete callback and display:none setting should be skipped since we're completing prematurely. */
-                $.each(callsToStop, function(i, j) {
-                    completeCall(j, true);
-                });
+                if (propertiesMap === "stop") {
+                    $.each(callsToStop, function(i, j) {
+                        completeCall(j, true);
+                    });
 
-                if (promiseData.promise) {
-                    /* Immediately resolve the promise associated with this stop call since stop runs synchronously. */
-                    promiseData.resolver(elements);
+                    if (promiseData.promise) {
+                        /* Immediately resolve the promise associated with this stop call since stop runs synchronously. */
+                        promiseData.resolver(elements);
+                    }
                 }
 
                 /* Since we're stopping, and not proceeding with queueing, exit out of Velocity. */
@@ -19379,8 +19845,6 @@ return function (global, window, document, undefined) {
                             /* $.position() values are relative to the container's currently viewable area (without taking into account the container's true dimensions
                                -- say, for example, if the container was not overflowing). Thus, the scroll end value is the sum of the child element's position *and*
                                the scroll container's current scroll position. */
-                            /* Note: jQuery does not offer a utility alias for $.position(), so we have to incur jQuery object conversion here.
-                               This syncs up with an ensuing batch of GETs, so it fortunately does not trigger layout thrashing. */
                             scrollPositionEnd = (scrollPositionCurrent + $(element).position()[scrollDirection.toLowerCase()]) + scrollOffset; /* GET */
                         /* If a value other than a jQuery object or a raw DOM element was passed in, default to null so that this option is ignored. */
                         } else {
@@ -19644,12 +20108,12 @@ return function (global, window, document, undefined) {
                         var rootProperty = CSS.Hooks.getRoot(property),
                             rootPropertyValue = false;
 
-                        /* Properties that are not supported by the browser (and do not have an associated normalization) will
+                        /* Other than for the dummy tween property, properties that are not supported by the browser (and do not have an associated normalization) will
                            inherently produce no style changes when set, so they are skipped in order to decrease animation tick overhead.
                            Property support is determined via prefixCheck(), which returns a false flag when no supported is detected. */
                         /* Note: Since SVG elements have some of their properties directly applied as HTML attributes,
                            there is no way to check for their explicit browser support, and so we skip skip this check for them. */
-                        if (!Data(element).isSVG && CSS.Names.prefixCheck(rootProperty)[1] === false && CSS.Normalizations.registered[rootProperty] === undefined) {
+                        if (!Data(element).isSVG && rootProperty !== "tween" && CSS.Names.prefixCheck(rootProperty)[1] === false && CSS.Normalizations.registered[rootProperty] === undefined) {
                             if (Velocity.debug) console.log("Skipping [" + rootProperty + "] due to a lack of browser support.");
 
                             continue;
@@ -20020,13 +20484,6 @@ return function (global, window, document, undefined) {
                     /* Once the final element in this call's element set has been processed, push the call array onto
                        Velocity.State.calls for the animation tick to immediately begin processing. */
                     if (elementsIndex === elementsLength - 1) {
-                        /* To speed up iterating over this array, it is compacted (falsey items -- calls that have completed -- are removed)
-                           when its length has ballooned to a point that can impact tick performance. This only becomes necessary when animation
-                           has been continuous with many elements over a long period of time; whenever all active calls are completed, completeCall() clears Velocity.State.calls. */
-                        if (Velocity.State.calls.length > 10000) {
-                            Velocity.State.calls = compactSparseArray(Velocity.State.calls);
-                        }
-
                         /* Add the current call plus its associated metadata (the element set and the call's options) onto the global call container.
                            Anything on this call container is subjected to tick() processing. */
                         Velocity.State.calls.push([ call, elements, opts, null, promiseData.resolver ]);
@@ -20208,8 +20665,17 @@ return function (global, window, document, undefined) {
                Call Iteration
             ********************/
 
+            var callsLength = Velocity.State.calls.length;
+
+            /* To speed up iterating over this array, it is compacted (falsey items -- calls that have completed -- are removed)
+               when its length has ballooned to a point that can impact tick performance. This only becomes necessary when animation
+               has been continuous with many elements over a long period of time; whenever all active calls are completed, completeCall() clears Velocity.State.calls. */
+            if (callsLength > 10000) {
+                Velocity.State.calls = compactSparseArray(Velocity.State.calls);
+            }
+
             /* Iterate through each active call. */
-            for (var i = 0, callsLength = Velocity.State.calls.length; i < callsLength; i++) {
+            for (var i = 0; i < callsLength; i++) {
                 /* When a Velocity call is completed, its Velocity.State.calls entry is set to false. Continue on to the next call. */
                 if (!Velocity.State.calls[i]) {
                     continue;
@@ -20223,7 +20689,8 @@ return function (global, window, document, undefined) {
                     call = callContainer[0],
                     opts = callContainer[2],
                     timeStart = callContainer[3],
-                    firstTick = !!timeStart;
+                    firstTick = !!timeStart,
+                    tweenDummyValue = null;
 
                 /* If timeStart is undefined, then this is the first time that this call has been processed by tick().
                    We assign timeStart now so that its value is as close to the real animation start time as possible.
@@ -20306,7 +20773,8 @@ return function (global, window, document, undefined) {
                                 currentValue = tween.endValue;
                             /* Otherwise, calculate currentValue based on the current delta from startValue. */
                             } else {
-                                currentValue = tween.startValue + ((tween.endValue - tween.startValue) * easing(percentComplete));
+                                var tweenDelta = tween.endValue - tween.startValue;
+                                currentValue = tween.startValue + (tweenDelta * easing(percentComplete, opts, tweenDelta));
 
                                 /* If no value change is occurring, don't proceed with DOM updating. */
                                 if (!firstTick && (currentValue === tween.currentValue)) {
@@ -20316,57 +20784,64 @@ return function (global, window, document, undefined) {
 
                             tween.currentValue = currentValue;
 
-                            /******************
-                               Hooks: Part I
-                            ******************/
+                            /* If we're tweening a fake 'tween' property in order to log transition values, update the one-per-call variable so that
+                               it can be passed into the progress callback. */ 
+                            if (property === "tween") {
+                                tweenDummyValue = currentValue;
+                            } else {
+                                /******************
+                                   Hooks: Part I
+                                ******************/
 
-                            /* For hooked properties, the newly-updated rootPropertyValueCache is cached onto the element so that it can be used
-                               for subsequent hooks in this call that are associated with the same root property. If we didn't cache the updated
-                               rootPropertyValue, each subsequent update to the root property in this tick pass would reset the previous hook's
-                               updates to rootPropertyValue prior to injection. A nice performance byproduct of rootPropertyValue caching is that
-                               subsequently chained animations using the same hookRoot but a different hook can use this cached rootPropertyValue. */
-                            if (CSS.Hooks.registered[property]) {
-                                var hookRoot = CSS.Hooks.getRoot(property),
-                                    rootPropertyValueCache = Data(element).rootPropertyValueCache[hookRoot];
+                                /* For hooked properties, the newly-updated rootPropertyValueCache is cached onto the element so that it can be used
+                                   for subsequent hooks in this call that are associated with the same root property. If we didn't cache the updated
+                                   rootPropertyValue, each subsequent update to the root property in this tick pass would reset the previous hook's
+                                   updates to rootPropertyValue prior to injection. A nice performance byproduct of rootPropertyValue caching is that
+                                   subsequently chained animations using the same hookRoot but a different hook can use this cached rootPropertyValue. */
+                                if (CSS.Hooks.registered[property]) {
+                                    var hookRoot = CSS.Hooks.getRoot(property),
+                                        rootPropertyValueCache = Data(element).rootPropertyValueCache[hookRoot];
 
-                                if (rootPropertyValueCache) {
-                                    tween.rootPropertyValue = rootPropertyValueCache;
+                                    if (rootPropertyValueCache) {
+                                        tween.rootPropertyValue = rootPropertyValueCache;
+                                    }
                                 }
-                            }
 
-                            /*****************
-                                DOM Update
-                            *****************/
+                                /*****************
+                                    DOM Update
+                                *****************/
 
-                            /* setPropertyValue() returns an array of the property name and property value post any normalization that may have been performed. */
-                            /* Note: To solve an IE<=8 positioning bug, the unit type is dropped when setting a property value of 0. */
-                            var adjustedSetData = CSS.setPropertyValue(element, /* SET */
-                                                                       property,
-                                                                       tween.currentValue + (parseFloat(currentValue) === 0 ? "" : tween.unitType),
-                                                                       tween.rootPropertyValue,
-                                                                       tween.scrollData);
+                                /* setPropertyValue() returns an array of the property name and property value post any normalization that may have been performed. */
+                                /* Note: To solve an IE<=8 positioning bug, the unit type is dropped when setting a property value of 0. */
+                                var adjustedSetData = CSS.setPropertyValue(element, /* SET */
+                                                                           property,
+                                                                           tween.currentValue + (parseFloat(currentValue) === 0 ? "" : tween.unitType),
+                                                                           tween.rootPropertyValue,
+                                                                           tween.scrollData);
 
-                            /*******************
-                               Hooks: Part II
-                            *******************/
+                                /*******************
+                                   Hooks: Part II
+                                *******************/
 
-                            /* Now that we have the hook's updated rootPropertyValue (the post-processed value provided by adjustedSetData), cache it onto the element. */
-                            if (CSS.Hooks.registered[property]) {
-                                /* Since adjustedSetData contains normalized data ready for DOM updating, the rootPropertyValue needs to be re-extracted from its normalized form. ?? */
-                                if (CSS.Normalizations.registered[hookRoot]) {
-                                    Data(element).rootPropertyValueCache[hookRoot] = CSS.Normalizations.registered[hookRoot]("extract", null, adjustedSetData[1]);
-                                } else {
-                                    Data(element).rootPropertyValueCache[hookRoot] = adjustedSetData[1];
+                                /* Now that we have the hook's updated rootPropertyValue (the post-processed value provided by adjustedSetData), cache it onto the element. */
+                                if (CSS.Hooks.registered[property]) {
+                                    /* Since adjustedSetData contains normalized data ready for DOM updating, the rootPropertyValue needs to be re-extracted from its normalized form. ?? */
+                                    if (CSS.Normalizations.registered[hookRoot]) {
+                                        Data(element).rootPropertyValueCache[hookRoot] = CSS.Normalizations.registered[hookRoot]("extract", null, adjustedSetData[1]);
+                                    } else {
+                                        Data(element).rootPropertyValueCache[hookRoot] = adjustedSetData[1];
+                                    }
                                 }
-                            }
 
-                            /***************
-                               Transforms
-                            ***************/
+                                /***************
+                                   Transforms
+                                ***************/
 
-                            /* Flag whether a transform property is being animated so that flushTransformCache() can be triggered once this tick pass is complete. */
-                            if (adjustedSetData[0] === "transform") {
-                                transformPropertyExists = true;
+                                /* Flag whether a transform property is being animated so that flushTransformCache() can be triggered once this tick pass is complete. */
+                                if (adjustedSetData[0] === "transform") {
+                                    transformPropertyExists = true;
+                                }
+
                             }
                         }
                     }
@@ -20401,14 +20876,14 @@ return function (global, window, document, undefined) {
                     Velocity.State.calls[i][2].visibility = false;
                 }
 
-
-                /* Pass the elements and the timing data (percentComplete, msRemaining, and timeStart) into the progress callback. */
+                /* Pass the elements and the timing data (percentComplete, msRemaining, timeStart, tweenDummyValue) into the progress callback. */
                 if (opts.progress) {
                     opts.progress.call(callContainer[1],
                                        callContainer[1],
                                        percentComplete,
                                        Math.max(0, (timeStart + opts.duration) - timeCurrent),
-                                       timeStart);
+                                       timeStart,
+                                       tweenDummyValue);
                 }
 
                 /* If this call has finished tweening, pass its index to completeCall() to handle call cleanup. */
@@ -20532,13 +21007,18 @@ return function (global, window, document, undefined) {
                Option: Loop (Infinite)
             ****************************/
 
-            if (opts.loop === true && !isStopped) {
+            if (Data(element) && opts.loop === true && !isStopped) {
                 /* If a rotateX/Y/Z property is being animated to 360 deg with loop:true, swap tween start/end values to enable
                    continuous iterative rotation looping. (Otherise, the element would just rotate back and forth.) */
                 $.each(Data(element).tweensContainer, function(propertyName, tweenContainer) {
                     if (/^rotate/.test(propertyName) && parseFloat(tweenContainer.endValue) === 360) {
                         tweenContainer.endValue = 0;
                         tweenContainer.startValue = 360;
+                    }
+
+                    if (/^backgroundPosition/.test(propertyName) && parseFloat(tweenContainer.endValue) === 100 && tweenContainer.unitType === "%") {
+                        tweenContainer.endValue = 0;
+                        tweenContainer.startValue = 100;
                     }
                 });
 
@@ -20628,7 +21108,6 @@ return function (global, window, document, undefined) {
 
                 /* Cache the elements' original vertical dimensional property values so that we can animate back to them. */
                 for (var property in computedValues) {
-                    /* Cache all inline values, we reset to upon animation completion. */
                     inlineValues[property] = element.style[property];
 
                     /* For slideDown, use forcefeeding to animate all vertical properties from 0. For slideUp,

@@ -5,7 +5,7 @@ var func = function(window, undef) {
 
 /**
  * Tweene - JavaScript Animation Proxy 
- * @version 0.5.7
+ * @version 0.5.8
  * @link http://tweene.com
  *   
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
@@ -1405,9 +1405,17 @@ var Common = function()
      * @param {string} name
      */
     this._runHandlers = function(name)
-    {                  
+    {                    
         var i, end, entry;
-        // internal handlers are executed first
+        
+        // run external events first to guarantee correct events order inside timelines
+        if(name in this._handlers && this._handlers[name] !== null)
+        {
+            entry = this._handlers[name];
+            entry.callback.apply(entry.scope, entry.params);
+        }        
+        
+        // internal handlers
         if(this._coreHandlers[name].length)
         {
             for(i = 0, end = this._coreHandlers[name].length; i < end; i++)
@@ -1416,12 +1424,8 @@ var Common = function()
                 entry = this._coreHandlers[name][i];                
                 entry.callback.apply(entry.scope, entry.params);                    
             }
-        }
-        if(name in this._handlers && this._handlers[name] !== null)
-        {
-            entry = this._handlers[name];
-            entry.callback.apply(entry.scope, entry.params);
-        }
+        }                       
+        
     };
 
 
@@ -1658,14 +1662,17 @@ var Label = function(name)
  * @param {array} params
  * @param {number} dir - values: 1 | -1 | 0
  */
-var Callback = function(callback, scope, params, dir)
+var Callback = function(callback, scope, params, dir, isPause)
 {
     this.type = 'callback';    
     // unique id
     this._id = ++ Tw._idCounter;
+    
+    this.isPause = !!isPause;
+    
     dir = dir === 1? true : (dir === -1? false : null);
     var parent = null;
-    
+            
     /**
      * Get or set the parent timeline object
      * 
@@ -1712,12 +1719,14 @@ var Callback = function(callback, scope, params, dir)
      */
     this.resume = function()
     {
-        if(dir === null || dir != parent.reversed())
+        if(callback && (dir === null || dir != parent.reversed()))
         {
             callback.apply(scope || parent, params);
         }
         return this;
     };
+    
+    
     
 };
 
@@ -2448,7 +2457,7 @@ var TimelineCommon = function()
                 i ++;
                 // callback scope object expected after callback params
                 var scope = arguments.length > i? arguments[i] : null;
-                child = new Callback(child, scope, params, dir);
+                child = new Callback(child, scope, params, dir, false);
             }
 
             child.parent(this);            
@@ -2463,6 +2472,84 @@ var TimelineCommon = function()
         this.invalidate();
         return this;
     };
+
+
+    /**
+     * Add pause, with an optional callback
+     * @link http://tweene.com/docs/#addPause
+     * 
+     * @param {string|number} [startPosition]
+     * @param {string|number} [callbackDirection]
+     * @param {function} [callback] - callback 
+     * @param {array} [params] - callback params
+     * @param {object} [scope] - callback scope
+     * @returns {this}
+     */
+    this.addPause = function()
+    {                
+        var args = toArray(arguments),
+            startPosition = null,
+            dir = 0,
+            callback = null, 
+            params = [],
+            scope = null, 
+            arg, 
+            child;
+        
+        if(args.length)
+        {
+            arg = args.shift();            
+            if(isFunction(arg))
+            {
+                callback = arg;
+            }
+            else
+            {
+                startPosition = arg;
+            }                
+            
+            if(args.length)
+            {            
+                arg = args.shift();            
+                if(!callback)
+                {
+                    if(isNumber(arg))
+                    {
+                        dir = arg;
+                        if(args.length)
+                        {
+                            callback = args.shift();
+                        }
+                    }
+                    else
+                    {
+                        callback = arg;
+                    }
+                }
+                
+                if(callback && args.length)
+                {
+                    params = args.shift();
+                    if(!isArray(params))
+                    {
+                        params = [params];
+                    }
+                    
+                    if(args.length)
+                    {
+                        scope = args.shift();
+                    }
+                }
+            }            
+        }
+        
+        child = new Callback(callback, scope, params, dir, true);
+        child.parent(this);            
+        this._children.push({id: child.id(), child: child, start: startPosition});
+        this.invalidate();
+        return this;
+    };
+
 
 
     /**
@@ -3034,7 +3121,7 @@ Tw.registerDriver('Gsap', 'tween', function(){
         })
             .pause()
             .timeScale(this._speed);
-             
+                          
         // with Gsap we do per-property easing with overlapping tweens of the same targets
         data.tween = this._hasMultipleEasing? this._splitEasing(data.tween) : [{tween: data.tween, easing: data.easing}];
         
@@ -3109,6 +3196,7 @@ Tw.registerDriver('Gsap', 'tween', function(){
                 }                
             }
 
+            var duration = Math.max(0, data.duration - 0.000001);
             if(fromCount)
             {
                 if(this._display.begin)
@@ -3122,20 +3210,20 @@ Tw.registerDriver('Gsap', 'tween', function(){
                 
                 if(toCount)
                 {
-                    elem = TweenMax.fromTo(this._target, data.duration, from, to);
+                    elem = TweenMax.fromTo(this._target, duration, from, to);
                 }
                 else
                 {
-                    elem = TweenMax.from(this._target, data.duration, from);
+                    elem = TweenMax.from(this._target, duration, from);
                 }
             }
             else if(toCount)
             {
-                elem = TweenMax.to(this._target, data.duration, to);
+                elem = TweenMax.to(this._target, duration, to);
             }
             else
             {
-                elem = TweenMax.to(this._target, data.duration, {opacity: '+=0'});
+                elem = TweenMax.to(this._target, duration, {opacity: '+=0'});
             }
             
 
@@ -3166,6 +3254,8 @@ Tw.registerDriver('Gsap', 'tween', function(){
         {
             this._native.to(this._target, 0, then, data.duration);
         }
+        
+        this._setupEvents();
         
         return this._getTotalDuration();
     };
@@ -3222,7 +3312,7 @@ Tw.registerDriver('Gsap', 'timeline', function(){
         else
         {        
             this._native = new TimelineMax({paused: true, delay: convertTime(this._delay, this._coreTimeUnit, this._driverTimeUnit)})           
-                .add(_native, 0);
+                .add(_native);
             _native.paused(false);
         }
         
@@ -3290,7 +3380,14 @@ Tw.registerDriver('Gsap', 'timeline', function(){
     {
         if(begin != Infinity)
         {
-            this._innerNative.call(child.resume, [], child, convertTime(begin, this._coreTimeUnit, this._driverTimeUnit));
+            if(child.isPause)
+            {
+                this._native.addPause(convertTime(begin + this._delay, this._coreTimeUnit, this._driverTimeUnit), child.resume, [], child);                                
+            }
+            else
+            {
+                this._innerNative.call(child.resume, [], child, convertTime(begin, this._coreTimeUnit, this._driverTimeUnit));                
+            }            
         }
     };
             

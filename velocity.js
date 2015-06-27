@@ -5,7 +5,7 @@ var func = function(window, undef) {
 
 /**
  * Tweene - JavaScript Animation Proxy 
- * @version 0.5.7
+ * @version 0.5.8
  * @link http://tweene.com
  *   
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
@@ -1405,9 +1405,17 @@ var Common = function()
      * @param {string} name
      */
     this._runHandlers = function(name)
-    {                  
+    {                    
         var i, end, entry;
-        // internal handlers are executed first
+        
+        // run external events first to guarantee correct events order inside timelines
+        if(name in this._handlers && this._handlers[name] !== null)
+        {
+            entry = this._handlers[name];
+            entry.callback.apply(entry.scope, entry.params);
+        }        
+        
+        // internal handlers
         if(this._coreHandlers[name].length)
         {
             for(i = 0, end = this._coreHandlers[name].length; i < end; i++)
@@ -1416,12 +1424,8 @@ var Common = function()
                 entry = this._coreHandlers[name][i];                
                 entry.callback.apply(entry.scope, entry.params);                    
             }
-        }
-        if(name in this._handlers && this._handlers[name] !== null)
-        {
-            entry = this._handlers[name];
-            entry.callback.apply(entry.scope, entry.params);
-        }
+        }                       
+        
     };
 
 
@@ -1658,14 +1662,17 @@ var Label = function(name)
  * @param {array} params
  * @param {number} dir - values: 1 | -1 | 0
  */
-var Callback = function(callback, scope, params, dir)
+var Callback = function(callback, scope, params, dir, isPause)
 {
     this.type = 'callback';    
     // unique id
     this._id = ++ Tw._idCounter;
+    
+    this.isPause = !!isPause;
+    
     dir = dir === 1? true : (dir === -1? false : null);
     var parent = null;
-    
+            
     /**
      * Get or set the parent timeline object
      * 
@@ -1712,12 +1719,14 @@ var Callback = function(callback, scope, params, dir)
      */
     this.resume = function()
     {
-        if(dir === null || dir != parent.reversed())
+        if(callback && (dir === null || dir != parent.reversed()))
         {
             callback.apply(scope || parent, params);
         }
         return this;
     };
+    
+    
     
 };
 
@@ -2448,7 +2457,7 @@ var TimelineCommon = function()
                 i ++;
                 // callback scope object expected after callback params
                 var scope = arguments.length > i? arguments[i] : null;
-                child = new Callback(child, scope, params, dir);
+                child = new Callback(child, scope, params, dir, false);
             }
 
             child.parent(this);            
@@ -2463,6 +2472,84 @@ var TimelineCommon = function()
         this.invalidate();
         return this;
     };
+
+
+    /**
+     * Add pause, with an optional callback
+     * @link http://tweene.com/docs/#addPause
+     * 
+     * @param {string|number} [startPosition]
+     * @param {string|number} [callbackDirection]
+     * @param {function} [callback] - callback 
+     * @param {array} [params] - callback params
+     * @param {object} [scope] - callback scope
+     * @returns {this}
+     */
+    this.addPause = function()
+    {                
+        var args = toArray(arguments),
+            startPosition = null,
+            dir = 0,
+            callback = null, 
+            params = [],
+            scope = null, 
+            arg, 
+            child;
+        
+        if(args.length)
+        {
+            arg = args.shift();            
+            if(isFunction(arg))
+            {
+                callback = arg;
+            }
+            else
+            {
+                startPosition = arg;
+            }                
+            
+            if(args.length)
+            {            
+                arg = args.shift();            
+                if(!callback)
+                {
+                    if(isNumber(arg))
+                    {
+                        dir = arg;
+                        if(args.length)
+                        {
+                            callback = args.shift();
+                        }
+                    }
+                    else
+                    {
+                        callback = arg;
+                    }
+                }
+                
+                if(callback && args.length)
+                {
+                    params = args.shift();
+                    if(!isArray(params))
+                    {
+                        params = [params];
+                    }
+                    
+                    if(args.length)
+                    {
+                        scope = args.shift();
+                    }
+                }
+            }            
+        }
+        
+        child = new Callback(callback, scope, params, dir, true);
+        child.parent(this);            
+        this._children.push({id: child.id(), child: child, start: startPosition});
+        this.invalidate();
+        return this;
+    };
+
 
 
     /**
@@ -3060,6 +3147,7 @@ var ControlsPro = function()
      */
     this.pause = function()
     {
+//        console.log(this._id, 'pause');
         // if not ready, it means that is not yet started, so no need to perform a pause
         if(this._ready)
         {
@@ -3076,6 +3164,7 @@ var ControlsPro = function()
 
             if(!this._paused)
             {
+//                console.log(this._id, 'pausing');
                 this._paused = true;
 
                 this._pauseTime = Tw.ticker.now();
@@ -3094,7 +3183,12 @@ var ControlsPro = function()
      * 
      */
     this.resume = function()
-    {        
+    {   
+//        if(this._parent && this._parent.paused())
+//        {
+//            return this;        
+//        }
+//        console.log(this._id, 'resume', (this._parent && this._parent.paused()? 'parent paused': 'parent running'));
         if(this._paused && (this._fwd && this._playAllowed || !this._fwd && this._reverseAllowed))
         {           
             this._paused = false;
@@ -3794,7 +3888,7 @@ var TweenPro = function()
             // if the tween is reversed, restore previous style values
             // this is needed in timelines, when a reversed tween is preceded by others that refer common targets, with a time gap between them
             // otherwise, during the time gap in reverse direction the targets will have wrong style values
-            if(this._hasPre && this._offset !== 0)
+            if(this._hasPre)// && this._offset !== 0)
             {
                 this._setTween('pre');
             }
@@ -4025,6 +4119,10 @@ var TimelinePro = function()
 
     this._backEnabled = true;
 
+    this._keyTime = null;
+    this._keyDirection = null;
+    this._keyCurrentIndex = null;
+
 
     
     /**
@@ -4234,10 +4332,17 @@ var TimelinePro = function()
 
         if(!(begin in keyframes))
         {
-            keyframes[begin] = {f: [], b: [], fTrigger: null, bTrigger: null};                            
+            keyframes[begin] = {f: [], b: [], fc: [], bc: [], fTrigger: null, bTrigger: null};                            
             index.push(begin);
         }
-        keyframes[begin].f.push(tween);
+        if(tween.type == 'callback')
+        {
+            keyframes[begin].fc.push(tween);                        
+        }
+        else
+        {
+            keyframes[begin].f.push(tween);            
+        }
         // use only one child for each keyframe trigger in forward direction
         firstBegin = fTriggering && !this._keyframes[begin].fTrigger;
         if(firstBegin)
@@ -4249,10 +4354,17 @@ var TimelinePro = function()
         {
             if(!(end in keyframes))
             {
-                keyframes[end] = {f: [], b: [], fTrigger: null, bTrigger: null};                            
+                keyframes[end] = {f: [], b: [], fc: [], bc: [], fTrigger: null, bTrigger: null};                            
                 index.push(end);
             }
-            keyframes[end].b.push(tween);
+            if(tween.type == 'callback')
+            {
+                keyframes[end].bc.push(tween);                        
+            }
+            else
+            {
+                keyframes[end].b.push(tween);            
+            }
             // use only one child for each keyframe trigger in backward direction
             firstEnd = bTriggering && !this._keyframes[end].bTrigger;
             if(firstEnd)
@@ -4348,22 +4460,71 @@ var TimelinePro = function()
             delete this._runningList[id];
             this._runningCount--;
         }
-        
+                
         if(isKeyChild)
         {
             if(time in this._keyframes)
             {
-                var elemList = this._keyframes[time][direction];
-                for(var i = 0, end = elemList.length; i < end; i++)
+                this._processKeyframe(time, direction, null);
+            }
+        }
+    };  
+    
+    
+    
+    this._processKeyframe = function(time, direction, currentIndex)
+    {
+        this._keyCurrentIndex = null;
+        
+        var cDirection = direction + 'c', cList = this._keyframes[time][cDirection], tList = this._keyframes[time][direction], 
+            i, end, offset, item, paused = false;
+        
+        if(cList.length)
+        {
+            if(direction == 'f')
+            {
+                i = currentIndex !== null? currentIndex + 1 : 0;
+                end = cList.length;
+                offset = 1;
+            }
+            else
+            {
+                i = currentIndex !== null? currentIndex - 1 : cList.length - 1;
+                end = -1;
+                offset = -1;           
+            }
+
+            for(; i != end; i += offset)
+            {
+                item = cList[i];
+                if(item.isPause)
                 {
-                    // add to runningList
-                    if(elemList[i].type != 'callback')
-                    {
-                        this._addToRun(elemList[i]);
-                    }
-                    // also callback are executed by resume()
-                    elemList[i].resume(); 
+                    paused = true;
+                    this._keyTime = time;
+                    this._keyDirection = direction;
+                    this._keyCurrentIndex = i;
+                    this.pause();
                 }
+                
+                // also callback are executed by resume()
+                item.resume(); 
+                if(paused)
+                {
+                    break;
+                }            
+            }                          
+        }
+        
+        if(!paused)
+        {
+            if(tList.length)
+            {
+                for(i = 0, end = tList.length; i < end; i++)
+                {
+                    item = tList[i];
+                    this._addToRun(item);
+                    item.resume(); 
+                }                
             }
             // emulate end / reverse events
             if((direction == 'b' && time === 0) || (direction == 'f' && time == this._index[this._index.length - 1]))
@@ -4371,7 +4532,9 @@ var TimelinePro = function()
                 this._runHandlers('_end');
             }
         }
-    };  
+        
+        return paused;        
+    };
 
 
     /**
@@ -4421,28 +4584,39 @@ var TimelinePro = function()
      */
     this._resumeTween = function()
     {      
+        var runningCount = this._runningCount, paused = false;
         this._startProgress();
-        if(this._runningCount)
-        {        
-            this._propagate('resume');  
-        }
-        else
+        
+        if(this._keyCurrentIndex !== null)
         {
-            var args = false, direction = this._localFwd;
-
-            if(direction && this._position === 0)
-            {
-                args = ['f', 0, -1, true];
+            this._keyDirection = this._localFwd? 'f' : 'b';
+            paused = this._processKeyframe(this._keyTime, this._keyDirection, this._keyCurrentIndex);
+        }                
+        
+        if(!paused)
+        {
+            if(runningCount)
+            {        
+                this._propagate('resume');  
             }
-            else if(!direction && this._position == this._duration)
+            else
             {
-                args = ['b', this._index.length? this._index[this._index.length - 1] : 0, -1, true];
-            }
+                var args = false, direction = this._localFwd;
 
-            if(args)
-            {
-                this._childCallback.apply(this, args);
-            }            
+                if(direction && this._position === 0)
+                {
+                    args = ['f', 0, -1, true];
+                }
+                else if(!direction && this._position == this._duration)
+                {
+                    args = ['b', this._index.length? this._index[this._index.length - 1] : 0, -1, true];
+                }
+
+                if(args)
+                {
+                    this._childCallback.apply(this, args);
+                }            
+            }
         }
     };
     
@@ -5048,7 +5222,9 @@ Tw.registerDriver('velocity', 'tween', function() {
      */ 
     this._pauseTween = function()
     {
+//        console.log('pausing velocity tween');
         this._target.velocity('stop', 'tweene_' + this._id);            
+//        this._pendings = [];
         return this;
     };
       
@@ -5056,6 +5232,7 @@ Tw.registerDriver('velocity', 'tween', function() {
         
     this._resumeTween = function()
     {
+//        console.log('resuming velocity tween');
         return this._playTween();
     };
 

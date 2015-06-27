@@ -256,7 +256,7 @@ var TweenPro = function()
             // if the tween is reversed, restore previous style values
             // this is needed in timelines, when a reversed tween is preceded by others that refer common targets, with a time gap between them
             // otherwise, during the time gap in reverse direction the targets will have wrong style values
-            if(this._hasPre && this._offset !== 0)
+            if(this._hasPre)// && this._offset !== 0)
             {
                 this._setTween('pre');
             }
