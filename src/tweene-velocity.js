@@ -1,13 +1,13 @@
 /**
- * Tweene - JavaScript Animation Proxy 
- * 
+ * Tweene - JavaScript Animation Proxy
+ *
  * @link http://tweene.com
- *   
+ *
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
- * 
- * @license Artistic License 2.0 
+ *
+ * @license Artistic License 2.0
  * See LICENSE.txt for details
- * 
+ *
  */
 
 
@@ -17,30 +17,30 @@ var velocitySetPendings = [];
 
 
 /**
- * Velocity Tween Driver 
- * 
- * @link http://julian.com/research/velocity/ 
+ * Velocity Tween Driver
+ *
+ * @link http://julian.com/research/velocity/
  * @mixes Common, TweenCommon, ControlsPro, TweenPro
- *  
+ *
  */
-Tw.registerDriver('velocity', 'tween', function() { 
+Tw.registerDriver('velocity', 'tween', function() {
     Common.call(this);
     TweenCommon.call(this);
     ControlsPro.call(this);
-    TweenPro.call(this);    
+    TweenPro.call(this);
 
     this._driverTimeUnit = 'ms';
 
     this._emulatedPlayhead = true;
-    this._emulatedFrom = true;        
+    this._emulatedFrom = true;
     this._emulatedLoop = true;
     this._emulatedDelay = true;
     this._emulatedBegin = false;
     this._emulatedProgress = false;
     this._allowMultipleEasing = true;
     this._allowTransform = true;
-        
-        
+
+
     this._propertyMap = {
         x: 'translateX',
         y: 'translateY',
@@ -50,17 +50,17 @@ Tw.registerDriver('velocity', 'tween', function() {
         rotationX: 'rotateX',
         rotationY: 'rotateY',
         rotationZ: 'rotateZ'
-    };            
-    
+    };
+
     var _css = $.fn.velocity.CSS;
-    this._tweenReady = true;    
-    this._pendings = [];        
+    this._tweenReady = true;
+    this._pendings = [];
     this._setPending = false;
-    
-    
+
+
     /**
-     * Velocity executes also instant tweens async, so we need to handle an internal schedule 
-     * 
+     * Velocity executes also instant tweens async, so we need to handle an internal schedule
+     *
      * @param {function} callback
      * @param {array} [params]
      */
@@ -68,11 +68,11 @@ Tw.registerDriver('velocity', 'tween', function() {
     {
         this._pendings.push([callback, params || []]);
     };
-    
-    
+
+
     /**
      * Run pending callbacks
-     * 
+     *
      */
     this._processPendings = function()
     {
@@ -87,20 +87,20 @@ Tw.registerDriver('velocity', 'tween', function() {
 
     /**
      * Fetch actual style values from Velocity calls queue, then pass them to a callback
-     * 
+     *
      * @param {object} tween
      * @param {function} callback
      */
     this._getVelocityValues = function(tween, callback)
-    {        
+    {
         var calls = $.fn.velocity.State.calls;
         var name, root, beginValue, endValue, entry = calls[calls.length - 1][0][0];
-        for(name in entry)            
+        for(name in entry)
         {
             if(isObject(entry[name]) && 'startValue' in entry[name])
             {
                 // Velocity splits some properties in sub-properties
-                root = _css.Hooks.getRoot(name);                
+                root = _css.Hooks.getRoot(name);
                 if(!(name in tween))
                 {
                     tween[name] = {begin: null, end: null, then: null, easing: root in tween? tween[root].easing : null};
@@ -115,7 +115,7 @@ Tw.registerDriver('velocity', 'tween', function() {
 
     /**
      * Velocity implements bezier internally, we can send directly the array param
-     * 
+     *
      * @param {array} value
      * @returns {array}
      */
@@ -123,17 +123,17 @@ Tw.registerDriver('velocity', 'tween', function() {
     {
         return value;
     };
-        
-       
+
+
     /**
      * Save pre-start values in tween structure
-     * 
+     *
      * @param {object} tween
      * @param {string} name
      * @param {string} root
      * @param {string|number} begin
      * @param {string|number} end
-     */      
+     */
     this._fetchBegin = function(tween, name, root, begin, end)
     {
         tween[name].begin = end;
@@ -161,20 +161,20 @@ Tw.registerDriver('velocity', 'tween', function() {
             {
                 tween[root].begin = null;
             }
-        }                    
-        
+        }
+
     };
 
-    
+
     /**
      * Save then values in tween structure
-     * 
+     *
      * @param {object} tween
      * @param {string} name
      * @param {string} root
      * @param {string|number} begin
      * @param {string|number} end
-     */          
+     */
     this._fetchThen = function(tween, name, root, begin, end)
     {
         tween[name].then = end;
@@ -193,19 +193,19 @@ Tw.registerDriver('velocity', 'tween', function() {
         if(root != name)
         {
             tween[root].begin = tween[root].end = tween[root].then = tween[root].pre = null;
-        }        
+        }
     };
-    
-    
+
+
     /**
      * Save post-tween values in tween structure
-     * 
+     *
      * @param {object} tween
      * @param {string} name
      * @param {string} root
      * @param {string|number} begin
      * @param {string|number} end
-     */      
+     */
     this._fetchEnd = function(tween, name, root, begin, end)
     {
         tween[name].begin = begin;
@@ -221,32 +221,32 @@ Tw.registerDriver('velocity', 'tween', function() {
         if(root != name)
         {
             tween[root].begin = tween[root].end = tween[root].pre = tween[root].then = null;
-        }        
+        }
     };
-    
-        
+
+
     /**
      * Set css values instantly
-     * 
+     *
      * @param {string} field - 'begin' | 'end' | 'pre' | 'then'
-     */ 
+     */
     this._setTween = function(field)
-    {           
+    {
         if(!this._tweenReady)
         {
             this._addPendingCall(this._setTween, [field]);
             return;
-        }        
-        
-        var options, self = this, i, end, tween, values, 
+        }
+
+        var options, self = this, i, end, tween, values,
             onComplete = function() {
                 self._tweenReady = true;
                 self._processPendings();
             };
-            
+
         this._tweenReady = false;
         for(i = 0, end = this._target.length; i < end; i++)
-        {    
+        {
             tween = this._data.tween[i];
             values = this._getTweenValues(this._data.tween[i], field, true);
             options = {duration: 0, queue: false};
@@ -263,21 +263,21 @@ Tw.registerDriver('velocity', 'tween', function() {
             else if(field == 'then' && this._hasThen && !this._thenReady)
             {
                 this._getVelocityValues(tween, this._fetchThen);
-            }            
+            }
         }
-        
+
         if(field == 'begin')
         {
             this._beginReady = true;
         }
         else if(field == 'then')
         {
-            this._thenReady = true;            
+            this._thenReady = true;
         }
     };
-                        
-    
-    /** 
+
+
+    /**
      * Execute the effective tween
      *
      */
@@ -288,31 +288,31 @@ Tw.registerDriver('velocity', 'tween', function() {
             this._addPendingCall(this._playTween);
             return;
         }
-        // in Velocity also tweens with duration = 0 are async, so we need to handle a queue in order to allow multiple Tweene.set() to run in the right order         
+        // in Velocity also tweens with duration = 0 are async, so we need to handle a queue in order to allow multiple Tweene.set() to run in the right order
         if(!this._duration)
         {
             if(!this._setPending)
             {
                 this._setPending = true;
-                velocitySetPendings.push(this);            
-                
+                velocitySetPendings.push(this);
+
                 this.setCoreHandler('_end', 'setEnd', function() {
                     velocitySetPendings.shift();
                     if(velocitySetPendings.length > 0)
                     {
                         velocitySetPendings[0]._playTween();
                     }
-                }, this);                
-                
+                }, this);
+
                 if(velocitySetPendings.length > 1)
                 {
                     return;
-                }                
-            }            
+                }
+            }
         }
-        
-        
-        var self = this, 
+
+
+        var self = this,
             data = this._data,
             field = this._localFwd? 'end' : 'begin',
             i, end, tween, values, options,  target,
@@ -328,59 +328,58 @@ Tw.registerDriver('velocity', 'tween', function() {
                 duration: data.realDuration,
                 queue: 'tweene_' + this._id
             };
-            
+
             if(data.duration)
             {
                 options.easing = this._getRealEasing(data.easing);
-            }            
-            
+            }
+
             if(i === end - 1)
             {
                 options.begin = onBegin;
                 options.complete = onComplete;
-                
+
                 if(this._hasHandlers('progress'))
                 {
-                    options.progress = onProgress;                    
+                    options.progress = onProgress;
                 }
             }
-            
             target.velocity(values, options).dequeue('tweene_' + this._id);
             if(!this._endReady)
             {
                 this._getVelocityValues(tween, this._fetchEnd);
-            }            
-        }        
+            }
+        }
         this._endReady = true;
         return this;
     };
 
-    
-    
+
+
     /**
      * Pause a running tween
-     * 
-     */ 
+     *
+     */
     this._pauseTween = function()
     {
 //        console.log('pausing velocity tween');
-        this._target.velocity('stop', 'tweene_' + this._id);            
+        this._target.velocity('stop', 'tweene_' + this._id);
 //        this._pendings = [];
         return this;
     };
-      
-    
-        
+
+
+
     this._resumeTween = function()
     {
 //        console.log('resuming velocity tween');
         return this._playTween();
     };
 
-    
+
     // need to handle also this with queue
     this._oldStaticProps = this._setStaticProps;
-    
+
     this._setStaticProps = function(first, second)
     {
         if(!this._tweenReady)
@@ -388,29 +387,28 @@ Tw.registerDriver('velocity', 'tween', function() {
             this._addPendingCall(this._setStaticProps, [first, second]);
             return;
         }
-        
+
         this._oldStaticProps(first, second);
-    };         
-           
-        
+    };
+
+
 });
 
 
 /**
- * Velocity Timeline Driver 
- * 
+ * Velocity Timeline Driver
+ *
  * @mixes Common, TimelineCommon, ControlsPro, TimelinePro
- *  
+ *
  */
-Tw.registerDriver('velocity', 'timeline', function() {    
+Tw.registerDriver('velocity', 'timeline', function() {
     Common.call(this);
     TimelineCommon.call(this);
     ControlsPro.call(this);
-    TimelinePro.call(this);    
-    
-    this._driverTimeUnit = 'ms';        
+    TimelinePro.call(this);
+
+    this._driverTimeUnit = 'ms';
 });
 
 Tw.defaultTimeUnit = 'ms';
 Tw.defaultDriver = 'velocity';
-

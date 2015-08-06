@@ -2,16 +2,16 @@
 
 __Tweene__ is a JS library that helps to improve your favourite animation engine, allowing you to do more and better.
 
-There are already a lot of good JavaScript animation libraries on the market, each one with specific features, strengths and weaknesses. 
-Each programmer and each project have their specific requirements, so sometimes one library may be suitable while other times it could not. 
+There are already a lot of good JavaScript animation libraries on the market, each one with specific features, strengths and weaknesses.
+Each programmer and each project have their specific requirements, so sometimes one library may be suitable while other times it could not.
 
 __Tweene__ is something different. It is an animation proxy: used as a wrapper of your chosen library, it may allow you to
 
 - write animations easily, thanks to its versatile interface that adapts itself to your programming style
-- gain extra features (play, pause, reverse, resume, restart and speed control, Timelines) 
-- switch easily from one library to another any time you want. 
+- gain extra features (play, pause, reverse, resume, restart and speed control, Timelines)
+- switch easily from one library to another any time you want.
 
-Currently it can work together with [GSAP](http://www.greensock.com/gsap-js/), [Velocity.js](http://julian.com/research/velocity/), 
+Currently it can work together with [GSAP](http://www.greensock.com/gsap-js/), [Velocity.js](http://julian.com/research/velocity/),
 [Transit (CSS Transitions)](http://ricostacruz.com/jquery.transit/) or [jQuery](http://jquery.com).
 
 ## Resources
@@ -23,7 +23,7 @@ Currently it can work together with [GSAP](http://www.greensock.com/gsap-js/), [
 ## Roadmap
 Changes and new features planned for next releases
 
-- __0.6.0__: Add support for stagger tweens 
+- __0.6.0__: Add support for stagger tweens
 - __0.7.0__: Remove dependencies on jQuery and Transit, CSS Transitions will be supported without external libraries
 - __0.8.0__: Add new Driver for [Web Animations Spec.](http://updates.html5rocks.com/2014/12/web-animation-playback)
 - __0.9.0__: Add support for scrubbing animation’s currentTime position on all supported driver
@@ -112,6 +112,7 @@ However, you can change it any time you want and also on a single call basis.
 Check http://tweene.com/docs/#duration for more details.
 
 ## Changelog
+- __0.5.9__ Fixed restart() procedure when timelines are paused.
 - __0.5.8__ Added addPause() method. Fixed events call order.
 - __0.5.7__ Fixed wrong link to Velocity.js homepage
 - __0.5.6__ Fixed require() return value. Roadmap added.
@@ -126,4 +127,4 @@ Check http://tweene.com/docs/#duration for more details.
 
 Tweene is available under Artistic License 2.0, check the LICENSE.txt inside the archive for details.
 
-Animation libraries of your choice are not included and have their own license agreement. 
+Animation libraries of your choice are not included and have their own license agreement.

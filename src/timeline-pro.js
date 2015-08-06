@@ -1,13 +1,13 @@
 /**
- * Tweene - JavaScript Animation Proxy 
- * 
+ * Tweene - JavaScript Animation Proxy
+ *
  * @link http://tweene.com
- *   
+ *
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
- * 
- * @license Artistic License 2.0 
+ *
+ * @license Artistic License 2.0
  * See LICENSE.txt for details
- * 
+ *
  */
 
 
@@ -15,7 +15,7 @@
 /**
  * Vars and methods used in timeline object, for animation library that does not have native support for timelines
  * @mixin
- * 
+ *
  */
 var TimelinePro = function()
 {
@@ -37,7 +37,7 @@ var TimelinePro = function()
 
     this._backKeyframes = {};
 
-    this._backIndex = [];        
+    this._backIndex = [];
 
     this._backEnabled = true;
 
@@ -46,10 +46,10 @@ var TimelinePro = function()
     this._keyCurrentIndex = null;
 
 
-    
+
     /**
      * Cascade a method call to the children that are currently running
-     * 
+     *
      * @param {string} method
      * @returns {this}
      */
@@ -58,7 +58,7 @@ var TimelinePro = function()
         var args = toArray(arguments, 1);
         for(var id in this._runningList)
         {
-            this._runningList[id][method].apply(this._runningList[id], args);            
+            this._runningList[id][method].apply(this._runningList[id], args);
         }
         return this;
     };
@@ -66,7 +66,7 @@ var TimelinePro = function()
 
     /**
      * Cascade a method call to the all the children, regardless their running status
-     * 
+     *
      * @param {string} method
      * @returns {this}
      */
@@ -75,7 +75,7 @@ var TimelinePro = function()
         var args = toArray(arguments, 1);
         for(var i = 0, end = this._childrenList.length; i < end; i++)
         {
-            this._childrenList[i][method].apply(this._childrenList[i], args);            
+            this._childrenList[i][method].apply(this._childrenList[i], args);
         }
         return this;
     };
@@ -83,18 +83,18 @@ var TimelinePro = function()
 
     /**
      * Perform internal tasks needed before starting the timeline
-     * 
+     *
      * @returns {number} - Returns the timeline total duration
      */
     this.prepare = function()
-    {               
+    {
         if(this._ready)
         {
             return this;
         }
-        
+
         var sortInt = function(a, b){
-            return a - b;       
+            return a - b;
         };
 
         this._reset();
@@ -103,12 +103,12 @@ var TimelinePro = function()
         {
             this
                 .setCoreHandler('end', '_progress', this._stopProgress, this, [])
-                .setCoreHandler('reverse', '_progress', this._stopProgress, this, []);                
+                .setCoreHandler('reverse', '_progress', this._stopProgress, this, []);
         }
 
         this._mergeChildren();
         this._index.sort(sortInt);
-        
+
         // empty timeline
         if(!this._index.length)
         {
@@ -117,7 +117,7 @@ var TimelinePro = function()
         }
 
         var i = 1;
-        var firstTime = this._index[0];        
+        var firstTime = this._index[0];
         // if the first child does not start at 0, add a dummy to fill to gap
         if(firstTime !== 0)
         {
@@ -134,14 +134,14 @@ var TimelinePro = function()
         for(var len = this._index.length - 1; i < len; i++)
         {
             time = this._index[i];
-            keyframe = this._keyframes[time];                        
+            keyframe = this._keyframes[time];
             if(!keyframe.bTrigger)
             {
-                j = i - 1;                
+                j = i - 1;
                 while(j > 0 && !this._keyframes[this._index[j]].bTrigger)
                 {
                     j--;
-                }                
+                }
                 this._addDummy(this._index[j], time);
             }
             if(!keyframe.fTrigger)
@@ -150,20 +150,20 @@ var TimelinePro = function()
                 while(j < this._index.length - 2 && !this._keyframes[this._index[j]].fTrigger)
                 {
                     j++;
-                }                
+                }
                 this._addDummy(time, this._index[j]);
-            }            
+            }
         }
 
         this._backIndex.sort(sortInt);
-        this._ready = true;           
+        this._ready = true;
         return this._getTotalDuration();
     };
 
 
     /**
      * Push child to the top level timeline in order to build a sorted index needed for restarting all the tweens in the right order
-     * 
+     *
      * @param {object} tween
      * @param {number} begin
      * @param {number} end
@@ -183,7 +183,7 @@ var TimelinePro = function()
                 tween.offset(begin + offset);
             }
         }
-        
+
         // add to backIndex
         this._addToIndex(tween, begin, end, false, false, true);
         return this;
@@ -192,12 +192,12 @@ var TimelinePro = function()
 
     /**
      * Reset internal indexes and properties, needed by invalidate()
-     * 
+     *
      */
     this._reset = function()
     {
         this._offset = 0;
-        this._cursor = null;                
+        this._cursor = null;
         this._keyframes = {};
         this._index = [];
         this._backKeyframes = {};
@@ -208,7 +208,7 @@ var TimelinePro = function()
     /**
      * Add a dummy child. Dummies are needed to fill gaps between real children.
      * Dummy reverse and end events will trigger the start for other children
-     * 
+     *
      * @param {number} begin
      * @param {number} end
      */
@@ -222,21 +222,21 @@ var TimelinePro = function()
             .duration(end - begin)
             .setCoreHandler('reverse', 'timeline', this._childCallback, this, ['b', begin, dummy.id(), res[0]])
             .setCoreHandler('end', 'timeline', this._childCallback, this, ['f', end, dummy.id(), res[1]]);
-        
-        this._childrenList.push(dummy);        
+
+        this._childrenList.push(dummy);
     };
 
 
     /**
      * Save a children to index or backIndex. Indexes are needed to start and reset tweens in the right order
-     * 
+     *
      * @param {object} tween - dummy, tween or timeline object
      * @param {number} begin
      * @param {number} end
      * @param {boolean} fTriggering - forward triggering, true when this child is suitable for triggering next children with its end event
      * @param {boolean} bTriggering - backward triggering, true when this child is suitable for triggering previous children with its reverse event
      * @param {boolean} useBack - true = store data in backIndex
-     * @returns {array} 
+     * @returns {array}
      */
     this._addToIndex = function(tween, begin, end, fTriggering, bTriggering, useBack)
     {
@@ -254,16 +254,16 @@ var TimelinePro = function()
 
         if(!(begin in keyframes))
         {
-            keyframes[begin] = {f: [], b: [], fc: [], bc: [], fTrigger: null, bTrigger: null};                            
+            keyframes[begin] = {f: [], b: [], fc: [], bc: [], fTrigger: null, bTrigger: null};
             index.push(begin);
         }
         if(tween.type == 'callback')
         {
-            keyframes[begin].fc.push(tween);                        
+            keyframes[begin].fc.push(tween);
         }
         else
         {
-            keyframes[begin].f.push(tween);            
+            keyframes[begin].f.push(tween);
         }
         // use only one child for each keyframe trigger in forward direction
         firstBegin = fTriggering && !this._keyframes[begin].fTrigger;
@@ -276,44 +276,44 @@ var TimelinePro = function()
         {
             if(!(end in keyframes))
             {
-                keyframes[end] = {f: [], b: [], fc: [], bc: [], fTrigger: null, bTrigger: null};                            
+                keyframes[end] = {f: [], b: [], fc: [], bc: [], fTrigger: null, bTrigger: null};
                 index.push(end);
             }
             if(tween.type == 'callback')
             {
-                keyframes[end].bc.push(tween);                        
+                keyframes[end].bc.push(tween);
             }
             else
             {
-                keyframes[end].b.push(tween);            
+                keyframes[end].b.push(tween);
             }
             // use only one child for each keyframe trigger in backward direction
             firstEnd = bTriggering && !this._keyframes[end].bTrigger;
             if(firstEnd)
             {
                 keyframes[end].bTrigger = tween;
-            }            
-        }     
+            }
+        }
 
-        return [firstBegin, firstEnd];        
+        return [firstBegin, firstEnd];
     };
 
 
     /**
      * Available for drivers that need to perform extra operation with labels
-     * 
+     *
      * @param {object} child - Label object
      * @param {number} begin - label position inside the timeline
      */
     this._mergeLabel = function(child, begin)
     {
-        // nop        
+        // nop
     };
 
 
     /**
      * Merge tweens and timelines inside their parent timeline
-     * 
+     *
      * @param {object} child - tween or timeline
      * @param {number} begin
      * @param {number} end
@@ -324,23 +324,23 @@ var TimelinePro = function()
         this._mergeElement(child, begin, end, true);
     };
 
-    
+
     /**
      * Merge callbacks inside their parent timeline
-     * 
+     *
      * @param {object} child - Callback object
      * @param {number} begin
      * @param {number} end
      */
     this._mergeCallback = function(child, begin, end)
     {
-        this._mergeElement(child, begin, end, false);        
+        this._mergeElement(child, begin, end, false);
     };
 
 
     /**
      * Finalize the merging of tweens, timelines and callbacks
-     * 
+     *
      * @param {object} child
      * @param {number} begin
      * @param {number} end
@@ -360,15 +360,15 @@ var TimelinePro = function()
             child.setCoreHandler('reverse', 'timeline', this._childCallback, this, ['b', begin, child.id(), res[0]]);
             if(end != Infinity)
             {
-                child.setCoreHandler('end', 'timeline', this._childCallback, this, ['f', end, child.id(), res[1]]);                
+                child.setCoreHandler('end', 'timeline', this._childCallback, this, ['f', end, child.id(), res[1]]);
             }
-        }        
+        }
     };
 
 
     /**
      * Called by each child on reverse and end events. Used for update runningList and trigger the start of other previous or next children
-     * 
+     *
      * @param {string} direction - 'b' = backward | 'f' = forward
      * @param {number} time
      * @param {number} id - unique identifier of the child
@@ -382,7 +382,7 @@ var TimelinePro = function()
             delete this._runningList[id];
             this._runningCount--;
         }
-                
+
         if(isKeyChild)
         {
             if(time in this._keyframes)
@@ -390,17 +390,17 @@ var TimelinePro = function()
                 this._processKeyframe(time, direction, null);
             }
         }
-    };  
-    
-    
-    
+    };
+
+
+
     this._processKeyframe = function(time, direction, currentIndex)
     {
         this._keyCurrentIndex = null;
-        
-        var cDirection = direction + 'c', cList = this._keyframes[time][cDirection], tList = this._keyframes[time][direction], 
+
+        var cDirection = direction + 'c', cList = this._keyframes[time][cDirection], tList = this._keyframes[time][direction],
             i, end, offset, item, paused = false;
-        
+
         if(cList.length)
         {
             if(direction == 'f')
@@ -413,7 +413,7 @@ var TimelinePro = function()
             {
                 i = currentIndex !== null? currentIndex - 1 : cList.length - 1;
                 end = -1;
-                offset = -1;           
+                offset = -1;
             }
 
             for(; i != end; i += offset)
@@ -427,16 +427,16 @@ var TimelinePro = function()
                     this._keyCurrentIndex = i;
                     this.pause();
                 }
-                
+
                 // also callback are executed by resume()
-                item.resume(); 
+                item.resume();
                 if(paused)
                 {
                     break;
-                }            
-            }                          
+                }
+            }
         }
-        
+
         if(!paused)
         {
             if(tList.length)
@@ -445,8 +445,8 @@ var TimelinePro = function()
                 {
                     item = tList[i];
                     this._addToRun(item);
-                    item.resume(); 
-                }                
+                    item.resume();
+                }
             }
             // emulate end / reverse events
             if((direction == 'b' && time === 0) || (direction == 'f' && time == this._index[this._index.length - 1]))
@@ -454,14 +454,14 @@ var TimelinePro = function()
                 this._runHandlers('_end');
             }
         }
-        
-        return paused;        
+
+        return paused;
     };
 
 
     /**
      * Called on first timeline start
-     * 
+     *
      * @returns {this}
      */
     this._run = function()
@@ -477,23 +477,23 @@ var TimelinePro = function()
         this._startTime = Tw.ticker.now();
         this._playTween();
 
-        return this;            
+        return this;
     };
 
 
     /**
      * trigger the start of the first keyframe
-     * 
+     *
      */
     this._playTween = function()
-    {            
+    {
         this._childCallback('f', 0, -1, true);
     };
 
 
     /**
      * propagate pause to the running children
-     * 
+     *
      */
     this._pauseTween = function()
     {
@@ -505,21 +505,21 @@ var TimelinePro = function()
      * if running, propagate resume to running children, else trigger first or last keyframe accordingly with current direction
      */
     this._resumeTween = function()
-    {      
+    {
         var runningCount = this._runningCount, paused = false;
         this._startProgress();
-        
+
         if(this._keyCurrentIndex !== null)
         {
             this._keyDirection = this._localFwd? 'f' : 'b';
             paused = this._processKeyframe(this._keyTime, this._keyDirection, this._keyCurrentIndex);
-        }                
-        
+        }
+
         if(!paused)
         {
             if(runningCount)
-            {        
-                this._propagate('resume');  
+            {
+                this._propagate('resume');
             }
             else
             {
@@ -537,22 +537,22 @@ var TimelinePro = function()
                 if(args)
                 {
                     this._childCallback.apply(this, args);
-                }            
+                }
             }
         }
     };
-    
+
 
     /**
      * Go to final or start position resetting also the children, accordingly with current direction
-     * 
+     *
      */
     this._backTween = function()
     {
         // clear running List
         this._runningList = {};
-        this._runningCount = 0;        
-        
+        this._runningCount = 0;
+
         // timeline disable back in nested timelines when going back
         if(!this._backEnabled)
         {
@@ -570,7 +570,7 @@ var TimelinePro = function()
         }
         else
         {
-            i = 0; 
+            i = 0;
             end = this._backIndex.length;
             inc = 1;
             type = 'b';
@@ -584,18 +584,18 @@ var TimelinePro = function()
             for(var j = elemList.length - 1; j >= 0; j--)
             {
                 var child = elemList[j];
-                // disable back in children timelines 
+                // disable back in children timelines
                 child._backEnabled = false;
                 child.pause().back();
                 child._backEnabled = true;
             }
-        }        
+        }
     };
 
 
     /**
      * Add child to runningList
-     * 
+     *
      * @param {object} child
      * @returns {this}
      */
@@ -611,13 +611,13 @@ var TimelinePro = function()
                 this._runningList[id] = child;
             }
         }
-        return this;        
+        return this;
     };
 
 
     /**
      * Remove child from runningList
-     * 
+     *
      * @param {object} child
      * @returns {this}
      */
@@ -630,6 +630,6 @@ var TimelinePro = function()
             this._runningCount --;
             delete this._runningList[id];
         }
-        return this;                
+        return this;
     };
 };

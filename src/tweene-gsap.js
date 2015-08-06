@@ -1,13 +1,13 @@
 /**
- * Tweene - JavaScript Animation Proxy 
- * 
+ * Tweene - JavaScript Animation Proxy
+ *
  * @link http://tweene.com
- *   
+ *
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
- * 
- * @license Artistic License 2.0 
+ *
+ * @license Artistic License 2.0
  * See LICENSE.txt for details
- * 
+ *
  */
 
 
@@ -17,7 +17,7 @@
  */
 var GsapCommon = function()
 {
-    
+
     this._driverTimeUnit = 's';
 
     this._native = null;
@@ -26,10 +26,10 @@ var GsapCommon = function()
 
     this._eventsSet = false;
 
-    
+
     /**
-     * Return the native TimelineMax object used internally by tween and timeline 
-     * 
+     * Return the native TimelineMax object used internally by tween and timeline
+     *
      * @returns {object} - TimelineMax object
      */
     this.getNative = function()
@@ -41,7 +41,7 @@ var GsapCommon = function()
 
     /**
      * Get current time position, needed only by info methods like time() and progress()
-     * 
+     *
      * @returns {number}
      */
     this._getPosition = function()
@@ -55,8 +55,8 @@ var GsapCommon = function()
 
 
     /**
-     * Get the current percent progress, as a value between 0 and 1 
-     * 
+     * Get the current percent progress, as a value between 0 and 1
+     *
      * @returns {number}
      */
     this._getProgress = function()
@@ -71,7 +71,7 @@ var GsapCommon = function()
 
     /**
      * Get the current running status
-     * 
+     *
      * @returns {bolean}
      */
     this._getPaused = function()
@@ -82,7 +82,7 @@ var GsapCommon = function()
 
     /**
      * Map Tweene event handlers to native Gsap events
-     * 
+     *
      */
     this._setupEvents = function()
     {
@@ -116,7 +116,7 @@ var GsapCommon = function()
 
     /**
      * Propagate a call to the internal native object
-     * 
+     *
      * @param {string} name - method name
      */
     this._callNative = function(name)
@@ -126,10 +126,10 @@ var GsapCommon = function()
         this._native[name]();
     };
 
-    
+
     /**
      * Propagate play() to native object
-     * 
+     *
      */
     this._playTween = function()
     {
@@ -139,7 +139,7 @@ var GsapCommon = function()
 
     /**
      * Propagate pause() to native object
-     * 
+     *
      */
     this._pauseTween = function()
     {
@@ -149,7 +149,7 @@ var GsapCommon = function()
 
     /**
      * Propagate resume() to native object
-     * 
+     *
      */
     this._resumeTween = function()
     {
@@ -159,7 +159,7 @@ var GsapCommon = function()
 
     /**
      * Propagate reverse() to native object
-     * 
+     *
      */
     this._reverseTween = function()
     {
@@ -169,7 +169,7 @@ var GsapCommon = function()
 
     /**
      * Propagate restart() to native object
-     * 
+     *
      */
     this._restartTween = function()
     {
@@ -178,26 +178,26 @@ var GsapCommon = function()
 
 
     /**
-     * Map speed() calls to native timeScale() method 
-     * 
+     * Map speed() calls to native timeScale() method
+     *
      */
     this._speedTween = function()
     {
         if(this._native && !this._parent)
         {
             this._native.timeScale(this._speed);
-        }        
-    };            
+        }
+    };
 
 };
-    
+
 
 /**
- * Gsap Tween Driver 
+ * Gsap Tween Driver
  * @link http://greensock.com/gsap
- * 
+ *
  * @mixes Common, TweenCommon, GsapCommon
- *  
+ *
  */
 Tw.registerDriver('Gsap', 'tween', function(){
     Common.call(this);
@@ -214,14 +214,14 @@ Tw.registerDriver('Gsap', 'tween', function(){
         rotate: 'rotation',
         rotateX: 'rotationX',
         rotateY: 'rotationY',
-        rotateZ: 'rotationZ'        
-    };        
+        rotateZ: 'rotationZ'
+    };
 
 
 
     /**
      * Override TweenCommon._reset()
-     * 
+     *
      */
     this._reset = function()
     {
@@ -237,7 +237,7 @@ Tw.registerDriver('Gsap', 'tween', function(){
 
     /**
      * Get a Gsap generic Ease object constructed with a cubic bezier easing function
-     * 
+     *
      * @param {array} value
      * @returns {object}
      */
@@ -245,37 +245,37 @@ Tw.registerDriver('Gsap', 'tween', function(){
     {
         return new Ease(bezier.apply(null, value));
     };
-    
+
 
     /**
      * Override TweenCommon.prepare()
-     * 
+     *
      * @returns {number}
      */
     this.prepare = function()
-    {                
+    {
         this._prepare();
-        
+
         if(this._native !== null)
         {
             return this;
         }
-                 
-        var 
+
+        var
             data = this._data,
-            from, to, 
+            from, to,
             then = {},
             i, end, tween, name, elem, fromCount, toCount, thenCount = 0;
-        
+
         this._native = new TimelineMax({
             delay: data.delay
         })
             .pause()
             .timeScale(this._speed);
-                          
+
         // with Gsap we do per-property easing with overlapping tweens of the same targets
         data.tween = this._hasMultipleEasing? this._splitEasing(data.tween) : [{tween: data.tween, easing: data.easing}];
-        
+
         for(i = 0, end = data.tween.length; i < end; i++)
         {
             tween = data.tween[i].tween;
@@ -284,7 +284,7 @@ Tw.registerDriver('Gsap', 'tween', function(){
             toCount = 0;
             from = {};
             to = {};
-            
+
             for(name in tween)
             {
                 if(tween[name].begin !== null)
@@ -292,26 +292,26 @@ Tw.registerDriver('Gsap', 'tween', function(){
                     fromCount ++;
                     from[name] = tween[name].begin;
                 }
-                
+
                 if(tween[name].end !== null)
                 {
                     toCount ++;
                     to[name] = tween[name].end;
-                }                
-                
+                }
+
                 if(tween[name].then !== null)
-                {                   
+                {
                     thenCount ++;
                     then[name] = tween[name].then;
                 }
-            }            
-            
+            }
+
             var values = (this._hasEnd)? to : from;
             if(data.duration)
             {
                 values.ease = this._getRealEasing(data.tween[i].easing);
             }
-            
+
             // in order to achieve almost the same behavior in all the drivers, it runs always with immediateRender = false
             values.immediateRender = false;
             values.paused = true;
@@ -324,9 +324,9 @@ Tw.registerDriver('Gsap', 'tween', function(){
             {
                 values.yoyo = true;
             }
-            
+
             // add display and visibility properties
-            
+
             if(toCount)
             {
                 if(this._display.end)
@@ -344,7 +344,7 @@ Tw.registerDriver('Gsap', 'tween', function(){
                     {
                         to.visibility = this._visibility.end;
                     }
-                }                
+                }
             }
 
             var duration = Math.max(0, data.duration - 0.000001);
@@ -358,7 +358,7 @@ Tw.registerDriver('Gsap', 'tween', function(){
                 {
                     from.visibility = this._visibility.begin;
                 }
-                
+
                 if(toCount)
                 {
                     elem = TweenMax.fromTo(this._target, duration, from, to);
@@ -376,20 +376,20 @@ Tw.registerDriver('Gsap', 'tween', function(){
             {
                 elem = TweenMax.to(this._target, duration, {opacity: '+=0'});
             }
-            
+
 
             // we add events only to the first tween
             if(i === 0)
             {
                 this._eventsTarget = elem;
             }
-            
+
             // avoid from bug when nested inside timelines
             // @link http://greensock.com/forums/topic/10418-fromto-seems-to-ignore-immediaterender-false-when-nested/
             this._native.add(elem, 0.000001);
-            elem.paused(false);            
+            elem.paused(false);
         }
-        
+
         if(this._display.then)
         {
             thenCount++;
@@ -400,39 +400,39 @@ Tw.registerDriver('Gsap', 'tween', function(){
             thenCount++;
             then.visibility = this._visibility.then;
         }
-        
+
         if(thenCount)
         {
             this._native.to(this._target, 0, then, data.duration);
         }
-        
+
         this._setupEvents();
-        
+
         return this._getTotalDuration();
     };
-                                         
-    
+
+
 });
-        
-                
-  
+
+
+
 /**
- * Gsap Timeline Driver 
- * 
+ * Gsap Timeline Driver
+ *
  * @mixes Common, TimelineCommon, GsapCommon
- *  
+ *
  */
 Tw.registerDriver('Gsap', 'timeline', function(){
     Common.call(this);
     TimelineCommon.call(this);
-    GsapCommon.call(this);    
+    GsapCommon.call(this);
 
     this._innerNative = null;
-    
-    
+
+
     /**
      * Override TimelineCommon.prepare()
-     * 
+     *
      * @returns {number}
      */
     this.prepare = function()
@@ -440,52 +440,52 @@ Tw.registerDriver('Gsap', 'timeline', function(){
         if(this._ready)
         {
             return this;
-        }        
-        
+        }
+
         var values = {paused: true};
         if(this._loops)
         {
             values.repeat = this._loops;
             values.repeatDelay = convertTime(this._loopsDelay, this._coreTimeUnit, this._driverTimeUnit);
         }
-        
+
         if(this._yoyo)
         {
             values.yoyo = true;
         }
-        
+
         var _native = new TimelineMax(values);
-        
+
         if(this._parent)
         {
             this._native = _native;
         }
         else
-        {        
-            this._native = new TimelineMax({paused: true, delay: convertTime(this._delay, this._coreTimeUnit, this._driverTimeUnit)})           
+        {
+            this._native = new TimelineMax({paused: true, delay: convertTime(this._delay, this._coreTimeUnit, this._driverTimeUnit)})
                 .add(_native);
             _native.paused(false);
         }
-        
+
         this._innerNative = _native;
         this._native.timeScale(this._speed);
         this._eventsTarget = _native;
         this._setupEvents();
-        
+
         this._mergeChildren();
         this._ready = true;
-        return this._getTotalDuration();        
+        return this._getTotalDuration();
     };
-    
-    
+
+
     /**
      * Override TimelineCommon._reset()
-     * 
+     *
      */
     this._reset = function()
     {
         this._offset = 0;
-        this._cursor = null;                
+        this._cursor = null;
         if(this._native)
         {
             this._native.clear();
@@ -496,22 +496,22 @@ Tw.registerDriver('Gsap', 'timeline', function(){
         this._eventsTarget = null;
         this._eventsSet = false;
     };
-    
-        
+
+
     /**
      * Override TimelineCommon._mergeLabel()
-     * 
+     *
      */
     this._mergeLabel = function(child, begin)
     {
-        // nop        
+        // nop
     };
-    
-    
+
+
     /**
      * Override TimelineCommon._mergeTweenable()
-     * 
-     */    
+     *
+     */
     this._mergeTweenable = function(child, begin, end)
     {
         if(begin != Infinity)
@@ -521,29 +521,29 @@ Tw.registerDriver('Gsap', 'timeline', function(){
             childNative.paused(false);
         }
     };
-    
-    
+
+
     /**
      * Override TimelineCommon._mergeCallback()
-     * 
-     */    
+     *
+     */
     this._mergeCallback = function(child, begin, end)
     {
         if(begin != Infinity)
         {
             if(child.isPause)
             {
-                this._native.addPause(convertTime(begin + this._delay, this._coreTimeUnit, this._driverTimeUnit), child.resume, [], child);                                
+                this._native.addPause(convertTime(begin + this._delay, this._coreTimeUnit, this._driverTimeUnit), child.resume, [], child);
             }
             else
             {
-                this._innerNative.call(child.resume, [], child, convertTime(begin, this._coreTimeUnit, this._driverTimeUnit));                
-            }            
+                this._innerNative.call(child.resume, [], child, convertTime(begin, this._coreTimeUnit, this._driverTimeUnit));
+            }
         }
     };
-            
-    
-        
+
+
+
 });
 
 

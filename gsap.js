@@ -4,15 +4,15 @@ var func = function(window, undef) {
 'use strict'; 
 
 /**
- * Tweene - JavaScript Animation Proxy 
- * @version 0.5.8
+ * Tweene - JavaScript Animation Proxy
+ * @version 0.5.9
  * @link http://tweene.com
- *   
+ *
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
- * 
- * @license Artistic License 2.0 
+ *
+ * @license Artistic License 2.0
  * See LICENSE.txt for details
- * 
+ *
  */
 
 /* jshint -W008 */
@@ -35,10 +35,10 @@ var compoundTransforms = transformProperties.slice(0, 8);
 
 // compound properties we parse to obtain a list of key - value couples
 var compoundNames = 'margin|padding|borderColor|borderWidth|borderRadius'.split('|');
-var compoundDirections = ['Top', 'Right', 'Bottom', 'Left'];    
+var compoundDirections = ['Top', 'Right', 'Bottom', 'Left'];
 var radiusDirections = ['TopLeft', 'TopRight', 'BottomRight', 'BottomLeft'];
 
-// base name and aliases for event names. Those with an empty string as value are the names used internally  
+// base name and aliases for event names. Those with an empty string as value are the names used internally
 var handlersMap = {
     begin: '',
     end: '',
@@ -61,10 +61,10 @@ var handlersMap = {
     onRepeat: 'loop',
     onReverse: 'reverse',
     onReverseComplete: 'reverse'
-};    
+};
 
 
-// base name and aliases for option names. Those with an empty string as value are the names used internally  
+// base name and aliases for option names. Those with an empty string as value are the names used internally
 var optionsMap = {
     delay: '',
     loops: '',
@@ -81,12 +81,12 @@ var optionsMap = {
 
 // base name and aliases for tween option names
 var tweenOptionsMap = {
-    easing: '', 
+    easing: '',
     duration: '',
     paused: '',
     to: '',
     from: '',
-    then: '',    
+    then: '',
     ease: 'easing'
 };
 
@@ -100,7 +100,7 @@ var easings = {
     'ease-in-out': [.42, 0, .58, 1],
     'in': [.42, 0, 1, 1],
     out: [0, 0, .58, 1],
-    'in-out': [.42, 0, .58, 1],            
+    'in-out': [.42, 0, .58, 1],
     snap: [0, 1, .5, 1],
     easeInCubic: [.550,.055,.675,.190],
     easeOutCubic: [.215,.61,.355,1],
@@ -125,7 +125,7 @@ var easings = {
     easeInOutSine: [.445,.05,.55,.95],
     easeInBack: [.6,-.28,.735,.045],
     easeOutBack: [.175, .885,.32,1.275],
-    easeInOutBack: [.68,-.55,.265,1.55]                        
+    easeInOutBack: [.68,-.55,.265,1.55]
 };
 
 
@@ -144,35 +144,35 @@ var speeds = {
 
 
 
-function isFunction(value) 
+function isFunction(value)
 {
     return typeof value == 'function';
 }
 
 
 
-function isNumber(value) 
+function isNumber(value)
 {
     return typeof value == 'number' || (value && typeof value == 'object' && Object.prototype.toString.call(value) == '[object Number]') || false;
 }
 
 
 
-function isString(value) 
+function isString(value)
 {
     return typeof value == 'string' || (value && typeof value == 'object' && Object.prototype.toString.call(value) == '[object String]') || false;
 }
 
 
 
-var isArray = Array.isArray || function(value) 
-{        
+var isArray = Array.isArray || function(value)
+{
     return value && typeof value == 'object' && typeof value.length == 'number' && Object.prototype.toString.call(value) == '[object Array]';
 };
 
 
 
-function isObject(value) 
+function isObject(value)
 {
     var type = typeof value;
     return type === 'function' || type === 'object' && !!value;
@@ -182,7 +182,7 @@ function isObject(value)
 /*
  * @link http://stackoverflow.com/questions/18082/validate-decimal-numbers-in-javascript-isnumeric
  */
-function isNumeric(value) 
+function isNumeric(value)
 {
     return !isArray(value) && (value - parseFloat(value) + 1) >= 0;
 }
@@ -204,12 +204,12 @@ function isEmpty(obj)
 
 function seemsPlainObject(value)
 {
-    return  isObject(value) && !(value instanceof Function) && value.constructor == Object;        
+    return  isObject(value) && !(value instanceof Function) && value.constructor == Object;
 }
 
 
 
-function extendObject(obj) 
+function extendObject(obj)
 {
     if (!isObject(obj))
     {
@@ -217,10 +217,10 @@ function extendObject(obj)
     }
 
     var source, name, i, length;
-    for (i = 1, length = arguments.length; i < length; i++) 
+    for (i = 1, length = arguments.length; i < length; i++)
     {
         source = arguments[i];
-        for (name in source) 
+        for (name in source)
         {
             obj[name] = source[name];
         }
@@ -229,7 +229,7 @@ function extendObject(obj)
 }
 
 
-function cloneObject(obj, deep) 
+function cloneObject(obj, deep)
 {
     if (isFunction(obj) || !isObject(obj))
     {
@@ -237,7 +237,7 @@ function cloneObject(obj, deep)
     }
     if(isArray(obj))
     {
-        obj = obj.slice();           
+        obj = obj.slice();
         if(deep)
         {
             for(var i = 0, end = obj.length; i < end; i++)
@@ -266,7 +266,7 @@ function cloneObject(obj, deep)
 
 
 
-function keys(obj) 
+function keys(obj)
 {
     if(Object.keys)
     {
@@ -285,13 +285,13 @@ function keys(obj)
 
 
 // simplified version of Array.indexOf polyfill
-function inArray(array, search) 
+function inArray(array, search)
 {
     if(!isArray(array))
     {
         throw 'expected an array as first param';
     }
-    
+
     if(array.indexOf)
     {
         return array.indexOf(search);
@@ -321,7 +321,7 @@ function toArray(args, pos)
 
 /**
  * convert time from seconds to milliseconds and vice versa
- * 
+ *
  * @param {number} value
  * @param {string} fromUnit - 's' | 'ms'
  * @param {string} toUnit - 's' | 'ms'
@@ -340,30 +340,30 @@ function convertTime(value, fromUnit, toUnit)
 
 /*
  *  Based on Bez http://github.com/rdallasgray/bez
- * 
+ *
  * Copyright Robert Dallas Gray. All rights reserved.
  * Provided under the FreeBSD license: https://github.com/rdallasgray/bez/blob/master/LICENSE.txt
-*/   
-function bezier(x1, y1, x2, y2) 
+*/
+function bezier(x1, y1, x2, y2)
 {
     var p1 = [x1, y1], p2 = [x2, y2],
         A = [null, null], B = [null, null], C = [null, null],
 
-        bezCoOrd = function(time, ax) 
+        bezCoOrd = function(time, ax)
         {
             C[ax] = 3 * p1[ax]; B[ax] = 3 * (p2[ax] - p1[ax]) - C[ax]; A[ax] = 1 - C[ax] - B[ax];
             return time * (C[ax] + time * (B[ax] + time * A[ax]));
         },
 
-        xDeriv = function(time) 
+        xDeriv = function(time)
         {
             return C[0] + time * (2 * B[0] + 3 * A[0] * time);
         },
 
-        xForT = function(time) 
+        xForT = function(time)
         {
             var x = time, i = 0, z;
-            while (++i < 14) 
+            while (++i < 14)
             {
                 z = bezCoOrd(x, 0) - time;
                 if (Math.abs(z) < 1e-3) break;
@@ -380,14 +380,14 @@ function bezier(x1, y1, x2, y2)
 
 /**
  * take as input compound properties defined as a space separated string of values and return the list of single value properties
- * 
+ *
  *   padding: 5 => paddingTop: 5, paddingRight: 5, paddingBottom: 5, paddingLeft: 5
- *   border-width: 2px 1px => borderTopWidth: 2px, borderRightWidth: 1px, borderBottomWidth: 2px, borderLeftWidth: 1px 
- * 
+ *   border-width: 2px 1px => borderTopWidth: 2px, borderRightWidth: 1px, borderBottomWidth: 2px, borderLeftWidth: 1px
+ *
  * @param {string} name
  * @param {string} value
  * @returns {object}
- */    
+ */
 function compoundMapping(name, value)
 {
     var parts, nameParts, prefix, suffix, dirs, values = {}, easing, i;
@@ -400,9 +400,9 @@ function compoundMapping(name, value)
     {
         easing = null;
     }
-                    
+
     parts = String(value).split(/\s+/);
-    
+
     switch(parts.length)
     {
         case 1: parts = [parts[0], parts[0], parts[0], parts[0]]; break;
@@ -413,9 +413,9 @@ function compoundMapping(name, value)
     nameParts = decamelize(name).split('-');
     prefix = nameParts[0];
     suffix = nameParts.length > 1? nameParts[1].substr(0, 1).toUpperCase() + nameParts[1].substr(1) : '';
-    
+
     dirs = name == 'borderRadius'? radiusDirections : compoundDirections;
-    
+
     for(i = 0; i < 4; i++)
     {
         values[prefix + dirs[i] + suffix] = easing? [parts[i], easing] : parts[i];
@@ -426,10 +426,10 @@ function compoundMapping(name, value)
 
 /**
  *  split commpound transform values
- *  
+ *
  *   scale: 1.2 => scaleX: 1.2, scaleY: 1.2
  *   rotate3d: 30, 60, 40 => rotateX: 30, rotateY: 60, rotateZ: 40
- *   
+ *
  * @param {string} name
  * @param {string} value
  * @returns {object}
@@ -446,10 +446,10 @@ function transformMapping(name, value)
     {
         easing = null;
     }
-                    
+
     parts = String(value).split(/\s*,\s*/);
     baseName = name.indexOf('3') !== -1? name.substr(0, name.length - 2) : name;
-    
+
     if(name == 'rotate3d')
     {
         if(parts.length == 4)
@@ -466,18 +466,18 @@ function transformMapping(name, value)
     {
         switch(parts.length)
         {
-            // for rotations, a single value is passed as Z-value, while for other transforms it is applied to X and Y       
+            // for rotations, a single value is passed as Z-value, while for other transforms it is applied to X and Y
             case 1:
                 parts = baseName == 'rotate' || baseName == 'rotation'? [null, null, parts[0]] : [parts[0], parts[0], null];
             break;
 
             case 2:
                 parts = [parts[0], parts[1], null];
-            break;                
+            break;
         }
-        
+
     }
-            
+
     for(var i = 0; i < dirs.length; i++)
     {
         if(parts[i] !== null)
@@ -488,7 +488,7 @@ function transformMapping(name, value)
     return values;
 }
 
-    
+
 
 function isTransformProperty(name)
 {
@@ -497,7 +497,7 @@ function isTransformProperty(name)
 
 
 // border-bottom-width -> borderBottomWidth
-function camelize(name) 
+function camelize(name)
 {
     return name.replace(/(\-[a-z])/g, function(value) {
         return value.substr(1).toUpperCase();
@@ -508,14 +508,14 @@ function camelize(name)
 // borderBottomWidth -> border-bottom-width
 function decamelize(name)
 {
-    return name.replace(/([A-Z])/g, '-$1').toLowerCase();    
+    return name.replace(/([A-Z])/g, '-$1').toLowerCase();
 }
 
 
 /**
- * accept a speed name shortcuts or a number and give back an acceptable positive value. 
+ * accept a speed name shortcuts or a number and give back an acceptable positive value.
  * Fallback to 1 if value is out of valid range
- * 
+ *
  * @param {string|number} value
  * @returns {number}
  */
@@ -539,29 +539,29 @@ function parseSpeed(value)
 
 /**
  * Tweene global class, is the unique identifier exported
- *  
- * You will never need to instantiate a Tweene object. You have to use Tweene static methods 
- * in order to obtain instances of tween and timeline objects of the different drivers 
- *   
+ *
+ * You will never need to instantiate a Tweene object. You have to use Tweene static methods
+ * in order to obtain instances of tween and timeline objects of the different drivers
+ *
  * @class
- *  
+ *
  */
-var Tweene = function() 
+var Tweene = function()
 {
     var _self = this;
-    
+
     // used for generate unique identifier for any tweene object (tweens, timelines, callbacks and labels)
     this._idCounter = 0;
-    
+
     // internally, all time values use this unit
-    this._coreTimeUnit = 'ms';   
-    
+    this._coreTimeUnit = 'ms';
+
     // time unit used when pure numbers are passed as delay or duration values. Users can change this value any time
     // when the user requires only GSAP driver, it defaults to 's' in order to mimic the library native API
     this.defaultTimeUnit = 'ms';
-        
-    this._macros = {};    
-                        
+
+    this._macros = {};
+
     this.easings = easings;
 
     this.durations = durations;
@@ -571,9 +571,9 @@ var Tweene = function()
     this.defaultDriver = 'jquery';
 
     this.defaultEasing = 'easeOutQuad';
-    
-    this.defaultDuration = '400ms';        
-    
+
+    this.defaultDuration = '400ms';
+
     // container for registered drivers
     var _drivers = {
             tween: {},
@@ -583,7 +583,7 @@ var Tweene = function()
 
         /**
          * Create a tween or timeline object of the specified driver. If driverName is not given, it fallbacks to default driver
-         * 
+         *
          * @param {string} 'tween' or 'timeline'
          * @param {string} [driverName] - one of the registered driver's name
          * @returns {object} tween or timeline object
@@ -592,21 +592,21 @@ var Tweene = function()
         {
             var d, i;
             driverName = (driverName? driverName : _self.defaultDriver).toLowerCase();
-            
+
             if(driverName in _drivers[type])
             {
-                d = _drivers[type][driverName];                
+                d = _drivers[type][driverName];
                 i = new d();
                 i.driverName = driverName;
                 return i;
             }
             throw 'Driver ' + name + ' not found';
         },
-        
-        
+
+
         /**
          * Common method used inside from(), to() and fromTo() to create a tween and pass arguments to it
-         * 
+         *
          * @param {arguments} args - list of arguments passed to original public method
          * @param {string} method - 'from' | 'to' | 'fromTo'
          * @returns {object} - return a tween object
@@ -620,20 +620,20 @@ var Tweene = function()
                 tw.target(args.shift())[method].apply(tw, args);
             }
 
-            return tw._immediateStart? tw.play() : tw;        
+            return tw._immediateStart? tw.play() : tw;
         };
 
 
     /**
-     * Register an animation driver 
-     * 
+     * Register an animation driver
+     *
      * @param {string} name - name of the driver
      * @param {string} type - 'tween' | 'timeline'
      * @param {function} construct - constructor function that defines the driver class
      * @returns {Tweene}
      */
     this.registerDriver = function(name, type, construct)
-    {        
+    {
         type = type.toLowerCase();
         if(type != 'tween')
         {
@@ -642,12 +642,12 @@ var Tweene = function()
         _drivers[type][name.toLowerCase()] = construct;
         return this;
     };
-    
-    
+
+
     /**
      * Define a macro for tween objects
      * @link http://tweene.com/docs/#macro
-     * 
+     *
      * @param {string} name
      * @param {function} macro - inside the function, 'this' refers to the tween object
      * @returns {Tweene}
@@ -657,12 +657,12 @@ var Tweene = function()
         this._macros[name] = macro;
         return this;
     };
-           
-       
+
+
     /**
      * Return an instance of a tween object
      * @link http://tweene.com/docs/#createTween
-     * 
+     *
      * @param {object|string} [target] jquery object or string selector of the dom element(s) to be animated
      * @param {string} [driver]
      * @returns {object}
@@ -676,7 +676,7 @@ var Tweene = function()
 
     /**
      * Apply instantly the properties values to the target
-     * 
+     *
      * @param {object|string} target
      * @param {object} values - CSS property - value map
      * @returns {unresolved}
@@ -691,47 +691,47 @@ var Tweene = function()
      * Create a tween object for a 'to' animation and pass the arguments to it. First argument is always the target.
      * If you don't set paused: true in the options passed, the tween will start immediately.
      * @link http://tweene.com/docs/#tweenTo
-     * 
+     *
      * @returns {object} - return the tween object
      */
-    this.to = function() 
+    this.to = function()
     {
         return _tweenNow(arguments, 'to');
     };
 
-    
+
     /**
      * Create a tween object for a 'from' animation and pass the arguments to it. First argument is always the target.
      * If you don't set paused: true in the options passed, the tween will start immediately.
      * @link http://tweene.com/docs/#tweenFrom
-     * 
+     *
      * @returns {object} - return the tween object
      */
-    this.from = function() 
+    this.from = function()
     {
         return _tweenNow(arguments, 'from');
     };
 
-    
+
     /**
      * Create a tween object for a 'fromTo' animation and pass the arguments to it. First argument is always the target.
      * If you don't set paused: true in the options passed, the tween will start immediately.
      * @link http://tweene.com/docs/#tweenFromTo
-     * 
+     *
      * @returns {object} - return the tween object
      */
-    this.fromTo = function() 
+    this.fromTo = function()
     {
         return _tweenNow(arguments, 'fromTo');
     };
-    
-        
+
+
     /**
      * Create a timeline object
      * @link http://tweene.com/docs/#createTimeline
-     * 
+     *
      * @param {object|string} [target] - it checks if the object passed as first param is a plain object (options) or not (target)
-     * @param {object} [options] 
+     * @param {object} [options]
      * @param {string} driver - name of the driver
      * @returns {object} - a timeline object
      */
@@ -752,7 +752,7 @@ var Tweene = function()
             .options(options)
             .target(lineTarget);
     };
-                         
+
 };
 
 var Tw = new Tweene();
@@ -762,19 +762,16 @@ if(window)
     window.Tweene = Tw;
 }
 
- 
-
-
 /**
- * Tweene - JavaScript Animation Proxy 
- * 
+ * Tweene - JavaScript Animation Proxy
+ *
  * @link http://tweene.com
- *   
+ *
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
- * 
- * @license Artistic License 2.0 
+ *
+ * @license Artistic License 2.0
  * See LICENSE.txt for details
- * 
+ *
  */
 
 
@@ -782,7 +779,7 @@ if(window)
 /**
  * Vars and methods common to every tween and timeline, whatever is the driver used
  * @mixin
- * 
+ *
  */
 var Common = function()
 {
@@ -790,7 +787,7 @@ var Common = function()
     this._id = ++ Tw._idCounter;
     this._coreTimeUnit = Tw._coreTimeUnit;
     this._timeUnit = Tw.defaultTimeUnit;
-    
+
     this._parent = null;
 
     this._target = null;
@@ -841,7 +838,7 @@ var Common = function()
     /**
      * Play the animation in forward direction
      * @link http://tweene.com/docs/#play
-     * 
+     *
      * @returns {this}
      */
     this.play = function()
@@ -855,22 +852,22 @@ var Common = function()
     /**
      * Play the animation in backward direction from its current position
      * @link http://tweene.com/docs/#reverse
-     * 
+     *
      * @returns {this}
      */
     this.reverse = function()
     {
         this._fwd = false;
         this._reverseTween();
-        return this;        
-    };              
+        return this;
+    };
 
 
     /**
      * Pause the animation on its current state.
      * @link http://tweene.com/docs/#pause
      *
-     * @returns {this} 
+     * @returns {this}
      */
     this.pause = function()
     {
@@ -879,28 +876,28 @@ var Common = function()
             this._pauseTween();
         }
         return this;
-    };        
-
-
-    /** 
-     * Resume a previously paused animation without affecting the current direction
-     * @link http://tweene.com/docs/#resume
-     * 
-     * @returns {this}
-     */
-    this.resume = function()
-    {        
-        this._resumeTween();        
-        return this;
-    };                    
+    };
 
 
     /**
-     * Restart animation in forward direction. 
-     * Reset also loops counter. 
+     * Resume a previously paused animation without affecting the current direction
+     * @link http://tweene.com/docs/#resume
+     *
+     * @returns {this}
+     */
+    this.resume = function()
+    {
+        this._resumeTween();
+        return this;
+    };
+
+
+    /**
+     * Restart animation in forward direction.
+     * Reset also loops counter.
      * Initial delay is performed only on the very first start, not on restart.
      * @link http://tweene.com/docs/#restart
-     * 
+     *
      * @returns {this}
      */
     this.restart = function()
@@ -912,23 +909,23 @@ var Common = function()
 
     /**
      * Go back to initial or final position accordingly to the value of direction. Intended to be used internally, you don't have to call this directly.
-     * 
+     *
      * @returns {this}
      */
     this.back = function()
     {
         this._backTween(this._localFwd? 'begin' : 'end');
         return this;
-    };        
+    };
 
-    
+
     /**
      * Get or set the speed of the current tween/timeline. Normal speed is 1, so 2 is double speed and 0.5 is half speed.
      * It's usable both before and during the animation.
      * It Accepts also string shortcut defined in Tweene.speeds
      * @link http://tweene.com/docs/#speedControl
-     * 
-     * @param {number} [value] 
+     *
+     * @param {number} [value]
      * @returns {number|this}
      */
     this.speed = function(value)
@@ -938,41 +935,41 @@ var Common = function()
             return this._speed;
         }
 
-        value = parseSpeed(value);        
+        value = parseSpeed(value);
         if(value != this._speed)
-        {        
+        {
             this._speed = value;
             this._speedTween();
         }
-        return this;        
+        return this;
     };
 
 
     /**
-     * Alias for speed() 
+     * Alias for speed()
      * @see speed
-     * 
+     *
      */
     this.timeScale = function()
     {
         return this.speed.apply(this, arguments);
-    };    
+    };
 
 
     /**
      * Return the current playhead time (a value between 0 and duration) in time unit set in Tweene.defaultTimeUnit
-     * 
+     *
      * @returns {number}
      */
     this.time = function()
     {
-        return Math.round(convertTime(this._getPosition(), this._coreTimeUnit, this._timeUnit) * 1000) / 1000;        
+        return Math.round(convertTime(this._getPosition(), this._coreTimeUnit, this._timeUnit) * 1000) / 1000;
     };
 
 
     /**
      * Return the current playhead position in percent (a value between 0 and 1)
-     * 
+     *
      * @returns {number}
      */
     this.progress = function()
@@ -982,11 +979,11 @@ var Common = function()
 
 
     /**
-     * Return true if the animation is currently paused 
+     * Return true if the animation is currently paused
      * Tt's true also when the animation is finished or not yet started
-     * 
+     *
      * @returns {boolean}
-     */        
+     */
     this.paused = function()
     {
         return this._getPaused();
@@ -994,8 +991,8 @@ var Common = function()
 
 
     /**
-     * Return true if the animation direction is currently reversed 
-     * 
+     * Return true if the animation direction is currently reversed
+     *
      * @returns {boolean}
      */
     this.reversed = function()
@@ -1006,12 +1003,12 @@ var Common = function()
 
     /**
      * Get/Set the tween duration (only get available for timeline)
-     * Accept numeric values interpreted as Tweene.defaultTimeUnit 
-     * or string with unit suffix, so '500ms' or '0.5s' 
-     * 
+     * Accept numeric values interpreted as Tweene.defaultTimeUnit
+     * or string with unit suffix, so '500ms' or '0.5s'
+     *
      * @param {string|number} [value]
-     * @returns {this|number} 
-     * 
+     * @returns {this|number}
+     *
      */
     this.duration = function(value)
     {
@@ -1037,11 +1034,11 @@ var Common = function()
     /**
      * Get the tween/timeline total duration including loops and loopsDelay, in the timeUnit set in Tweene.defaultTimeUnit
      * In case of infinite loop, it returns Infinity
-     * 
+     *
      * @returns {number}
      */
     this.totalDuration = function()
-    {        
+    {
         if(this.type == 'timeline')
         {
             this.prepare();
@@ -1053,7 +1050,7 @@ var Common = function()
     /**
      * Set the animation target (jquery or dom objects commonly, accordingly to the specific animation library in use)
      * @link http://tweene.com/docs/#target
-     * 
+     *
      * @param {string|object} [value]
      * @returns {string|object|this}
      */
@@ -1070,10 +1067,10 @@ var Common = function()
 
     /**
      * Get/Set the tween initial delay
-     * Accept numeric values interpreted as Tweene.defaultTimeUnit 
-     * or string with unit suffix, so '500ms' or '0.5s' 
+     * Accept numeric values interpreted as Tweene.defaultTimeUnit
+     * or string with unit suffix, so '500ms' or '0.5s'
      * @link http://tweene.com/docs/#delay
-     * 
+     *
      * @param {string|number} [value]
      * @returns {number|this}
      */
@@ -1094,7 +1091,7 @@ var Common = function()
      * Set the number of animation repeats. Default is 0, so loops(1) will execute the tween/timeline twice.
      * A value of -1 means 'Infinite loop'.
      * @link http://tweene.com/docs/#loops
-     * 
+     *
      * @param {number} value
      * @returns {this}
      */
@@ -1115,7 +1112,7 @@ var Common = function()
         }
         this._loops = value;
         this.invalidate();
-        return this;        
+        return this;
     };
 
 
@@ -1123,7 +1120,7 @@ var Common = function()
      * Enable/disable yoyo behavior or retrieve its status.
      * Yoyo makes sense only when used with looops.
      * @link http://tweene.com/docs/#yoyoEffect
-     * 
+     *
      * @param {boolean} [value]
      * @returns {boolean|this}
      */
@@ -1140,10 +1137,10 @@ var Common = function()
 
     /**
      * Get/Set the value of delay before each loop iteration
-     * Accept numeric values interpreted as Tweene.defaultTimeUnit 
-     * or string with unit suffix, so '500ms' or '0.5s' 
+     * Accept numeric values interpreted as Tweene.defaultTimeUnit
+     * or string with unit suffix, so '500ms' or '0.5s'
      * @link http://tweene.com/docs/#loopsDelay
-     * 
+     *
      * @param {string|number} [value]
      * @returns {number|this}
      */
@@ -1155,40 +1152,40 @@ var Common = function()
         }
         this._loopsDelay = this._parseTime(value);
         this.invalidate();
-        return this;        
+        return this;
     };
 
 
     /**
-     * Add event handler. 
-     * First param is the event name, 
-     * second param is the callback function, 
+     * Add event handler.
+     * First param is the event name,
+     * second param is the callback function,
      * third (optional) array of params to pass to the callback
      * fourth (optional) scope for the callback (the default is the tween / timeline object that will raise the event)
-     * 
+     *
      * Available events:
-     *  begin | onBegin | start | onStart: 
+     *  begin | onBegin | start | onStart:
      *      raised on the animation start
-     *      
-     *  end | onEnd | complete | onComplete | finish | onFinish | done: 
-     *      raised on the animation end, after all loops (a tween with infinite loops will never fire this event)  
-     *      
-     *  reverse | onReverse | onReverseComplete: 
+     *
+     *  end | onEnd | complete | onComplete | finish | onFinish | done:
+     *      raised on the animation end, after all loops (a tween with infinite loops will never fire this event)
+     *
+     *  reverse | onReverse | onReverseComplete:
      *      raised when the animation ends in backward direction, so at the start position.
-     *           
+     *
      *  progress | onProgress | update | onUpdate:
      *      fires periodically during the tween. The frequency of the call
-     *      could be different for any animation library used. 
-     *      When the library does not offer native progress event, it is emulated 
+     *      could be different for any animation library used.
+     *      When the library does not offer native progress event, it is emulated
      *      via RequestAnimationFrame
-     *      
+     *
      *  loop | onLoop | onRepeat:
      *      raised on each loop iteration
-     *      
-     *      
+     *
+     *
      * @link http://tweene.com/docs/#events
-     *  
-     * @param {string} name 
+     *
+     * @param {string} name
      * @param {function|null} callback - pass null to remove a previously set event handler
      * @param {array} [params]
      * @param {object} [scope]
@@ -1218,7 +1215,7 @@ var Common = function()
 
     /**
      * Used internally for register core event handlers
-     * 
+     *
      * @param {string} name
      * @param {string} id
      * @param {function} callback
@@ -1228,7 +1225,7 @@ var Common = function()
      * @returns {this}
      */
     this.setCoreHandler = function(name, id, callback, scope, params, priority)
-    {             
+    {
         this.unsetCoreHandler(name, id);
         var entry = {id: id, callback: callback, scope: scope || this, params: params || []};
 
@@ -1244,10 +1241,10 @@ var Common = function()
         return this;
     };
 
-    
+
     /**
      * Used internally for unregister core event handlers
-     * 
+     *
      * @param {string} name
      * @param {string} id
      * @returns {this}
@@ -1268,7 +1265,7 @@ var Common = function()
 
     /**
      * Reset _ready flag every time that one of the internal properties that need to be processed before running is changed
-     * 
+     *
      * @returns {this}
      */
     this.invalidate = function()
@@ -1287,7 +1284,7 @@ var Common = function()
 
     /**
      * Get/Set the parent object. The parent could be a timeline or a tween if the child is a DummyTween used for emulate delay
-     * 
+     *
      * @param {object} [value]
      * @returns {this|object}
      */
@@ -1305,7 +1302,7 @@ var Common = function()
 
     /**
      * Get the internal unique identifier
-     * 
+     *
      * @returns {number}
      */
     this.id = function()
@@ -1316,7 +1313,7 @@ var Common = function()
 
     /**
      * Set options for tween or timeline
-     * 
+     *
      * @param {object} options
      * @returns {this}
      */
@@ -1329,23 +1326,23 @@ var Common = function()
         this._applyArguments(opts);
         return this;
     };
-    
+
 
     /**
      * Return the resulting speed of the object
-     * 
+     *
      * @returns {number}
      */
     this.getRealSpeed = function()
     {
         return this._parent? this._parent.getRealSpeed() * this._speed : this._speed;
-    };    
+    };
 
 
     /**
      * Get the tween/timeline total duration including loops and loopsDelay
      * In case of infinite loop, it returns Infinity
-     * 
+     *
      * @returns {number}
      */
     this._getTotalDuration = function()
@@ -1354,13 +1351,13 @@ var Common = function()
         {
             return Infinity;
         }
-        return (this._duration + ((this._loopsDelay + this._duration) * this._loops)) / this._speed;        
-    };    
+        return (this._duration + ((this._loopsDelay + this._duration) * this._loops)) / this._speed;
+    };
 
 
     /**
      * Assign otpions and event handlers previously parsed
-     * 
+     *
      * @param {object} args
      */
     this._applyArguments = function(args)
@@ -1382,14 +1379,14 @@ var Common = function()
             else if(name in this && this[name] instanceof Function)
             {
                 this[name](args[name]);
-            }            
+            }
         }
     };
 
 
     /**
      * Check if there are public or internal event handlers set for that name
-     * 
+     *
      * @param {string} name
      * @returns {boolean}
      */
@@ -1401,31 +1398,31 @@ var Common = function()
 
     /**
      * execute event handlers bound to the given name
-     * 
+     *
      * @param {string} name
      */
     this._runHandlers = function(name)
-    {                    
+    {
         var i, end, entry;
-        
+
         // run external events first to guarantee correct events order inside timelines
         if(name in this._handlers && this._handlers[name] !== null)
         {
             entry = this._handlers[name];
             entry.callback.apply(entry.scope, entry.params);
-        }        
-        
+        }
+
         // internal handlers
         if(this._coreHandlers[name].length)
         {
             for(i = 0, end = this._coreHandlers[name].length; i < end; i++)
             {
-                
-                entry = this._coreHandlers[name][i];                
-                entry.callback.apply(entry.scope, entry.params);                    
+
+                entry = this._coreHandlers[name][i];
+                entry.callback.apply(entry.scope, entry.params);
             }
-        }                       
-        
+        }
+
     };
 
 
@@ -1433,16 +1430,16 @@ var Common = function()
 
     /**
      * find and return allowed options in a generic object
-     * 
+     *
      * @param {Object} options
      * @param {Boolean} remove - if true, it removes found options from original object
-     * @returns {Object} 
+     * @returns {Object}
      */
     this._parseOptions = function(options, remove)
     {
         var opts = this.type == 'tween'? extendObject({}, optionsMap, tweenOptionsMap) : optionsMap,
             values = {}, name, realName, value;
-        
+
         for(name in options)
         {
             if(options.hasOwnProperty(name) && name in opts)
@@ -1462,7 +1459,7 @@ var Common = function()
                 {
                     delete options[name];
                 }
-                
+
             }
         }
         return values;
@@ -1472,7 +1469,7 @@ var Common = function()
 
     /**
      * Find and return allowed event in a generic object
-     * 
+     *
      * @param {object} options
      * @param {boolean} remove - if true, it removes found handlers and related values (scope and params) from original object
      * @returns {object}
@@ -1515,14 +1512,14 @@ var Common = function()
                 values[realName] = args;
             }
         }
-        return values;        
+        return values;
     };
 
 
     /**
      * Parse time value used for delay and duration settings, return a number that is the time expressed in coreTimeUnit.
      * Fallback to 0 if the given value is not valid
-     * 
+     *
      * @param {string|number} value
      * @returns {number}
      */
@@ -1542,16 +1539,16 @@ var Common = function()
             }
 
             // accept 's' or 'ms' as suffix after the number
-            parts = value.match(/^[\+\-]?\s*([0-9\.]+)\s*(m?s)?$/i);            
+            parts = value.match(/^[\+\-]?\s*([0-9\.]+)\s*(m?s)?$/i);
             if(parts === null || parts[1] === void 0)
             {
                 return 0;
-            }            
+            }
             if(parts[2] !== void 0)
             {
                 unit = parts[2].toLowerCase();
             }
-            value = parts[1];            
+            value = parts[1];
         }
         value = Number(value);
 
@@ -1568,7 +1565,7 @@ var Common = function()
 
     /**
      * Set the target for tween or timeline. It accept both an object or a selector string
-     * 
+     *
      * @param {string|object} value
      * @returns {this}
      */
@@ -1584,6 +1581,7 @@ var Common = function()
 
 
 };
+
 /**
  * Tweene - JavaScript Animation Proxy 
  * 
@@ -2848,15 +2846,15 @@ var TimelineCommon = function()
 
 };
 /**
- * Tweene - JavaScript Animation Proxy 
- * 
+ * Tweene - JavaScript Animation Proxy
+ *
  * @link http://tweene.com
- *   
+ *
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
- * 
- * @license Artistic License 2.0 
+ *
+ * @license Artistic License 2.0
  * See LICENSE.txt for details
- * 
+ *
  */
 
 
@@ -2866,7 +2864,7 @@ var TimelineCommon = function()
  */
 var GsapCommon = function()
 {
-    
+
     this._driverTimeUnit = 's';
 
     this._native = null;
@@ -2875,10 +2873,10 @@ var GsapCommon = function()
 
     this._eventsSet = false;
 
-    
+
     /**
-     * Return the native TimelineMax object used internally by tween and timeline 
-     * 
+     * Return the native TimelineMax object used internally by tween and timeline
+     *
      * @returns {object} - TimelineMax object
      */
     this.getNative = function()
@@ -2890,7 +2888,7 @@ var GsapCommon = function()
 
     /**
      * Get current time position, needed only by info methods like time() and progress()
-     * 
+     *
      * @returns {number}
      */
     this._getPosition = function()
@@ -2904,8 +2902,8 @@ var GsapCommon = function()
 
 
     /**
-     * Get the current percent progress, as a value between 0 and 1 
-     * 
+     * Get the current percent progress, as a value between 0 and 1
+     *
      * @returns {number}
      */
     this._getProgress = function()
@@ -2920,7 +2918,7 @@ var GsapCommon = function()
 
     /**
      * Get the current running status
-     * 
+     *
      * @returns {bolean}
      */
     this._getPaused = function()
@@ -2931,7 +2929,7 @@ var GsapCommon = function()
 
     /**
      * Map Tweene event handlers to native Gsap events
-     * 
+     *
      */
     this._setupEvents = function()
     {
@@ -2965,7 +2963,7 @@ var GsapCommon = function()
 
     /**
      * Propagate a call to the internal native object
-     * 
+     *
      * @param {string} name - method name
      */
     this._callNative = function(name)
@@ -2975,10 +2973,10 @@ var GsapCommon = function()
         this._native[name]();
     };
 
-    
+
     /**
      * Propagate play() to native object
-     * 
+     *
      */
     this._playTween = function()
     {
@@ -2988,7 +2986,7 @@ var GsapCommon = function()
 
     /**
      * Propagate pause() to native object
-     * 
+     *
      */
     this._pauseTween = function()
     {
@@ -2998,7 +2996,7 @@ var GsapCommon = function()
 
     /**
      * Propagate resume() to native object
-     * 
+     *
      */
     this._resumeTween = function()
     {
@@ -3008,7 +3006,7 @@ var GsapCommon = function()
 
     /**
      * Propagate reverse() to native object
-     * 
+     *
      */
     this._reverseTween = function()
     {
@@ -3018,7 +3016,7 @@ var GsapCommon = function()
 
     /**
      * Propagate restart() to native object
-     * 
+     *
      */
     this._restartTween = function()
     {
@@ -3027,26 +3025,26 @@ var GsapCommon = function()
 
 
     /**
-     * Map speed() calls to native timeScale() method 
-     * 
+     * Map speed() calls to native timeScale() method
+     *
      */
     this._speedTween = function()
     {
         if(this._native && !this._parent)
         {
             this._native.timeScale(this._speed);
-        }        
-    };            
+        }
+    };
 
 };
-    
+
 
 /**
- * Gsap Tween Driver 
+ * Gsap Tween Driver
  * @link http://greensock.com/gsap
- * 
+ *
  * @mixes Common, TweenCommon, GsapCommon
- *  
+ *
  */
 Tw.registerDriver('Gsap', 'tween', function(){
     Common.call(this);
@@ -3063,14 +3061,14 @@ Tw.registerDriver('Gsap', 'tween', function(){
         rotate: 'rotation',
         rotateX: 'rotationX',
         rotateY: 'rotationY',
-        rotateZ: 'rotationZ'        
-    };        
+        rotateZ: 'rotationZ'
+    };
 
 
 
     /**
      * Override TweenCommon._reset()
-     * 
+     *
      */
     this._reset = function()
     {
@@ -3086,7 +3084,7 @@ Tw.registerDriver('Gsap', 'tween', function(){
 
     /**
      * Get a Gsap generic Ease object constructed with a cubic bezier easing function
-     * 
+     *
      * @param {array} value
      * @returns {object}
      */
@@ -3094,37 +3092,37 @@ Tw.registerDriver('Gsap', 'tween', function(){
     {
         return new Ease(bezier.apply(null, value));
     };
-    
+
 
     /**
      * Override TweenCommon.prepare()
-     * 
+     *
      * @returns {number}
      */
     this.prepare = function()
-    {                
+    {
         this._prepare();
-        
+
         if(this._native !== null)
         {
             return this;
         }
-                 
-        var 
+
+        var
             data = this._data,
-            from, to, 
+            from, to,
             then = {},
             i, end, tween, name, elem, fromCount, toCount, thenCount = 0;
-        
+
         this._native = new TimelineMax({
             delay: data.delay
         })
             .pause()
             .timeScale(this._speed);
-                          
+
         // with Gsap we do per-property easing with overlapping tweens of the same targets
         data.tween = this._hasMultipleEasing? this._splitEasing(data.tween) : [{tween: data.tween, easing: data.easing}];
-        
+
         for(i = 0, end = data.tween.length; i < end; i++)
         {
             tween = data.tween[i].tween;
@@ -3133,7 +3131,7 @@ Tw.registerDriver('Gsap', 'tween', function(){
             toCount = 0;
             from = {};
             to = {};
-            
+
             for(name in tween)
             {
                 if(tween[name].begin !== null)
@@ -3141,26 +3139,26 @@ Tw.registerDriver('Gsap', 'tween', function(){
                     fromCount ++;
                     from[name] = tween[name].begin;
                 }
-                
+
                 if(tween[name].end !== null)
                 {
                     toCount ++;
                     to[name] = tween[name].end;
-                }                
-                
+                }
+
                 if(tween[name].then !== null)
-                {                   
+                {
                     thenCount ++;
                     then[name] = tween[name].then;
                 }
-            }            
-            
+            }
+
             var values = (this._hasEnd)? to : from;
             if(data.duration)
             {
                 values.ease = this._getRealEasing(data.tween[i].easing);
             }
-            
+
             // in order to achieve almost the same behavior in all the drivers, it runs always with immediateRender = false
             values.immediateRender = false;
             values.paused = true;
@@ -3173,9 +3171,9 @@ Tw.registerDriver('Gsap', 'tween', function(){
             {
                 values.yoyo = true;
             }
-            
+
             // add display and visibility properties
-            
+
             if(toCount)
             {
                 if(this._display.end)
@@ -3193,7 +3191,7 @@ Tw.registerDriver('Gsap', 'tween', function(){
                     {
                         to.visibility = this._visibility.end;
                     }
-                }                
+                }
             }
 
             var duration = Math.max(0, data.duration - 0.000001);
@@ -3207,7 +3205,7 @@ Tw.registerDriver('Gsap', 'tween', function(){
                 {
                     from.visibility = this._visibility.begin;
                 }
-                
+
                 if(toCount)
                 {
                     elem = TweenMax.fromTo(this._target, duration, from, to);
@@ -3225,20 +3223,20 @@ Tw.registerDriver('Gsap', 'tween', function(){
             {
                 elem = TweenMax.to(this._target, duration, {opacity: '+=0'});
             }
-            
+
 
             // we add events only to the first tween
             if(i === 0)
             {
                 this._eventsTarget = elem;
             }
-            
+
             // avoid from bug when nested inside timelines
             // @link http://greensock.com/forums/topic/10418-fromto-seems-to-ignore-immediaterender-false-when-nested/
             this._native.add(elem, 0.000001);
-            elem.paused(false);            
+            elem.paused(false);
         }
-        
+
         if(this._display.then)
         {
             thenCount++;
@@ -3249,39 +3247,39 @@ Tw.registerDriver('Gsap', 'tween', function(){
             thenCount++;
             then.visibility = this._visibility.then;
         }
-        
+
         if(thenCount)
         {
             this._native.to(this._target, 0, then, data.duration);
         }
-        
+
         this._setupEvents();
-        
+
         return this._getTotalDuration();
     };
-                                         
-    
+
+
 });
-        
-                
-  
+
+
+
 /**
- * Gsap Timeline Driver 
- * 
+ * Gsap Timeline Driver
+ *
  * @mixes Common, TimelineCommon, GsapCommon
- *  
+ *
  */
 Tw.registerDriver('Gsap', 'timeline', function(){
     Common.call(this);
     TimelineCommon.call(this);
-    GsapCommon.call(this);    
+    GsapCommon.call(this);
 
     this._innerNative = null;
-    
-    
+
+
     /**
      * Override TimelineCommon.prepare()
-     * 
+     *
      * @returns {number}
      */
     this.prepare = function()
@@ -3289,52 +3287,52 @@ Tw.registerDriver('Gsap', 'timeline', function(){
         if(this._ready)
         {
             return this;
-        }        
-        
+        }
+
         var values = {paused: true};
         if(this._loops)
         {
             values.repeat = this._loops;
             values.repeatDelay = convertTime(this._loopsDelay, this._coreTimeUnit, this._driverTimeUnit);
         }
-        
+
         if(this._yoyo)
         {
             values.yoyo = true;
         }
-        
+
         var _native = new TimelineMax(values);
-        
+
         if(this._parent)
         {
             this._native = _native;
         }
         else
-        {        
-            this._native = new TimelineMax({paused: true, delay: convertTime(this._delay, this._coreTimeUnit, this._driverTimeUnit)})           
+        {
+            this._native = new TimelineMax({paused: true, delay: convertTime(this._delay, this._coreTimeUnit, this._driverTimeUnit)})
                 .add(_native);
             _native.paused(false);
         }
-        
+
         this._innerNative = _native;
         this._native.timeScale(this._speed);
         this._eventsTarget = _native;
         this._setupEvents();
-        
+
         this._mergeChildren();
         this._ready = true;
-        return this._getTotalDuration();        
+        return this._getTotalDuration();
     };
-    
-    
+
+
     /**
      * Override TimelineCommon._reset()
-     * 
+     *
      */
     this._reset = function()
     {
         this._offset = 0;
-        this._cursor = null;                
+        this._cursor = null;
         if(this._native)
         {
             this._native.clear();
@@ -3345,22 +3343,22 @@ Tw.registerDriver('Gsap', 'timeline', function(){
         this._eventsTarget = null;
         this._eventsSet = false;
     };
-    
-        
+
+
     /**
      * Override TimelineCommon._mergeLabel()
-     * 
+     *
      */
     this._mergeLabel = function(child, begin)
     {
-        // nop        
+        // nop
     };
-    
-    
+
+
     /**
      * Override TimelineCommon._mergeTweenable()
-     * 
-     */    
+     *
+     */
     this._mergeTweenable = function(child, begin, end)
     {
         if(begin != Infinity)
@@ -3370,29 +3368,29 @@ Tw.registerDriver('Gsap', 'timeline', function(){
             childNative.paused(false);
         }
     };
-    
-    
+
+
     /**
      * Override TimelineCommon._mergeCallback()
-     * 
-     */    
+     *
+     */
     this._mergeCallback = function(child, begin, end)
     {
         if(begin != Infinity)
         {
             if(child.isPause)
             {
-                this._native.addPause(convertTime(begin + this._delay, this._coreTimeUnit, this._driverTimeUnit), child.resume, [], child);                                
+                this._native.addPause(convertTime(begin + this._delay, this._coreTimeUnit, this._driverTimeUnit), child.resume, [], child);
             }
             else
             {
-                this._innerNative.call(child.resume, [], child, convertTime(begin, this._coreTimeUnit, this._driverTimeUnit));                
-            }            
+                this._innerNative.call(child.resume, [], child, convertTime(begin, this._coreTimeUnit, this._driverTimeUnit));
+            }
         }
     };
-            
-    
-        
+
+
+
 });
 
 

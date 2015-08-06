@@ -1,13 +1,13 @@
 /**
- * Tweene - JavaScript Animation Proxy 
- * 
+ * Tweene - JavaScript Animation Proxy
+ *
  * @link http://tweene.com
- *   
+ *
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
- * 
- * @license Artistic License 2.0 
+ *
+ * @license Artistic License 2.0
  * See LICENSE.txt for details
- * 
+ *
  */
 
 
@@ -15,7 +15,7 @@
 /**
  * Vars and methods common to every tween and timeline, whatever is the driver used
  * @mixin
- * 
+ *
  */
 var Common = function()
 {
@@ -23,7 +23,7 @@ var Common = function()
     this._id = ++ Tw._idCounter;
     this._coreTimeUnit = Tw._coreTimeUnit;
     this._timeUnit = Tw.defaultTimeUnit;
-    
+
     this._parent = null;
 
     this._target = null;
@@ -74,7 +74,7 @@ var Common = function()
     /**
      * Play the animation in forward direction
      * @link http://tweene.com/docs/#play
-     * 
+     *
      * @returns {this}
      */
     this.play = function()
@@ -88,22 +88,22 @@ var Common = function()
     /**
      * Play the animation in backward direction from its current position
      * @link http://tweene.com/docs/#reverse
-     * 
+     *
      * @returns {this}
      */
     this.reverse = function()
     {
         this._fwd = false;
         this._reverseTween();
-        return this;        
-    };              
+        return this;
+    };
 
 
     /**
      * Pause the animation on its current state.
      * @link http://tweene.com/docs/#pause
      *
-     * @returns {this} 
+     * @returns {this}
      */
     this.pause = function()
     {
@@ -112,28 +112,28 @@ var Common = function()
             this._pauseTween();
         }
         return this;
-    };        
-
-
-    /** 
-     * Resume a previously paused animation without affecting the current direction
-     * @link http://tweene.com/docs/#resume
-     * 
-     * @returns {this}
-     */
-    this.resume = function()
-    {        
-        this._resumeTween();        
-        return this;
-    };                    
+    };
 
 
     /**
-     * Restart animation in forward direction. 
-     * Reset also loops counter. 
+     * Resume a previously paused animation without affecting the current direction
+     * @link http://tweene.com/docs/#resume
+     *
+     * @returns {this}
+     */
+    this.resume = function()
+    {
+        this._resumeTween();
+        return this;
+    };
+
+
+    /**
+     * Restart animation in forward direction.
+     * Reset also loops counter.
      * Initial delay is performed only on the very first start, not on restart.
      * @link http://tweene.com/docs/#restart
-     * 
+     *
      * @returns {this}
      */
     this.restart = function()
@@ -145,23 +145,23 @@ var Common = function()
 
     /**
      * Go back to initial or final position accordingly to the value of direction. Intended to be used internally, you don't have to call this directly.
-     * 
+     *
      * @returns {this}
      */
     this.back = function()
     {
         this._backTween(this._localFwd? 'begin' : 'end');
         return this;
-    };        
+    };
 
-    
+
     /**
      * Get or set the speed of the current tween/timeline. Normal speed is 1, so 2 is double speed and 0.5 is half speed.
      * It's usable both before and during the animation.
      * It Accepts also string shortcut defined in Tweene.speeds
      * @link http://tweene.com/docs/#speedControl
-     * 
-     * @param {number} [value] 
+     *
+     * @param {number} [value]
      * @returns {number|this}
      */
     this.speed = function(value)
@@ -171,41 +171,41 @@ var Common = function()
             return this._speed;
         }
 
-        value = parseSpeed(value);        
+        value = parseSpeed(value);
         if(value != this._speed)
-        {        
+        {
             this._speed = value;
             this._speedTween();
         }
-        return this;        
+        return this;
     };
 
 
     /**
-     * Alias for speed() 
+     * Alias for speed()
      * @see speed
-     * 
+     *
      */
     this.timeScale = function()
     {
         return this.speed.apply(this, arguments);
-    };    
+    };
 
 
     /**
      * Return the current playhead time (a value between 0 and duration) in time unit set in Tweene.defaultTimeUnit
-     * 
+     *
      * @returns {number}
      */
     this.time = function()
     {
-        return Math.round(convertTime(this._getPosition(), this._coreTimeUnit, this._timeUnit) * 1000) / 1000;        
+        return Math.round(convertTime(this._getPosition(), this._coreTimeUnit, this._timeUnit) * 1000) / 1000;
     };
 
 
     /**
      * Return the current playhead position in percent (a value between 0 and 1)
-     * 
+     *
      * @returns {number}
      */
     this.progress = function()
@@ -215,11 +215,11 @@ var Common = function()
 
 
     /**
-     * Return true if the animation is currently paused 
+     * Return true if the animation is currently paused
      * Tt's true also when the animation is finished or not yet started
-     * 
+     *
      * @returns {boolean}
-     */        
+     */
     this.paused = function()
     {
         return this._getPaused();
@@ -227,8 +227,8 @@ var Common = function()
 
 
     /**
-     * Return true if the animation direction is currently reversed 
-     * 
+     * Return true if the animation direction is currently reversed
+     *
      * @returns {boolean}
      */
     this.reversed = function()
@@ -239,12 +239,12 @@ var Common = function()
 
     /**
      * Get/Set the tween duration (only get available for timeline)
-     * Accept numeric values interpreted as Tweene.defaultTimeUnit 
-     * or string with unit suffix, so '500ms' or '0.5s' 
-     * 
+     * Accept numeric values interpreted as Tweene.defaultTimeUnit
+     * or string with unit suffix, so '500ms' or '0.5s'
+     *
      * @param {string|number} [value]
-     * @returns {this|number} 
-     * 
+     * @returns {this|number}
+     *
      */
     this.duration = function(value)
     {
@@ -270,11 +270,11 @@ var Common = function()
     /**
      * Get the tween/timeline total duration including loops and loopsDelay, in the timeUnit set in Tweene.defaultTimeUnit
      * In case of infinite loop, it returns Infinity
-     * 
+     *
      * @returns {number}
      */
     this.totalDuration = function()
-    {        
+    {
         if(this.type == 'timeline')
         {
             this.prepare();
@@ -286,7 +286,7 @@ var Common = function()
     /**
      * Set the animation target (jquery or dom objects commonly, accordingly to the specific animation library in use)
      * @link http://tweene.com/docs/#target
-     * 
+     *
      * @param {string|object} [value]
      * @returns {string|object|this}
      */
@@ -303,10 +303,10 @@ var Common = function()
 
     /**
      * Get/Set the tween initial delay
-     * Accept numeric values interpreted as Tweene.defaultTimeUnit 
-     * or string with unit suffix, so '500ms' or '0.5s' 
+     * Accept numeric values interpreted as Tweene.defaultTimeUnit
+     * or string with unit suffix, so '500ms' or '0.5s'
      * @link http://tweene.com/docs/#delay
-     * 
+     *
      * @param {string|number} [value]
      * @returns {number|this}
      */
@@ -327,7 +327,7 @@ var Common = function()
      * Set the number of animation repeats. Default is 0, so loops(1) will execute the tween/timeline twice.
      * A value of -1 means 'Infinite loop'.
      * @link http://tweene.com/docs/#loops
-     * 
+     *
      * @param {number} value
      * @returns {this}
      */
@@ -348,7 +348,7 @@ var Common = function()
         }
         this._loops = value;
         this.invalidate();
-        return this;        
+        return this;
     };
 
 
@@ -356,7 +356,7 @@ var Common = function()
      * Enable/disable yoyo behavior or retrieve its status.
      * Yoyo makes sense only when used with looops.
      * @link http://tweene.com/docs/#yoyoEffect
-     * 
+     *
      * @param {boolean} [value]
      * @returns {boolean|this}
      */
@@ -373,10 +373,10 @@ var Common = function()
 
     /**
      * Get/Set the value of delay before each loop iteration
-     * Accept numeric values interpreted as Tweene.defaultTimeUnit 
-     * or string with unit suffix, so '500ms' or '0.5s' 
+     * Accept numeric values interpreted as Tweene.defaultTimeUnit
+     * or string with unit suffix, so '500ms' or '0.5s'
      * @link http://tweene.com/docs/#loopsDelay
-     * 
+     *
      * @param {string|number} [value]
      * @returns {number|this}
      */
@@ -388,40 +388,40 @@ var Common = function()
         }
         this._loopsDelay = this._parseTime(value);
         this.invalidate();
-        return this;        
+        return this;
     };
 
 
     /**
-     * Add event handler. 
-     * First param is the event name, 
-     * second param is the callback function, 
+     * Add event handler.
+     * First param is the event name,
+     * second param is the callback function,
      * third (optional) array of params to pass to the callback
      * fourth (optional) scope for the callback (the default is the tween / timeline object that will raise the event)
-     * 
+     *
      * Available events:
-     *  begin | onBegin | start | onStart: 
+     *  begin | onBegin | start | onStart:
      *      raised on the animation start
-     *      
-     *  end | onEnd | complete | onComplete | finish | onFinish | done: 
-     *      raised on the animation end, after all loops (a tween with infinite loops will never fire this event)  
-     *      
-     *  reverse | onReverse | onReverseComplete: 
+     *
+     *  end | onEnd | complete | onComplete | finish | onFinish | done:
+     *      raised on the animation end, after all loops (a tween with infinite loops will never fire this event)
+     *
+     *  reverse | onReverse | onReverseComplete:
      *      raised when the animation ends in backward direction, so at the start position.
-     *           
+     *
      *  progress | onProgress | update | onUpdate:
      *      fires periodically during the tween. The frequency of the call
-     *      could be different for any animation library used. 
-     *      When the library does not offer native progress event, it is emulated 
+     *      could be different for any animation library used.
+     *      When the library does not offer native progress event, it is emulated
      *      via RequestAnimationFrame
-     *      
+     *
      *  loop | onLoop | onRepeat:
      *      raised on each loop iteration
-     *      
-     *      
+     *
+     *
      * @link http://tweene.com/docs/#events
-     *  
-     * @param {string} name 
+     *
+     * @param {string} name
      * @param {function|null} callback - pass null to remove a previously set event handler
      * @param {array} [params]
      * @param {object} [scope]
@@ -451,7 +451,7 @@ var Common = function()
 
     /**
      * Used internally for register core event handlers
-     * 
+     *
      * @param {string} name
      * @param {string} id
      * @param {function} callback
@@ -461,7 +461,7 @@ var Common = function()
      * @returns {this}
      */
     this.setCoreHandler = function(name, id, callback, scope, params, priority)
-    {             
+    {
         this.unsetCoreHandler(name, id);
         var entry = {id: id, callback: callback, scope: scope || this, params: params || []};
 
@@ -477,10 +477,10 @@ var Common = function()
         return this;
     };
 
-    
+
     /**
      * Used internally for unregister core event handlers
-     * 
+     *
      * @param {string} name
      * @param {string} id
      * @returns {this}
@@ -501,7 +501,7 @@ var Common = function()
 
     /**
      * Reset _ready flag every time that one of the internal properties that need to be processed before running is changed
-     * 
+     *
      * @returns {this}
      */
     this.invalidate = function()
@@ -520,7 +520,7 @@ var Common = function()
 
     /**
      * Get/Set the parent object. The parent could be a timeline or a tween if the child is a DummyTween used for emulate delay
-     * 
+     *
      * @param {object} [value]
      * @returns {this|object}
      */
@@ -538,7 +538,7 @@ var Common = function()
 
     /**
      * Get the internal unique identifier
-     * 
+     *
      * @returns {number}
      */
     this.id = function()
@@ -549,7 +549,7 @@ var Common = function()
 
     /**
      * Set options for tween or timeline
-     * 
+     *
      * @param {object} options
      * @returns {this}
      */
@@ -562,23 +562,23 @@ var Common = function()
         this._applyArguments(opts);
         return this;
     };
-    
+
 
     /**
      * Return the resulting speed of the object
-     * 
+     *
      * @returns {number}
      */
     this.getRealSpeed = function()
     {
         return this._parent? this._parent.getRealSpeed() * this._speed : this._speed;
-    };    
+    };
 
 
     /**
      * Get the tween/timeline total duration including loops and loopsDelay
      * In case of infinite loop, it returns Infinity
-     * 
+     *
      * @returns {number}
      */
     this._getTotalDuration = function()
@@ -587,13 +587,13 @@ var Common = function()
         {
             return Infinity;
         }
-        return (this._duration + ((this._loopsDelay + this._duration) * this._loops)) / this._speed;        
-    };    
+        return (this._duration + ((this._loopsDelay + this._duration) * this._loops)) / this._speed;
+    };
 
 
     /**
      * Assign otpions and event handlers previously parsed
-     * 
+     *
      * @param {object} args
      */
     this._applyArguments = function(args)
@@ -615,14 +615,14 @@ var Common = function()
             else if(name in this && this[name] instanceof Function)
             {
                 this[name](args[name]);
-            }            
+            }
         }
     };
 
 
     /**
      * Check if there are public or internal event handlers set for that name
-     * 
+     *
      * @param {string} name
      * @returns {boolean}
      */
@@ -634,31 +634,31 @@ var Common = function()
 
     /**
      * execute event handlers bound to the given name
-     * 
+     *
      * @param {string} name
      */
     this._runHandlers = function(name)
-    {                    
+    {
         var i, end, entry;
-        
+
         // run external events first to guarantee correct events order inside timelines
         if(name in this._handlers && this._handlers[name] !== null)
         {
             entry = this._handlers[name];
             entry.callback.apply(entry.scope, entry.params);
-        }        
-        
+        }
+
         // internal handlers
         if(this._coreHandlers[name].length)
         {
             for(i = 0, end = this._coreHandlers[name].length; i < end; i++)
             {
-                
-                entry = this._coreHandlers[name][i];                
-                entry.callback.apply(entry.scope, entry.params);                    
+
+                entry = this._coreHandlers[name][i];
+                entry.callback.apply(entry.scope, entry.params);
             }
-        }                       
-        
+        }
+
     };
 
 
@@ -666,16 +666,16 @@ var Common = function()
 
     /**
      * find and return allowed options in a generic object
-     * 
+     *
      * @param {Object} options
      * @param {Boolean} remove - if true, it removes found options from original object
-     * @returns {Object} 
+     * @returns {Object}
      */
     this._parseOptions = function(options, remove)
     {
         var opts = this.type == 'tween'? extendObject({}, optionsMap, tweenOptionsMap) : optionsMap,
             values = {}, name, realName, value;
-        
+
         for(name in options)
         {
             if(options.hasOwnProperty(name) && name in opts)
@@ -695,7 +695,7 @@ var Common = function()
                 {
                     delete options[name];
                 }
-                
+
             }
         }
         return values;
@@ -705,7 +705,7 @@ var Common = function()
 
     /**
      * Find and return allowed event in a generic object
-     * 
+     *
      * @param {object} options
      * @param {boolean} remove - if true, it removes found handlers and related values (scope and params) from original object
      * @returns {object}
@@ -748,14 +748,14 @@ var Common = function()
                 values[realName] = args;
             }
         }
-        return values;        
+        return values;
     };
 
 
     /**
      * Parse time value used for delay and duration settings, return a number that is the time expressed in coreTimeUnit.
      * Fallback to 0 if the given value is not valid
-     * 
+     *
      * @param {string|number} value
      * @returns {number}
      */
@@ -775,16 +775,16 @@ var Common = function()
             }
 
             // accept 's' or 'ms' as suffix after the number
-            parts = value.match(/^[\+\-]?\s*([0-9\.]+)\s*(m?s)?$/i);            
+            parts = value.match(/^[\+\-]?\s*([0-9\.]+)\s*(m?s)?$/i);
             if(parts === null || parts[1] === void 0)
             {
                 return 0;
-            }            
+            }
             if(parts[2] !== void 0)
             {
                 unit = parts[2].toLowerCase();
             }
-            value = parts[1];            
+            value = parts[1];
         }
         value = Number(value);
 
@@ -801,7 +801,7 @@ var Common = function()
 
     /**
      * Set the target for tween or timeline. It accept both an object or a selector string
-     * 
+     *
      * @param {string|object} value
      * @returns {this}
      */

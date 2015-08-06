@@ -4,15 +4,15 @@ var func = function(window, undef) {
 'use strict'; 
 
 /**
- * Tweene - JavaScript Animation Proxy 
- * @version 0.5.8
+ * Tweene - JavaScript Animation Proxy
+ * @version 0.5.9
  * @link http://tweene.com
- *   
+ *
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
- * 
- * @license Artistic License 2.0 
+ *
+ * @license Artistic License 2.0
  * See LICENSE.txt for details
- * 
+ *
  */
 
 /* jshint -W008 */
@@ -35,10 +35,10 @@ var compoundTransforms = transformProperties.slice(0, 8);
 
 // compound properties we parse to obtain a list of key - value couples
 var compoundNames = 'margin|padding|borderColor|borderWidth|borderRadius'.split('|');
-var compoundDirections = ['Top', 'Right', 'Bottom', 'Left'];    
+var compoundDirections = ['Top', 'Right', 'Bottom', 'Left'];
 var radiusDirections = ['TopLeft', 'TopRight', 'BottomRight', 'BottomLeft'];
 
-// base name and aliases for event names. Those with an empty string as value are the names used internally  
+// base name and aliases for event names. Those with an empty string as value are the names used internally
 var handlersMap = {
     begin: '',
     end: '',
@@ -61,10 +61,10 @@ var handlersMap = {
     onRepeat: 'loop',
     onReverse: 'reverse',
     onReverseComplete: 'reverse'
-};    
+};
 
 
-// base name and aliases for option names. Those with an empty string as value are the names used internally  
+// base name and aliases for option names. Those with an empty string as value are the names used internally
 var optionsMap = {
     delay: '',
     loops: '',
@@ -81,12 +81,12 @@ var optionsMap = {
 
 // base name and aliases for tween option names
 var tweenOptionsMap = {
-    easing: '', 
+    easing: '',
     duration: '',
     paused: '',
     to: '',
     from: '',
-    then: '',    
+    then: '',
     ease: 'easing'
 };
 
@@ -100,7 +100,7 @@ var easings = {
     'ease-in-out': [.42, 0, .58, 1],
     'in': [.42, 0, 1, 1],
     out: [0, 0, .58, 1],
-    'in-out': [.42, 0, .58, 1],            
+    'in-out': [.42, 0, .58, 1],
     snap: [0, 1, .5, 1],
     easeInCubic: [.550,.055,.675,.190],
     easeOutCubic: [.215,.61,.355,1],
@@ -125,7 +125,7 @@ var easings = {
     easeInOutSine: [.445,.05,.55,.95],
     easeInBack: [.6,-.28,.735,.045],
     easeOutBack: [.175, .885,.32,1.275],
-    easeInOutBack: [.68,-.55,.265,1.55]                        
+    easeInOutBack: [.68,-.55,.265,1.55]
 };
 
 
@@ -144,35 +144,35 @@ var speeds = {
 
 
 
-function isFunction(value) 
+function isFunction(value)
 {
     return typeof value == 'function';
 }
 
 
 
-function isNumber(value) 
+function isNumber(value)
 {
     return typeof value == 'number' || (value && typeof value == 'object' && Object.prototype.toString.call(value) == '[object Number]') || false;
 }
 
 
 
-function isString(value) 
+function isString(value)
 {
     return typeof value == 'string' || (value && typeof value == 'object' && Object.prototype.toString.call(value) == '[object String]') || false;
 }
 
 
 
-var isArray = Array.isArray || function(value) 
-{        
+var isArray = Array.isArray || function(value)
+{
     return value && typeof value == 'object' && typeof value.length == 'number' && Object.prototype.toString.call(value) == '[object Array]';
 };
 
 
 
-function isObject(value) 
+function isObject(value)
 {
     var type = typeof value;
     return type === 'function' || type === 'object' && !!value;
@@ -182,7 +182,7 @@ function isObject(value)
 /*
  * @link http://stackoverflow.com/questions/18082/validate-decimal-numbers-in-javascript-isnumeric
  */
-function isNumeric(value) 
+function isNumeric(value)
 {
     return !isArray(value) && (value - parseFloat(value) + 1) >= 0;
 }
@@ -204,12 +204,12 @@ function isEmpty(obj)
 
 function seemsPlainObject(value)
 {
-    return  isObject(value) && !(value instanceof Function) && value.constructor == Object;        
+    return  isObject(value) && !(value instanceof Function) && value.constructor == Object;
 }
 
 
 
-function extendObject(obj) 
+function extendObject(obj)
 {
     if (!isObject(obj))
     {
@@ -217,10 +217,10 @@ function extendObject(obj)
     }
 
     var source, name, i, length;
-    for (i = 1, length = arguments.length; i < length; i++) 
+    for (i = 1, length = arguments.length; i < length; i++)
     {
         source = arguments[i];
-        for (name in source) 
+        for (name in source)
         {
             obj[name] = source[name];
         }
@@ -229,7 +229,7 @@ function extendObject(obj)
 }
 
 
-function cloneObject(obj, deep) 
+function cloneObject(obj, deep)
 {
     if (isFunction(obj) || !isObject(obj))
     {
@@ -237,7 +237,7 @@ function cloneObject(obj, deep)
     }
     if(isArray(obj))
     {
-        obj = obj.slice();           
+        obj = obj.slice();
         if(deep)
         {
             for(var i = 0, end = obj.length; i < end; i++)
@@ -266,7 +266,7 @@ function cloneObject(obj, deep)
 
 
 
-function keys(obj) 
+function keys(obj)
 {
     if(Object.keys)
     {
@@ -285,13 +285,13 @@ function keys(obj)
 
 
 // simplified version of Array.indexOf polyfill
-function inArray(array, search) 
+function inArray(array, search)
 {
     if(!isArray(array))
     {
         throw 'expected an array as first param';
     }
-    
+
     if(array.indexOf)
     {
         return array.indexOf(search);
@@ -321,7 +321,7 @@ function toArray(args, pos)
 
 /**
  * convert time from seconds to milliseconds and vice versa
- * 
+ *
  * @param {number} value
  * @param {string} fromUnit - 's' | 'ms'
  * @param {string} toUnit - 's' | 'ms'
@@ -340,30 +340,30 @@ function convertTime(value, fromUnit, toUnit)
 
 /*
  *  Based on Bez http://github.com/rdallasgray/bez
- * 
+ *
  * Copyright Robert Dallas Gray. All rights reserved.
  * Provided under the FreeBSD license: https://github.com/rdallasgray/bez/blob/master/LICENSE.txt
-*/   
-function bezier(x1, y1, x2, y2) 
+*/
+function bezier(x1, y1, x2, y2)
 {
     var p1 = [x1, y1], p2 = [x2, y2],
         A = [null, null], B = [null, null], C = [null, null],
 
-        bezCoOrd = function(time, ax) 
+        bezCoOrd = function(time, ax)
         {
             C[ax] = 3 * p1[ax]; B[ax] = 3 * (p2[ax] - p1[ax]) - C[ax]; A[ax] = 1 - C[ax] - B[ax];
             return time * (C[ax] + time * (B[ax] + time * A[ax]));
         },
 
-        xDeriv = function(time) 
+        xDeriv = function(time)
         {
             return C[0] + time * (2 * B[0] + 3 * A[0] * time);
         },
 
-        xForT = function(time) 
+        xForT = function(time)
         {
             var x = time, i = 0, z;
-            while (++i < 14) 
+            while (++i < 14)
             {
                 z = bezCoOrd(x, 0) - time;
                 if (Math.abs(z) < 1e-3) break;
@@ -380,14 +380,14 @@ function bezier(x1, y1, x2, y2)
 
 /**
  * take as input compound properties defined as a space separated string of values and return the list of single value properties
- * 
+ *
  *   padding: 5 => paddingTop: 5, paddingRight: 5, paddingBottom: 5, paddingLeft: 5
- *   border-width: 2px 1px => borderTopWidth: 2px, borderRightWidth: 1px, borderBottomWidth: 2px, borderLeftWidth: 1px 
- * 
+ *   border-width: 2px 1px => borderTopWidth: 2px, borderRightWidth: 1px, borderBottomWidth: 2px, borderLeftWidth: 1px
+ *
  * @param {string} name
  * @param {string} value
  * @returns {object}
- */    
+ */
 function compoundMapping(name, value)
 {
     var parts, nameParts, prefix, suffix, dirs, values = {}, easing, i;
@@ -400,9 +400,9 @@ function compoundMapping(name, value)
     {
         easing = null;
     }
-                    
+
     parts = String(value).split(/\s+/);
-    
+
     switch(parts.length)
     {
         case 1: parts = [parts[0], parts[0], parts[0], parts[0]]; break;
@@ -413,9 +413,9 @@ function compoundMapping(name, value)
     nameParts = decamelize(name).split('-');
     prefix = nameParts[0];
     suffix = nameParts.length > 1? nameParts[1].substr(0, 1).toUpperCase() + nameParts[1].substr(1) : '';
-    
+
     dirs = name == 'borderRadius'? radiusDirections : compoundDirections;
-    
+
     for(i = 0; i < 4; i++)
     {
         values[prefix + dirs[i] + suffix] = easing? [parts[i], easing] : parts[i];
@@ -426,10 +426,10 @@ function compoundMapping(name, value)
 
 /**
  *  split commpound transform values
- *  
+ *
  *   scale: 1.2 => scaleX: 1.2, scaleY: 1.2
  *   rotate3d: 30, 60, 40 => rotateX: 30, rotateY: 60, rotateZ: 40
- *   
+ *
  * @param {string} name
  * @param {string} value
  * @returns {object}
@@ -446,10 +446,10 @@ function transformMapping(name, value)
     {
         easing = null;
     }
-                    
+
     parts = String(value).split(/\s*,\s*/);
     baseName = name.indexOf('3') !== -1? name.substr(0, name.length - 2) : name;
-    
+
     if(name == 'rotate3d')
     {
         if(parts.length == 4)
@@ -466,18 +466,18 @@ function transformMapping(name, value)
     {
         switch(parts.length)
         {
-            // for rotations, a single value is passed as Z-value, while for other transforms it is applied to X and Y       
+            // for rotations, a single value is passed as Z-value, while for other transforms it is applied to X and Y
             case 1:
                 parts = baseName == 'rotate' || baseName == 'rotation'? [null, null, parts[0]] : [parts[0], parts[0], null];
             break;
 
             case 2:
                 parts = [parts[0], parts[1], null];
-            break;                
+            break;
         }
-        
+
     }
-            
+
     for(var i = 0; i < dirs.length; i++)
     {
         if(parts[i] !== null)
@@ -488,7 +488,7 @@ function transformMapping(name, value)
     return values;
 }
 
-    
+
 
 function isTransformProperty(name)
 {
@@ -497,7 +497,7 @@ function isTransformProperty(name)
 
 
 // border-bottom-width -> borderBottomWidth
-function camelize(name) 
+function camelize(name)
 {
     return name.replace(/(\-[a-z])/g, function(value) {
         return value.substr(1).toUpperCase();
@@ -508,14 +508,14 @@ function camelize(name)
 // borderBottomWidth -> border-bottom-width
 function decamelize(name)
 {
-    return name.replace(/([A-Z])/g, '-$1').toLowerCase();    
+    return name.replace(/([A-Z])/g, '-$1').toLowerCase();
 }
 
 
 /**
- * accept a speed name shortcuts or a number and give back an acceptable positive value. 
+ * accept a speed name shortcuts or a number and give back an acceptable positive value.
  * Fallback to 1 if value is out of valid range
- * 
+ *
  * @param {string|number} value
  * @returns {number}
  */
@@ -539,29 +539,29 @@ function parseSpeed(value)
 
 /**
  * Tweene global class, is the unique identifier exported
- *  
- * You will never need to instantiate a Tweene object. You have to use Tweene static methods 
- * in order to obtain instances of tween and timeline objects of the different drivers 
- *   
+ *
+ * You will never need to instantiate a Tweene object. You have to use Tweene static methods
+ * in order to obtain instances of tween and timeline objects of the different drivers
+ *
  * @class
- *  
+ *
  */
-var Tweene = function() 
+var Tweene = function()
 {
     var _self = this;
-    
+
     // used for generate unique identifier for any tweene object (tweens, timelines, callbacks and labels)
     this._idCounter = 0;
-    
+
     // internally, all time values use this unit
-    this._coreTimeUnit = 'ms';   
-    
+    this._coreTimeUnit = 'ms';
+
     // time unit used when pure numbers are passed as delay or duration values. Users can change this value any time
     // when the user requires only GSAP driver, it defaults to 's' in order to mimic the library native API
     this.defaultTimeUnit = 'ms';
-        
-    this._macros = {};    
-                        
+
+    this._macros = {};
+
     this.easings = easings;
 
     this.durations = durations;
@@ -571,9 +571,9 @@ var Tweene = function()
     this.defaultDriver = 'jquery';
 
     this.defaultEasing = 'easeOutQuad';
-    
-    this.defaultDuration = '400ms';        
-    
+
+    this.defaultDuration = '400ms';
+
     // container for registered drivers
     var _drivers = {
             tween: {},
@@ -583,7 +583,7 @@ var Tweene = function()
 
         /**
          * Create a tween or timeline object of the specified driver. If driverName is not given, it fallbacks to default driver
-         * 
+         *
          * @param {string} 'tween' or 'timeline'
          * @param {string} [driverName] - one of the registered driver's name
          * @returns {object} tween or timeline object
@@ -592,21 +592,21 @@ var Tweene = function()
         {
             var d, i;
             driverName = (driverName? driverName : _self.defaultDriver).toLowerCase();
-            
+
             if(driverName in _drivers[type])
             {
-                d = _drivers[type][driverName];                
+                d = _drivers[type][driverName];
                 i = new d();
                 i.driverName = driverName;
                 return i;
             }
             throw 'Driver ' + name + ' not found';
         },
-        
-        
+
+
         /**
          * Common method used inside from(), to() and fromTo() to create a tween and pass arguments to it
-         * 
+         *
          * @param {arguments} args - list of arguments passed to original public method
          * @param {string} method - 'from' | 'to' | 'fromTo'
          * @returns {object} - return a tween object
@@ -620,20 +620,20 @@ var Tweene = function()
                 tw.target(args.shift())[method].apply(tw, args);
             }
 
-            return tw._immediateStart? tw.play() : tw;        
+            return tw._immediateStart? tw.play() : tw;
         };
 
 
     /**
-     * Register an animation driver 
-     * 
+     * Register an animation driver
+     *
      * @param {string} name - name of the driver
      * @param {string} type - 'tween' | 'timeline'
      * @param {function} construct - constructor function that defines the driver class
      * @returns {Tweene}
      */
     this.registerDriver = function(name, type, construct)
-    {        
+    {
         type = type.toLowerCase();
         if(type != 'tween')
         {
@@ -642,12 +642,12 @@ var Tweene = function()
         _drivers[type][name.toLowerCase()] = construct;
         return this;
     };
-    
-    
+
+
     /**
      * Define a macro for tween objects
      * @link http://tweene.com/docs/#macro
-     * 
+     *
      * @param {string} name
      * @param {function} macro - inside the function, 'this' refers to the tween object
      * @returns {Tweene}
@@ -657,12 +657,12 @@ var Tweene = function()
         this._macros[name] = macro;
         return this;
     };
-           
-       
+
+
     /**
      * Return an instance of a tween object
      * @link http://tweene.com/docs/#createTween
-     * 
+     *
      * @param {object|string} [target] jquery object or string selector of the dom element(s) to be animated
      * @param {string} [driver]
      * @returns {object}
@@ -676,7 +676,7 @@ var Tweene = function()
 
     /**
      * Apply instantly the properties values to the target
-     * 
+     *
      * @param {object|string} target
      * @param {object} values - CSS property - value map
      * @returns {unresolved}
@@ -691,47 +691,47 @@ var Tweene = function()
      * Create a tween object for a 'to' animation and pass the arguments to it. First argument is always the target.
      * If you don't set paused: true in the options passed, the tween will start immediately.
      * @link http://tweene.com/docs/#tweenTo
-     * 
+     *
      * @returns {object} - return the tween object
      */
-    this.to = function() 
+    this.to = function()
     {
         return _tweenNow(arguments, 'to');
     };
 
-    
+
     /**
      * Create a tween object for a 'from' animation and pass the arguments to it. First argument is always the target.
      * If you don't set paused: true in the options passed, the tween will start immediately.
      * @link http://tweene.com/docs/#tweenFrom
-     * 
+     *
      * @returns {object} - return the tween object
      */
-    this.from = function() 
+    this.from = function()
     {
         return _tweenNow(arguments, 'from');
     };
 
-    
+
     /**
      * Create a tween object for a 'fromTo' animation and pass the arguments to it. First argument is always the target.
      * If you don't set paused: true in the options passed, the tween will start immediately.
      * @link http://tweene.com/docs/#tweenFromTo
-     * 
+     *
      * @returns {object} - return the tween object
      */
-    this.fromTo = function() 
+    this.fromTo = function()
     {
         return _tweenNow(arguments, 'fromTo');
     };
-    
-        
+
+
     /**
      * Create a timeline object
      * @link http://tweene.com/docs/#createTimeline
-     * 
+     *
      * @param {object|string} [target] - it checks if the object passed as first param is a plain object (options) or not (target)
-     * @param {object} [options] 
+     * @param {object} [options]
      * @param {string} driver - name of the driver
      * @returns {object} - a timeline object
      */
@@ -752,7 +752,7 @@ var Tweene = function()
             .options(options)
             .target(lineTarget);
     };
-                         
+
 };
 
 var Tw = new Tweene();
@@ -762,19 +762,16 @@ if(window)
     window.Tweene = Tw;
 }
 
- 
-
-
 /**
- * Tweene - JavaScript Animation Proxy 
- * 
+ * Tweene - JavaScript Animation Proxy
+ *
  * @link http://tweene.com
- *   
+ *
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
- * 
- * @license Artistic License 2.0 
+ *
+ * @license Artistic License 2.0
  * See LICENSE.txt for details
- * 
+ *
  */
 
 
@@ -782,7 +779,7 @@ if(window)
 /**
  * Vars and methods common to every tween and timeline, whatever is the driver used
  * @mixin
- * 
+ *
  */
 var Common = function()
 {
@@ -790,7 +787,7 @@ var Common = function()
     this._id = ++ Tw._idCounter;
     this._coreTimeUnit = Tw._coreTimeUnit;
     this._timeUnit = Tw.defaultTimeUnit;
-    
+
     this._parent = null;
 
     this._target = null;
@@ -841,7 +838,7 @@ var Common = function()
     /**
      * Play the animation in forward direction
      * @link http://tweene.com/docs/#play
-     * 
+     *
      * @returns {this}
      */
     this.play = function()
@@ -855,22 +852,22 @@ var Common = function()
     /**
      * Play the animation in backward direction from its current position
      * @link http://tweene.com/docs/#reverse
-     * 
+     *
      * @returns {this}
      */
     this.reverse = function()
     {
         this._fwd = false;
         this._reverseTween();
-        return this;        
-    };              
+        return this;
+    };
 
 
     /**
      * Pause the animation on its current state.
      * @link http://tweene.com/docs/#pause
      *
-     * @returns {this} 
+     * @returns {this}
      */
     this.pause = function()
     {
@@ -879,28 +876,28 @@ var Common = function()
             this._pauseTween();
         }
         return this;
-    };        
-
-
-    /** 
-     * Resume a previously paused animation without affecting the current direction
-     * @link http://tweene.com/docs/#resume
-     * 
-     * @returns {this}
-     */
-    this.resume = function()
-    {        
-        this._resumeTween();        
-        return this;
-    };                    
+    };
 
 
     /**
-     * Restart animation in forward direction. 
-     * Reset also loops counter. 
+     * Resume a previously paused animation without affecting the current direction
+     * @link http://tweene.com/docs/#resume
+     *
+     * @returns {this}
+     */
+    this.resume = function()
+    {
+        this._resumeTween();
+        return this;
+    };
+
+
+    /**
+     * Restart animation in forward direction.
+     * Reset also loops counter.
      * Initial delay is performed only on the very first start, not on restart.
      * @link http://tweene.com/docs/#restart
-     * 
+     *
      * @returns {this}
      */
     this.restart = function()
@@ -912,23 +909,23 @@ var Common = function()
 
     /**
      * Go back to initial or final position accordingly to the value of direction. Intended to be used internally, you don't have to call this directly.
-     * 
+     *
      * @returns {this}
      */
     this.back = function()
     {
         this._backTween(this._localFwd? 'begin' : 'end');
         return this;
-    };        
+    };
 
-    
+
     /**
      * Get or set the speed of the current tween/timeline. Normal speed is 1, so 2 is double speed and 0.5 is half speed.
      * It's usable both before and during the animation.
      * It Accepts also string shortcut defined in Tweene.speeds
      * @link http://tweene.com/docs/#speedControl
-     * 
-     * @param {number} [value] 
+     *
+     * @param {number} [value]
      * @returns {number|this}
      */
     this.speed = function(value)
@@ -938,41 +935,41 @@ var Common = function()
             return this._speed;
         }
 
-        value = parseSpeed(value);        
+        value = parseSpeed(value);
         if(value != this._speed)
-        {        
+        {
             this._speed = value;
             this._speedTween();
         }
-        return this;        
+        return this;
     };
 
 
     /**
-     * Alias for speed() 
+     * Alias for speed()
      * @see speed
-     * 
+     *
      */
     this.timeScale = function()
     {
         return this.speed.apply(this, arguments);
-    };    
+    };
 
 
     /**
      * Return the current playhead time (a value between 0 and duration) in time unit set in Tweene.defaultTimeUnit
-     * 
+     *
      * @returns {number}
      */
     this.time = function()
     {
-        return Math.round(convertTime(this._getPosition(), this._coreTimeUnit, this._timeUnit) * 1000) / 1000;        
+        return Math.round(convertTime(this._getPosition(), this._coreTimeUnit, this._timeUnit) * 1000) / 1000;
     };
 
 
     /**
      * Return the current playhead position in percent (a value between 0 and 1)
-     * 
+     *
      * @returns {number}
      */
     this.progress = function()
@@ -982,11 +979,11 @@ var Common = function()
 
 
     /**
-     * Return true if the animation is currently paused 
+     * Return true if the animation is currently paused
      * Tt's true also when the animation is finished or not yet started
-     * 
+     *
      * @returns {boolean}
-     */        
+     */
     this.paused = function()
     {
         return this._getPaused();
@@ -994,8 +991,8 @@ var Common = function()
 
 
     /**
-     * Return true if the animation direction is currently reversed 
-     * 
+     * Return true if the animation direction is currently reversed
+     *
      * @returns {boolean}
      */
     this.reversed = function()
@@ -1006,12 +1003,12 @@ var Common = function()
 
     /**
      * Get/Set the tween duration (only get available for timeline)
-     * Accept numeric values interpreted as Tweene.defaultTimeUnit 
-     * or string with unit suffix, so '500ms' or '0.5s' 
-     * 
+     * Accept numeric values interpreted as Tweene.defaultTimeUnit
+     * or string with unit suffix, so '500ms' or '0.5s'
+     *
      * @param {string|number} [value]
-     * @returns {this|number} 
-     * 
+     * @returns {this|number}
+     *
      */
     this.duration = function(value)
     {
@@ -1037,11 +1034,11 @@ var Common = function()
     /**
      * Get the tween/timeline total duration including loops and loopsDelay, in the timeUnit set in Tweene.defaultTimeUnit
      * In case of infinite loop, it returns Infinity
-     * 
+     *
      * @returns {number}
      */
     this.totalDuration = function()
-    {        
+    {
         if(this.type == 'timeline')
         {
             this.prepare();
@@ -1053,7 +1050,7 @@ var Common = function()
     /**
      * Set the animation target (jquery or dom objects commonly, accordingly to the specific animation library in use)
      * @link http://tweene.com/docs/#target
-     * 
+     *
      * @param {string|object} [value]
      * @returns {string|object|this}
      */
@@ -1070,10 +1067,10 @@ var Common = function()
 
     /**
      * Get/Set the tween initial delay
-     * Accept numeric values interpreted as Tweene.defaultTimeUnit 
-     * or string with unit suffix, so '500ms' or '0.5s' 
+     * Accept numeric values interpreted as Tweene.defaultTimeUnit
+     * or string with unit suffix, so '500ms' or '0.5s'
      * @link http://tweene.com/docs/#delay
-     * 
+     *
      * @param {string|number} [value]
      * @returns {number|this}
      */
@@ -1094,7 +1091,7 @@ var Common = function()
      * Set the number of animation repeats. Default is 0, so loops(1) will execute the tween/timeline twice.
      * A value of -1 means 'Infinite loop'.
      * @link http://tweene.com/docs/#loops
-     * 
+     *
      * @param {number} value
      * @returns {this}
      */
@@ -1115,7 +1112,7 @@ var Common = function()
         }
         this._loops = value;
         this.invalidate();
-        return this;        
+        return this;
     };
 
 
@@ -1123,7 +1120,7 @@ var Common = function()
      * Enable/disable yoyo behavior or retrieve its status.
      * Yoyo makes sense only when used with looops.
      * @link http://tweene.com/docs/#yoyoEffect
-     * 
+     *
      * @param {boolean} [value]
      * @returns {boolean|this}
      */
@@ -1140,10 +1137,10 @@ var Common = function()
 
     /**
      * Get/Set the value of delay before each loop iteration
-     * Accept numeric values interpreted as Tweene.defaultTimeUnit 
-     * or string with unit suffix, so '500ms' or '0.5s' 
+     * Accept numeric values interpreted as Tweene.defaultTimeUnit
+     * or string with unit suffix, so '500ms' or '0.5s'
      * @link http://tweene.com/docs/#loopsDelay
-     * 
+     *
      * @param {string|number} [value]
      * @returns {number|this}
      */
@@ -1155,40 +1152,40 @@ var Common = function()
         }
         this._loopsDelay = this._parseTime(value);
         this.invalidate();
-        return this;        
+        return this;
     };
 
 
     /**
-     * Add event handler. 
-     * First param is the event name, 
-     * second param is the callback function, 
+     * Add event handler.
+     * First param is the event name,
+     * second param is the callback function,
      * third (optional) array of params to pass to the callback
      * fourth (optional) scope for the callback (the default is the tween / timeline object that will raise the event)
-     * 
+     *
      * Available events:
-     *  begin | onBegin | start | onStart: 
+     *  begin | onBegin | start | onStart:
      *      raised on the animation start
-     *      
-     *  end | onEnd | complete | onComplete | finish | onFinish | done: 
-     *      raised on the animation end, after all loops (a tween with infinite loops will never fire this event)  
-     *      
-     *  reverse | onReverse | onReverseComplete: 
+     *
+     *  end | onEnd | complete | onComplete | finish | onFinish | done:
+     *      raised on the animation end, after all loops (a tween with infinite loops will never fire this event)
+     *
+     *  reverse | onReverse | onReverseComplete:
      *      raised when the animation ends in backward direction, so at the start position.
-     *           
+     *
      *  progress | onProgress | update | onUpdate:
      *      fires periodically during the tween. The frequency of the call
-     *      could be different for any animation library used. 
-     *      When the library does not offer native progress event, it is emulated 
+     *      could be different for any animation library used.
+     *      When the library does not offer native progress event, it is emulated
      *      via RequestAnimationFrame
-     *      
+     *
      *  loop | onLoop | onRepeat:
      *      raised on each loop iteration
-     *      
-     *      
+     *
+     *
      * @link http://tweene.com/docs/#events
-     *  
-     * @param {string} name 
+     *
+     * @param {string} name
      * @param {function|null} callback - pass null to remove a previously set event handler
      * @param {array} [params]
      * @param {object} [scope]
@@ -1218,7 +1215,7 @@ var Common = function()
 
     /**
      * Used internally for register core event handlers
-     * 
+     *
      * @param {string} name
      * @param {string} id
      * @param {function} callback
@@ -1228,7 +1225,7 @@ var Common = function()
      * @returns {this}
      */
     this.setCoreHandler = function(name, id, callback, scope, params, priority)
-    {             
+    {
         this.unsetCoreHandler(name, id);
         var entry = {id: id, callback: callback, scope: scope || this, params: params || []};
 
@@ -1244,10 +1241,10 @@ var Common = function()
         return this;
     };
 
-    
+
     /**
      * Used internally for unregister core event handlers
-     * 
+     *
      * @param {string} name
      * @param {string} id
      * @returns {this}
@@ -1268,7 +1265,7 @@ var Common = function()
 
     /**
      * Reset _ready flag every time that one of the internal properties that need to be processed before running is changed
-     * 
+     *
      * @returns {this}
      */
     this.invalidate = function()
@@ -1287,7 +1284,7 @@ var Common = function()
 
     /**
      * Get/Set the parent object. The parent could be a timeline or a tween if the child is a DummyTween used for emulate delay
-     * 
+     *
      * @param {object} [value]
      * @returns {this|object}
      */
@@ -1305,7 +1302,7 @@ var Common = function()
 
     /**
      * Get the internal unique identifier
-     * 
+     *
      * @returns {number}
      */
     this.id = function()
@@ -1316,7 +1313,7 @@ var Common = function()
 
     /**
      * Set options for tween or timeline
-     * 
+     *
      * @param {object} options
      * @returns {this}
      */
@@ -1329,23 +1326,23 @@ var Common = function()
         this._applyArguments(opts);
         return this;
     };
-    
+
 
     /**
      * Return the resulting speed of the object
-     * 
+     *
      * @returns {number}
      */
     this.getRealSpeed = function()
     {
         return this._parent? this._parent.getRealSpeed() * this._speed : this._speed;
-    };    
+    };
 
 
     /**
      * Get the tween/timeline total duration including loops and loopsDelay
      * In case of infinite loop, it returns Infinity
-     * 
+     *
      * @returns {number}
      */
     this._getTotalDuration = function()
@@ -1354,13 +1351,13 @@ var Common = function()
         {
             return Infinity;
         }
-        return (this._duration + ((this._loopsDelay + this._duration) * this._loops)) / this._speed;        
-    };    
+        return (this._duration + ((this._loopsDelay + this._duration) * this._loops)) / this._speed;
+    };
 
 
     /**
      * Assign otpions and event handlers previously parsed
-     * 
+     *
      * @param {object} args
      */
     this._applyArguments = function(args)
@@ -1382,14 +1379,14 @@ var Common = function()
             else if(name in this && this[name] instanceof Function)
             {
                 this[name](args[name]);
-            }            
+            }
         }
     };
 
 
     /**
      * Check if there are public or internal event handlers set for that name
-     * 
+     *
      * @param {string} name
      * @returns {boolean}
      */
@@ -1401,31 +1398,31 @@ var Common = function()
 
     /**
      * execute event handlers bound to the given name
-     * 
+     *
      * @param {string} name
      */
     this._runHandlers = function(name)
-    {                    
+    {
         var i, end, entry;
-        
+
         // run external events first to guarantee correct events order inside timelines
         if(name in this._handlers && this._handlers[name] !== null)
         {
             entry = this._handlers[name];
             entry.callback.apply(entry.scope, entry.params);
-        }        
-        
+        }
+
         // internal handlers
         if(this._coreHandlers[name].length)
         {
             for(i = 0, end = this._coreHandlers[name].length; i < end; i++)
             {
-                
-                entry = this._coreHandlers[name][i];                
-                entry.callback.apply(entry.scope, entry.params);                    
+
+                entry = this._coreHandlers[name][i];
+                entry.callback.apply(entry.scope, entry.params);
             }
-        }                       
-        
+        }
+
     };
 
 
@@ -1433,16 +1430,16 @@ var Common = function()
 
     /**
      * find and return allowed options in a generic object
-     * 
+     *
      * @param {Object} options
      * @param {Boolean} remove - if true, it removes found options from original object
-     * @returns {Object} 
+     * @returns {Object}
      */
     this._parseOptions = function(options, remove)
     {
         var opts = this.type == 'tween'? extendObject({}, optionsMap, tweenOptionsMap) : optionsMap,
             values = {}, name, realName, value;
-        
+
         for(name in options)
         {
             if(options.hasOwnProperty(name) && name in opts)
@@ -1462,7 +1459,7 @@ var Common = function()
                 {
                     delete options[name];
                 }
-                
+
             }
         }
         return values;
@@ -1472,7 +1469,7 @@ var Common = function()
 
     /**
      * Find and return allowed event in a generic object
-     * 
+     *
      * @param {object} options
      * @param {boolean} remove - if true, it removes found handlers and related values (scope and params) from original object
      * @returns {object}
@@ -1515,14 +1512,14 @@ var Common = function()
                 values[realName] = args;
             }
         }
-        return values;        
+        return values;
     };
 
 
     /**
      * Parse time value used for delay and duration settings, return a number that is the time expressed in coreTimeUnit.
      * Fallback to 0 if the given value is not valid
-     * 
+     *
      * @param {string|number} value
      * @returns {number}
      */
@@ -1542,16 +1539,16 @@ var Common = function()
             }
 
             // accept 's' or 'ms' as suffix after the number
-            parts = value.match(/^[\+\-]?\s*([0-9\.]+)\s*(m?s)?$/i);            
+            parts = value.match(/^[\+\-]?\s*([0-9\.]+)\s*(m?s)?$/i);
             if(parts === null || parts[1] === void 0)
             {
                 return 0;
-            }            
+            }
             if(parts[2] !== void 0)
             {
                 unit = parts[2].toLowerCase();
             }
-            value = parts[1];            
+            value = parts[1];
         }
         value = Number(value);
 
@@ -1568,7 +1565,7 @@ var Common = function()
 
     /**
      * Set the target for tween or timeline. It accept both an object or a selector string
-     * 
+     *
      * @param {string|object} value
      * @returns {this}
      */
@@ -1584,6 +1581,7 @@ var Common = function()
 
 
 };
+
 /**
  * Tweene - JavaScript Animation Proxy 
  * 
@@ -2984,27 +2982,27 @@ var Ticker = function()
 Tw.ticker = new Ticker();  
 
 /**
- * Tweene - JavaScript Animation Proxy 
- * 
+ * Tweene - JavaScript Animation Proxy
+ *
  * @link http://tweene.com
- *   
+ *
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
- * 
- * @license Artistic License 2.0 
+ *
+ * @license Artistic License 2.0
  * See LICENSE.txt for details
- * 
+ *
  */
 
 
 
 /**
- * Vars and methods common to tween and timeline, for animation library that does not have native support 
- * for playhead control (play / pause / reverse and so on) 
+ * Vars and methods common to tween and timeline, for animation library that does not have native support
+ * for playhead control (play / pause / reverse and so on)
  * @mixin
- * 
+ *
  */
 var ControlsPro = function()
-{    
+{
     this._time = null;
 
     this._startTime = 0;
@@ -3029,9 +3027,9 @@ var ControlsPro = function()
 
 
     /**
-     * play() and reverse() acts on both global and local direction (_fwd and _localFwd properties), while the change 
+     * play() and reverse() acts on both global and local direction (_fwd and _localFwd properties), while the change
      * in direction performed during a yoyo loop changes only local direction
-     * 
+     *
      * @param {boolean} value
      * @returns {this}
      */
@@ -3045,7 +3043,7 @@ var ControlsPro = function()
 
     /**
      * Change the actual local direction of the animation
-     * 
+     *
      * @param {boolean} value
      * @returns {this}
      */
@@ -3062,13 +3060,13 @@ var ControlsPro = function()
         {
             this._propagateToAll('setDir', value);
         }
-        return this;            
+        return this;
     };
 
 
     /**
      * Swap the global direction, from forward to backward or vice versa
-     * 
+     *
      * @returns {this}
      */
     this.swapDir = function()
@@ -3081,7 +3079,7 @@ var ControlsPro = function()
 
     /**
      * Swap the actual local direction, from forward to backward or vice versa
-     * 
+     *
      * @returns {this}
      */
     this.swapLocalDir = function()
@@ -3101,7 +3099,7 @@ var ControlsPro = function()
 
     /**
      * Override Common.play()
-     * 
+     *
      */
     this.play = function()
     {
@@ -3122,7 +3120,7 @@ var ControlsPro = function()
 
     /**
      * Override Common.reverse()
-     * 
+     *
      */
     this.reverse = function()
     {
@@ -3131,19 +3129,19 @@ var ControlsPro = function()
         {
             this._playAllowed = true;
             if(this._fwd)
-            {            
+            {
                 this.pause();
                 this.swapDir();
             }
             this.resume();
         }
-        return this;        
+        return this;
     };
 
 
     /**
      * Override Common.pause()
-     * 
+     *
      */
     this.pause = function()
     {
@@ -3175,28 +3173,28 @@ var ControlsPro = function()
             }
         }
         return this;
-    };    
+    };
 
 
     /**
      * Override Common.resume()
-     * 
+     *
      */
     this.resume = function()
-    {   
+    {
 //        if(this._parent && this._parent.paused())
 //        {
-//            return this;        
+//            return this;
 //        }
 //        console.log(this._id, 'resume', (this._parent && this._parent.paused()? 'parent paused': 'parent running'));
         if(this._paused && (this._fwd && this._playAllowed || !this._fwd && this._reverseAllowed))
-        {           
+        {
             this._paused = false;
             this.prepare();
 
             // propagate resume to delay, if present
             if(this._delayDummy)
-            {               
+            {
                 this._delayDummy.resume();
                 return this;
             }
@@ -3222,21 +3220,21 @@ var ControlsPro = function()
                 if(this._duration)
                 {
                     // resume progress ticker, if needed
-                    this._startProgress();                    
+                    this._startProgress();
                 }
-                
+
                 // when the animation library does not have native support for begin callback
                 if(this._emulatedBegin && this._hasHandlers('_begin'))
                 {
                     this._runHandlers('_begin');
                 }
-                
+
                 // at both ends of the tween (begin in forward dir, end in backward dir) perform preTween actions
                 if(this.type != 'timeline' && ((this._position === 0 && this._localFwd) || (this._position == this._duration && !this._localFwd)))
                 {
                     this._preTween(this._localFwd);
                 }
-                this._resumeTween();                        
+                this._resumeTween();
             }
             else
             {
@@ -3249,19 +3247,24 @@ var ControlsPro = function()
                 else
                 {
                     this._run();
-                }            
+                }
             }
-        }        
+        }
         return this;
     };
 
 
     /**
      * Override Common.restart()
-     * 
+     *
      */
     this.restart = function()
     {
+        if(this._keyCurrentIndex !== null)
+        {
+            this._keyCurrentIndex = null;
+        }
+
         this.pause();
         this.setDir(true);
         this.back();
@@ -3272,7 +3275,7 @@ var ControlsPro = function()
 
     /**
      * Override Common.back()
-     * 
+     *
      */
     this.back = function()
     {
@@ -3297,14 +3300,14 @@ var ControlsPro = function()
             this._back();
         }
         this._playAllowed = this._fwd;
-        this._reverseAllowed = !this._playAllowed;        
+        this._reverseAllowed = !this._playAllowed;
         return this;
     };
 
 
     /**
      * Override Common.speed()
-     * 
+     *
      */
     this.speed = function(value)
     {
@@ -3315,33 +3318,33 @@ var ControlsPro = function()
 
         if(!this._running)
         {
-            this.invalidate();            
+            this.invalidate();
         }
-        value = parseSpeed(value);    
-        
+        value = parseSpeed(value);
+
         if(value != this._speed)
-        {        
+        {
             // changing speed in running animations is performed pausing and immediately resuming with the new speed
             var notPaused = !this._paused;
             if(notPaused)
             {
                 this.pause();
             }
-            
+
             this._speed = value;
 
             if(notPaused)
             {
                 this.resume();
-            }                
+            }
         }
-        return this;        
+        return this;
     };
 
 
-    /** 
+    /**
      * Calculate current time position, needed only by info methods like time() and progress()
-     * 
+     *
      * @returns {number}
      */
     this._getPosition = function()
@@ -3360,9 +3363,9 @@ var ControlsPro = function()
 
 
     /**
-     * Calculate the current percent progress, as a value between 0 and 1 
-     * 
-     * @returns {number} 
+     * Calculate the current percent progress, as a value between 0 and 1
+     *
+     * @returns {number}
      */
     this._getProgress = function()
     {
@@ -3372,7 +3375,7 @@ var ControlsPro = function()
 
     /**
      * Get the current running status
-     * 
+     *
      * @returns {boolean}
      */
     this._getPaused = function()
@@ -3383,38 +3386,38 @@ var ControlsPro = function()
 
     /**
      * Reset the internal playhead position on both ends of animation
-     * 
+     *
      */
     this._resetPosition = function()
     {
         this._paused = true;
         this._position = this._localFwd? this._duration : 0;
         this._startTime = this._pauseTime = 0;
-    };    
+    };
 
 
     /**
      * Used to emulate a progress / update callback when the driver lacks native support for it
-     * 
+     *
      */
     this._startProgress = function()
     {
         if(this._emulatedProgress && this._hasHandlers('progress'))
         {
             // passing 0 as first param, it will fire until it is manually removed
-            Tw.ticker.addCallback(0, this._id + '_progress', this._runHandlers, this, ['progress']);        
+            Tw.ticker.addCallback(0, this._id + '_progress', this._runHandlers, this, ['progress']);
         }
     };
 
 
     /**
      * Used to emulate a progress / update callback when the driver lacks native support for it
-     * 
+     *
      */
     this._stopProgress = function()
     {
         if(this._emulatedProgress && this._hasHandlers('progress'))
-        {        
+        {
             Tw.ticker.removeCallback(this._id + '_progress');
         }
     };
@@ -3422,11 +3425,11 @@ var ControlsPro = function()
 
     /**
      * Internal method used to restart the animation in both directions.
-     * 
+     *
      */
     this._restart = function()
     {
-        this._delayDummy = null;  
+        this._delayDummy = null;
         this.pause();
         this._back();
         this.resume();
@@ -3435,12 +3438,12 @@ var ControlsPro = function()
 
     /**
      * Used in loop or manual restart, it reset data and animation to the begin (or end) state accordingly to direction
-     * 
+     *
      * @returns {this}
      */
-    this._back = function() 
+    this._back = function()
     {
-        this._position = this._localFwd? 0 : this._duration;        
+        this._position = this._localFwd? 0 : this._duration;
         if(this._running)
         {
             this._delayDummy = null;
@@ -3453,18 +3456,18 @@ var ControlsPro = function()
 
     /**
      * Update loop counter when running in backward direction and restart
-     * 
+     *
      */
     this._loopRev = function()
     {
         this._loopsCount --;
-        this._restart();                        
+        this._restart();
     };
 
 
     /**
      * Update loop counter when running in forward direction and restart
-     * 
+     *
      */
     this._loopFwd = function()
     {
@@ -3473,13 +3476,13 @@ var ControlsPro = function()
         {
             this.swapLocalDir();
         }
-        this._restart();            
+        this._restart();
     };
 
 
     /**
      * loop controller, performed on both ends of animation, accordingly with current direction and yoyo property
-     * 
+     *
      */
     this._loopCheck = function()
     {
@@ -3514,7 +3517,7 @@ var ControlsPro = function()
             }
             else
             {
-                this._loopRev();                
+                this._loopRev();
             }
         }
     };
@@ -3523,13 +3526,13 @@ var ControlsPro = function()
 
     /**
      * Emulate delay and loopsDelay using a special Dummy Tween
-     * 
+     *
      * @param {number} delay
      * @param {function} callback
      * @param {function} [reverseCallback] - used only in loopsDelay
      */
     this._emulateDelay = function(delay, callback, reverseCallback)
-    {                        
+    {
         var dummy = this._delayDummy = this._getDummy()
             .duration(delay)
             .setCoreHandler('end', name, callback, this);
@@ -3546,8 +3549,8 @@ var ControlsPro = function()
             dummy.setCoreHandler('reverse', name, reverseCallback, this);
         }
 
-        dummy[this._fwd? 'play' : 'reverse']();        
-    };        
+        dummy[this._fwd? 'play' : 'reverse']();
+    };
 
 
     /**
@@ -3580,7 +3583,7 @@ var ControlsPro = function()
                 if(this.type != 'timeline')
                 {
                     this._postTween('end');
-                }                
+                }
                 this._playAllowed = false;
                 this._time = this._duration;
                 this._runHandlers('end');
@@ -3589,7 +3592,7 @@ var ControlsPro = function()
             else if(this._loops !== 0)
             {
                 this._loopCheck();
-            }                
+            }
         }
         else
         {
@@ -3598,7 +3601,7 @@ var ControlsPro = function()
                 if(this.type != 'timeline')
                 {
                     this._postTween('begin');
-                }                
+                }
                 this._reverseAllowed = false;
                 this._time = 0;
                 this._runHandlers('reverse');
@@ -3607,7 +3610,7 @@ var ControlsPro = function()
             else if(this._loops !== 0)
             {
                 this._loopCheck();
-            }            
+            }
         }
     };
 
@@ -3615,7 +3618,7 @@ var ControlsPro = function()
     /**
      * Create a Dummy object
      * @see TweeneDummy
-     * 
+     *
      * @returns {object}
      */
     this._getDummy = function()
@@ -3627,9 +3630,10 @@ var ControlsPro = function()
 
     // register some internal handlers
     this.setCoreHandler('_begin', '_begin', this._onTweenBegin, this);
-    this.setCoreHandler('_end', '_end', this._onTweenEnd, this);                    
-    
+    this.setCoreHandler('_end', '_end', this._onTweenEnd, this);
+
 };
+
 /**
  * Tweene - JavaScript Animation Proxy 
  * 
@@ -4077,15 +4081,15 @@ var TweenPro = function()
 
 };
 /**
- * Tweene - JavaScript Animation Proxy 
- * 
+ * Tweene - JavaScript Animation Proxy
+ *
  * @link http://tweene.com
- *   
+ *
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
- * 
- * @license Artistic License 2.0 
+ *
+ * @license Artistic License 2.0
  * See LICENSE.txt for details
- * 
+ *
  */
 
 
@@ -4093,7 +4097,7 @@ var TweenPro = function()
 /**
  * Vars and methods used in timeline object, for animation library that does not have native support for timelines
  * @mixin
- * 
+ *
  */
 var TimelinePro = function()
 {
@@ -4115,7 +4119,7 @@ var TimelinePro = function()
 
     this._backKeyframes = {};
 
-    this._backIndex = [];        
+    this._backIndex = [];
 
     this._backEnabled = true;
 
@@ -4124,10 +4128,10 @@ var TimelinePro = function()
     this._keyCurrentIndex = null;
 
 
-    
+
     /**
      * Cascade a method call to the children that are currently running
-     * 
+     *
      * @param {string} method
      * @returns {this}
      */
@@ -4136,7 +4140,7 @@ var TimelinePro = function()
         var args = toArray(arguments, 1);
         for(var id in this._runningList)
         {
-            this._runningList[id][method].apply(this._runningList[id], args);            
+            this._runningList[id][method].apply(this._runningList[id], args);
         }
         return this;
     };
@@ -4144,7 +4148,7 @@ var TimelinePro = function()
 
     /**
      * Cascade a method call to the all the children, regardless their running status
-     * 
+     *
      * @param {string} method
      * @returns {this}
      */
@@ -4153,7 +4157,7 @@ var TimelinePro = function()
         var args = toArray(arguments, 1);
         for(var i = 0, end = this._childrenList.length; i < end; i++)
         {
-            this._childrenList[i][method].apply(this._childrenList[i], args);            
+            this._childrenList[i][method].apply(this._childrenList[i], args);
         }
         return this;
     };
@@ -4161,18 +4165,18 @@ var TimelinePro = function()
 
     /**
      * Perform internal tasks needed before starting the timeline
-     * 
+     *
      * @returns {number} - Returns the timeline total duration
      */
     this.prepare = function()
-    {               
+    {
         if(this._ready)
         {
             return this;
         }
-        
+
         var sortInt = function(a, b){
-            return a - b;       
+            return a - b;
         };
 
         this._reset();
@@ -4181,12 +4185,12 @@ var TimelinePro = function()
         {
             this
                 .setCoreHandler('end', '_progress', this._stopProgress, this, [])
-                .setCoreHandler('reverse', '_progress', this._stopProgress, this, []);                
+                .setCoreHandler('reverse', '_progress', this._stopProgress, this, []);
         }
 
         this._mergeChildren();
         this._index.sort(sortInt);
-        
+
         // empty timeline
         if(!this._index.length)
         {
@@ -4195,7 +4199,7 @@ var TimelinePro = function()
         }
 
         var i = 1;
-        var firstTime = this._index[0];        
+        var firstTime = this._index[0];
         // if the first child does not start at 0, add a dummy to fill to gap
         if(firstTime !== 0)
         {
@@ -4212,14 +4216,14 @@ var TimelinePro = function()
         for(var len = this._index.length - 1; i < len; i++)
         {
             time = this._index[i];
-            keyframe = this._keyframes[time];                        
+            keyframe = this._keyframes[time];
             if(!keyframe.bTrigger)
             {
-                j = i - 1;                
+                j = i - 1;
                 while(j > 0 && !this._keyframes[this._index[j]].bTrigger)
                 {
                     j--;
-                }                
+                }
                 this._addDummy(this._index[j], time);
             }
             if(!keyframe.fTrigger)
@@ -4228,20 +4232,20 @@ var TimelinePro = function()
                 while(j < this._index.length - 2 && !this._keyframes[this._index[j]].fTrigger)
                 {
                     j++;
-                }                
+                }
                 this._addDummy(time, this._index[j]);
-            }            
+            }
         }
 
         this._backIndex.sort(sortInt);
-        this._ready = true;           
+        this._ready = true;
         return this._getTotalDuration();
     };
 
 
     /**
      * Push child to the top level timeline in order to build a sorted index needed for restarting all the tweens in the right order
-     * 
+     *
      * @param {object} tween
      * @param {number} begin
      * @param {number} end
@@ -4261,7 +4265,7 @@ var TimelinePro = function()
                 tween.offset(begin + offset);
             }
         }
-        
+
         // add to backIndex
         this._addToIndex(tween, begin, end, false, false, true);
         return this;
@@ -4270,12 +4274,12 @@ var TimelinePro = function()
 
     /**
      * Reset internal indexes and properties, needed by invalidate()
-     * 
+     *
      */
     this._reset = function()
     {
         this._offset = 0;
-        this._cursor = null;                
+        this._cursor = null;
         this._keyframes = {};
         this._index = [];
         this._backKeyframes = {};
@@ -4286,7 +4290,7 @@ var TimelinePro = function()
     /**
      * Add a dummy child. Dummies are needed to fill gaps between real children.
      * Dummy reverse and end events will trigger the start for other children
-     * 
+     *
      * @param {number} begin
      * @param {number} end
      */
@@ -4300,21 +4304,21 @@ var TimelinePro = function()
             .duration(end - begin)
             .setCoreHandler('reverse', 'timeline', this._childCallback, this, ['b', begin, dummy.id(), res[0]])
             .setCoreHandler('end', 'timeline', this._childCallback, this, ['f', end, dummy.id(), res[1]]);
-        
-        this._childrenList.push(dummy);        
+
+        this._childrenList.push(dummy);
     };
 
 
     /**
      * Save a children to index or backIndex. Indexes are needed to start and reset tweens in the right order
-     * 
+     *
      * @param {object} tween - dummy, tween or timeline object
      * @param {number} begin
      * @param {number} end
      * @param {boolean} fTriggering - forward triggering, true when this child is suitable for triggering next children with its end event
      * @param {boolean} bTriggering - backward triggering, true when this child is suitable for triggering previous children with its reverse event
      * @param {boolean} useBack - true = store data in backIndex
-     * @returns {array} 
+     * @returns {array}
      */
     this._addToIndex = function(tween, begin, end, fTriggering, bTriggering, useBack)
     {
@@ -4332,16 +4336,16 @@ var TimelinePro = function()
 
         if(!(begin in keyframes))
         {
-            keyframes[begin] = {f: [], b: [], fc: [], bc: [], fTrigger: null, bTrigger: null};                            
+            keyframes[begin] = {f: [], b: [], fc: [], bc: [], fTrigger: null, bTrigger: null};
             index.push(begin);
         }
         if(tween.type == 'callback')
         {
-            keyframes[begin].fc.push(tween);                        
+            keyframes[begin].fc.push(tween);
         }
         else
         {
-            keyframes[begin].f.push(tween);            
+            keyframes[begin].f.push(tween);
         }
         // use only one child for each keyframe trigger in forward direction
         firstBegin = fTriggering && !this._keyframes[begin].fTrigger;
@@ -4354,44 +4358,44 @@ var TimelinePro = function()
         {
             if(!(end in keyframes))
             {
-                keyframes[end] = {f: [], b: [], fc: [], bc: [], fTrigger: null, bTrigger: null};                            
+                keyframes[end] = {f: [], b: [], fc: [], bc: [], fTrigger: null, bTrigger: null};
                 index.push(end);
             }
             if(tween.type == 'callback')
             {
-                keyframes[end].bc.push(tween);                        
+                keyframes[end].bc.push(tween);
             }
             else
             {
-                keyframes[end].b.push(tween);            
+                keyframes[end].b.push(tween);
             }
             // use only one child for each keyframe trigger in backward direction
             firstEnd = bTriggering && !this._keyframes[end].bTrigger;
             if(firstEnd)
             {
                 keyframes[end].bTrigger = tween;
-            }            
-        }     
+            }
+        }
 
-        return [firstBegin, firstEnd];        
+        return [firstBegin, firstEnd];
     };
 
 
     /**
      * Available for drivers that need to perform extra operation with labels
-     * 
+     *
      * @param {object} child - Label object
      * @param {number} begin - label position inside the timeline
      */
     this._mergeLabel = function(child, begin)
     {
-        // nop        
+        // nop
     };
 
 
     /**
      * Merge tweens and timelines inside their parent timeline
-     * 
+     *
      * @param {object} child - tween or timeline
      * @param {number} begin
      * @param {number} end
@@ -4402,23 +4406,23 @@ var TimelinePro = function()
         this._mergeElement(child, begin, end, true);
     };
 
-    
+
     /**
      * Merge callbacks inside their parent timeline
-     * 
+     *
      * @param {object} child - Callback object
      * @param {number} begin
      * @param {number} end
      */
     this._mergeCallback = function(child, begin, end)
     {
-        this._mergeElement(child, begin, end, false);        
+        this._mergeElement(child, begin, end, false);
     };
 
 
     /**
      * Finalize the merging of tweens, timelines and callbacks
-     * 
+     *
      * @param {object} child
      * @param {number} begin
      * @param {number} end
@@ -4438,15 +4442,15 @@ var TimelinePro = function()
             child.setCoreHandler('reverse', 'timeline', this._childCallback, this, ['b', begin, child.id(), res[0]]);
             if(end != Infinity)
             {
-                child.setCoreHandler('end', 'timeline', this._childCallback, this, ['f', end, child.id(), res[1]]);                
+                child.setCoreHandler('end', 'timeline', this._childCallback, this, ['f', end, child.id(), res[1]]);
             }
-        }        
+        }
     };
 
 
     /**
      * Called by each child on reverse and end events. Used for update runningList and trigger the start of other previous or next children
-     * 
+     *
      * @param {string} direction - 'b' = backward | 'f' = forward
      * @param {number} time
      * @param {number} id - unique identifier of the child
@@ -4460,7 +4464,7 @@ var TimelinePro = function()
             delete this._runningList[id];
             this._runningCount--;
         }
-                
+
         if(isKeyChild)
         {
             if(time in this._keyframes)
@@ -4468,17 +4472,17 @@ var TimelinePro = function()
                 this._processKeyframe(time, direction, null);
             }
         }
-    };  
-    
-    
-    
+    };
+
+
+
     this._processKeyframe = function(time, direction, currentIndex)
     {
         this._keyCurrentIndex = null;
-        
-        var cDirection = direction + 'c', cList = this._keyframes[time][cDirection], tList = this._keyframes[time][direction], 
+
+        var cDirection = direction + 'c', cList = this._keyframes[time][cDirection], tList = this._keyframes[time][direction],
             i, end, offset, item, paused = false;
-        
+
         if(cList.length)
         {
             if(direction == 'f')
@@ -4491,7 +4495,7 @@ var TimelinePro = function()
             {
                 i = currentIndex !== null? currentIndex - 1 : cList.length - 1;
                 end = -1;
-                offset = -1;           
+                offset = -1;
             }
 
             for(; i != end; i += offset)
@@ -4505,16 +4509,16 @@ var TimelinePro = function()
                     this._keyCurrentIndex = i;
                     this.pause();
                 }
-                
+
                 // also callback are executed by resume()
-                item.resume(); 
+                item.resume();
                 if(paused)
                 {
                     break;
-                }            
-            }                          
+                }
+            }
         }
-        
+
         if(!paused)
         {
             if(tList.length)
@@ -4523,8 +4527,8 @@ var TimelinePro = function()
                 {
                     item = tList[i];
                     this._addToRun(item);
-                    item.resume(); 
-                }                
+                    item.resume();
+                }
             }
             // emulate end / reverse events
             if((direction == 'b' && time === 0) || (direction == 'f' && time == this._index[this._index.length - 1]))
@@ -4532,14 +4536,14 @@ var TimelinePro = function()
                 this._runHandlers('_end');
             }
         }
-        
-        return paused;        
+
+        return paused;
     };
 
 
     /**
      * Called on first timeline start
-     * 
+     *
      * @returns {this}
      */
     this._run = function()
@@ -4555,23 +4559,23 @@ var TimelinePro = function()
         this._startTime = Tw.ticker.now();
         this._playTween();
 
-        return this;            
+        return this;
     };
 
 
     /**
      * trigger the start of the first keyframe
-     * 
+     *
      */
     this._playTween = function()
-    {            
+    {
         this._childCallback('f', 0, -1, true);
     };
 
 
     /**
      * propagate pause to the running children
-     * 
+     *
      */
     this._pauseTween = function()
     {
@@ -4583,21 +4587,21 @@ var TimelinePro = function()
      * if running, propagate resume to running children, else trigger first or last keyframe accordingly with current direction
      */
     this._resumeTween = function()
-    {      
+    {
         var runningCount = this._runningCount, paused = false;
         this._startProgress();
-        
+
         if(this._keyCurrentIndex !== null)
         {
             this._keyDirection = this._localFwd? 'f' : 'b';
             paused = this._processKeyframe(this._keyTime, this._keyDirection, this._keyCurrentIndex);
-        }                
-        
+        }
+
         if(!paused)
         {
             if(runningCount)
-            {        
-                this._propagate('resume');  
+            {
+                this._propagate('resume');
             }
             else
             {
@@ -4615,22 +4619,22 @@ var TimelinePro = function()
                 if(args)
                 {
                     this._childCallback.apply(this, args);
-                }            
+                }
             }
         }
     };
-    
+
 
     /**
      * Go to final or start position resetting also the children, accordingly with current direction
-     * 
+     *
      */
     this._backTween = function()
     {
         // clear running List
         this._runningList = {};
-        this._runningCount = 0;        
-        
+        this._runningCount = 0;
+
         // timeline disable back in nested timelines when going back
         if(!this._backEnabled)
         {
@@ -4648,7 +4652,7 @@ var TimelinePro = function()
         }
         else
         {
-            i = 0; 
+            i = 0;
             end = this._backIndex.length;
             inc = 1;
             type = 'b';
@@ -4662,18 +4666,18 @@ var TimelinePro = function()
             for(var j = elemList.length - 1; j >= 0; j--)
             {
                 var child = elemList[j];
-                // disable back in children timelines 
+                // disable back in children timelines
                 child._backEnabled = false;
                 child.pause().back();
                 child._backEnabled = true;
             }
-        }        
+        }
     };
 
 
     /**
      * Add child to runningList
-     * 
+     *
      * @param {object} child
      * @returns {this}
      */
@@ -4689,13 +4693,13 @@ var TimelinePro = function()
                 this._runningList[id] = child;
             }
         }
-        return this;        
+        return this;
     };
 
 
     /**
      * Remove child from runningList
-     * 
+     *
      * @param {object} child
      * @returns {this}
      */
@@ -4708,7 +4712,7 @@ var TimelinePro = function()
             this._runningCount --;
             delete this._runningList[id];
         }
-        return this;                
+        return this;
     };
 };
 
@@ -4858,15 +4862,15 @@ Tw.registerDriver('Dummy', 'tween', function() {
       
 
 /**
- * Tweene - JavaScript Animation Proxy 
- * 
+ * Tweene - JavaScript Animation Proxy
+ *
  * @link http://tweene.com
- *   
+ *
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
- * 
- * @license Artistic License 2.0 
+ *
+ * @license Artistic License 2.0
  * See LICENSE.txt for details
- * 
+ *
  */
 
 
@@ -4874,7 +4878,7 @@ Tw.registerDriver('Dummy', 'tween', function() {
 /**
  * // jQuery plugin that allow to use cubic bezier curves for easing
  *  Based on Bez http://github.com/rdallasgray/bez
- * 
+ *
  * Copyright Robert Dallas Gray. All rights reserved.
  * Provided under the FreeBSD license: https://github.com/rdallasgray/bez/blob/master/LICENSE.txt
 */
@@ -4882,9 +4886,9 @@ if(jQuery)
 {
     jQuery.extend({ tweeneBezier: function(coOrdArray) {
         var encodedFuncName = "tweenebez_" + jQuery.makeArray(arguments).join("_").replace(/\./g, "p");
-        if (typeof jQuery.easing[encodedFuncName] !== "function") 
+        if (typeof jQuery.easing[encodedFuncName] !== "function")
         {
-            jQuery.easing[encodedFuncName] = function(x, time, b, c, d) 
+            jQuery.easing[encodedFuncName] = function(x, time, b, c, d)
             {
                 return c * bezier(coOrdArray[0], coOrdArray[1], coOrdArray[2], coOrdArray[3])(time / d) + b;
             };
@@ -4895,36 +4899,36 @@ if(jQuery)
 
 
 /**
- * jQuery Tween Driver 
- * 
+ * jQuery Tween Driver
+ *
  * @mixes Common, TweenCommon, ControlsPro, TweenPro
- *  
+ *
  */
-Tw.registerDriver('jquery', 'tween', function() { 
+Tw.registerDriver('jquery', 'tween', function() {
     Common.call(this);
     TweenCommon.call(this);
     ControlsPro.call(this);
-    TweenPro.call(this);    
-    
+    TweenPro.call(this);
+
     this._driverTimeUnit = 'ms';
-    
+
     this._emulatedPlayhead = true;
     this._emulatedFrom = true;
-    this._emulatedLoop = true;                
+    this._emulatedLoop = true;
     this._emulatedDelay = true;
-    this._emulatedLoop = true;  
+    this._emulatedLoop = true;
     this._emulatedBegin = false;
     this._emulatedProgress = false;
-    this._allowMultipleEasing = true;    
+    this._allowMultipleEasing = true;
     this._allowTransform = false;
-        
+
 
     this._propertyMap = {
         x: 'left',
         y: 'top'
     };
-       
-       
+
+
     // handle position properties in a custom way
     this._getProperty = function(target, style, name)
     {
@@ -4938,14 +4942,14 @@ Tw.registerDriver('jquery', 'tween', function() {
 
             return [name, value];
         }
-        
+
         return getProperty(style, name);
     };
-    
-    
+
+
     /**
      * Fetch current values before starting
-     * 
+     *
      * @param {object} target
      * @param {object} tween
      */
@@ -4954,37 +4958,37 @@ Tw.registerDriver('jquery', 'tween', function() {
         var item = target.get(0), name, value, property, prop, style = window.getComputedStyle(item);
 
         for(name in tween)
-        {            
+        {
             property = this._getProperty(target, style, name);
             if(property[0] != name)
-            {                    
+            {
                 tween[property[0]] = tween[name];
                 delete tween[name];
-                name = property[0]; 
+                name = property[0];
             }
-            value = property[1];                
-            
+            value = property[1];
+
             if(value !== void 0)
-            {                
+            {
                 prop = tween[property[0]];
-                prop.pre = value;        
+                prop.pre = value;
                 if(!this._hasEnd)
                 {
                     prop.end = value;
                     if(this._hasThen && prop.then === null)
                     {
                         prop.then = value;
-                    }     
+                    }
                 }
-                this._hasPre = true;                
+                this._hasPre = true;
             }
-        }                
+        }
     };
-       
-    
+
+
     /**
      * return a callback used as jquery step event handler. It saves style values during _setTween()
-     * 
+     *
      * @param {object} tween
      * @param {boolean} fetchBegin
      * @param {boolean} fetchEnd
@@ -4997,7 +5001,7 @@ Tw.registerDriver('jquery', 'tween', function() {
             if(fx.prop in tween)
             {
                 var prop = tween[fx.prop];
-                var unit = isNumber(fx.end)? fx.unit : '';                            
+                var unit = isNumber(fx.end)? fx.unit : '';
                 if(fetchBegin)
                 {
                     prop.begin = fx.end + unit;
@@ -5017,7 +5021,7 @@ Tw.registerDriver('jquery', 'tween', function() {
                         {
                             prop.end = fx.end + unit;
                         }
-                    }                    
+                    }
                     self._hasPre = true;
                 }
                 else
@@ -5035,16 +5039,16 @@ Tw.registerDriver('jquery', 'tween', function() {
                     {
                         prop.pre = self._hasEnd? prop.begin : prop.end;
                     }
-                }                                                       
-            }                        
+                }
+            }
         };
-        
+
     };
-    
-    
+
+
     /**
      * return a callback used as jquery step event handler. It saves style values during _playTween()
-     * 
+     *
      * @param {object} tween
      * @returns {function}
      */
@@ -5052,7 +5056,7 @@ Tw.registerDriver('jquery', 'tween', function() {
     {
         var self = this;
         return function(now, fx)
-        {                       
+        {
             if(fx.prop in tween)
             {
                 var prop = tween[fx.prop];
@@ -5062,50 +5066,50 @@ Tw.registerDriver('jquery', 'tween', function() {
                 if(self._hasThen && prop.then === null)
                 {
                     prop.then = prop.end;
-                }                            
+                }
                 if(!self._beginReady || prop.begin === null)
                 {
                     prop.begin = fx.start + unit;
-                }    
+                }
                 if(self._duration)
                 {
                     fx.end = fx.start;
-                    fx.now = fx.start;                                
+                    fx.now = fx.start;
                 }
 
             }
-        };                      
+        };
     };
-        
+
 
     /**
      * Set css values instantly
-     * 
+     *
      * @param {string} field - 'begin' | 'end' | 'pre' | 'then'
-     */ 
+     */
     this._setTween = function(field)
-    {            
+    {
         var tween, target, i, end, values,
             fetchBegin = (field == 'begin' && this._hasBegin && !this._beginReady),
             fetchThen = !fetchBegin && (field == 'then' && this._hasThen && !this._thenReady),
             fetchEnd = fetchBegin && !this._hasEnd,
             fetch = fetchBegin || fetchThen;
-                
+
         for(i = 0, end = this._target.length; i < end; i++)
         {
             tween = this._data.tween[i];
             target = this._target.eq(i);
-            
+
             if(fetchBegin)
             {
                 this._getCurrentValues(target, tween);
-            }            
-            
+            }
+
             values = this._getTweenValues(tween, field, true);
             if(fetch)
             {
                 target.animate(values, {
-                    duration: 0, 
+                    duration: 0,
                     step: this._setFetch(tween, fetchBegin, fetchEnd)
                 });
             }
@@ -5114,34 +5118,34 @@ Tw.registerDriver('jquery', 'tween', function() {
                 target.css(values);
             }
         }
-            
+
         if(field == 'begin')
         {
             this._beginReady = true;
         }
         else if(field == 'then')
         {
-            this._thenReady = true;            
+            this._thenReady = true;
         }
-            
+
         return this;
-    };       
-                       
-        
-    /** 
+    };
+
+
+    /**
      * Execute the effective tween
      *
      */
     this._playTween = function()
     {
-        var data = this._data, 
+        var data = this._data,
             field = this._localFwd? 'end' : 'begin',
             self = this, tween, target, values, prePlay = false, options,
             onStart = function() { self._runHandlers('_begin'); },
             onComplete = function() { self._runHandlers('_end'); },
             onProgress = function() { self._runHandlers('progress'); };
-        
-        
+
+
         if(!this._endReady)
         {
             prePlay = true;
@@ -5151,23 +5155,25 @@ Tw.registerDriver('jquery', 'tween', function() {
                 target = this._target.eq(i);
                 values = this._getTweenValues(tween, field, true);
                 options = {
-                    duration: 0, 
+                    duration: 0,
                     step: this._playFetch(tween)
                 };
 
                 if(i == (end - 1) && !this._duration)
-                {                
+                {
                     options.start = onStart;
                     options.complete = onComplete;
                 }
 
+                t1 = performance.now();
                 target.animate(values, options);
+                t2 = performance.now();
             }
             this._beginReady = true;
             this._endReady = true;
         }
-        
-        
+
+
         if(this._duration || !prePlay)
         {
             for(var i = 0, end = this._target.length; i < end; i++)
@@ -5175,7 +5181,7 @@ Tw.registerDriver('jquery', 'tween', function() {
                 values = this._getTweenValues(data.tween[i], field, false);
                 options = {
                     duration: data.realDuration,
-                    queue: 'queue_' + this._id                
+                    queue: 'queue_' + this._id
                 };
                 if(data.duration)
                 {
@@ -5183,7 +5189,7 @@ Tw.registerDriver('jquery', 'tween', function() {
                 }
 
                 if(i == end - 1)
-                {                
+                {
                     options.start = onStart;
                     options.complete = onComplete;
                     if(this._hasHandlers('progress'))
@@ -5192,29 +5198,29 @@ Tw.registerDriver('jquery', 'tween', function() {
                     }
                 }
                 this._target.eq(i).animate(values, options);
-            }     
+            }
             this._target.dequeue('queue_' + this._id);
         }
     };
 
-    
-    
+
+
     /**
      * Pause a running tween
-     * 
-     */ 
+     *
+     */
     this._pauseTween = function()
     {
-        this._target.stop('queue_' + this._id, true);        
+        this._target.stop('queue_' + this._id, true);
     };
-        
-        
-        
+
+
+
     this._resumeTween = function()
     {
         return this._playTween();
     };
-    
+
 
 
     this._getBezierEasing = function(value)
@@ -5227,24 +5233,23 @@ Tw.registerDriver('jquery', 'tween', function() {
 
 
 /**
- * jQuery Timeline Driver 
- * 
+ * jQuery Timeline Driver
+ *
  * @mixes Common, TimelineCommon, ControlsPro, TimelinePro
- *  
+ *
  */
-Tw.registerDriver('jquery', 'timeline', function() {    
+Tw.registerDriver('jquery', 'timeline', function() {
     Common.call(this);
     TimelineCommon.call(this);
     ControlsPro.call(this);
-    TimelinePro.call(this);    
+    TimelinePro.call(this);
 
     this._driverTimeUnit = 'ms';
-    
+
 });
 
 Tw.defaultTimeUnit = 'ms';
 Tw.defaultDriver = 'jquery';
-
 return Tw;
 };
 

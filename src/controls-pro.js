@@ -1,25 +1,25 @@
 /**
- * Tweene - JavaScript Animation Proxy 
- * 
+ * Tweene - JavaScript Animation Proxy
+ *
  * @link http://tweene.com
- *   
+ *
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
- * 
- * @license Artistic License 2.0 
+ *
+ * @license Artistic License 2.0
  * See LICENSE.txt for details
- * 
+ *
  */
 
 
 
 /**
- * Vars and methods common to tween and timeline, for animation library that does not have native support 
- * for playhead control (play / pause / reverse and so on) 
+ * Vars and methods common to tween and timeline, for animation library that does not have native support
+ * for playhead control (play / pause / reverse and so on)
  * @mixin
- * 
+ *
  */
 var ControlsPro = function()
-{    
+{
     this._time = null;
 
     this._startTime = 0;
@@ -44,9 +44,9 @@ var ControlsPro = function()
 
 
     /**
-     * play() and reverse() acts on both global and local direction (_fwd and _localFwd properties), while the change 
+     * play() and reverse() acts on both global and local direction (_fwd and _localFwd properties), while the change
      * in direction performed during a yoyo loop changes only local direction
-     * 
+     *
      * @param {boolean} value
      * @returns {this}
      */
@@ -60,7 +60,7 @@ var ControlsPro = function()
 
     /**
      * Change the actual local direction of the animation
-     * 
+     *
      * @param {boolean} value
      * @returns {this}
      */
@@ -77,13 +77,13 @@ var ControlsPro = function()
         {
             this._propagateToAll('setDir', value);
         }
-        return this;            
+        return this;
     };
 
 
     /**
      * Swap the global direction, from forward to backward or vice versa
-     * 
+     *
      * @returns {this}
      */
     this.swapDir = function()
@@ -96,7 +96,7 @@ var ControlsPro = function()
 
     /**
      * Swap the actual local direction, from forward to backward or vice versa
-     * 
+     *
      * @returns {this}
      */
     this.swapLocalDir = function()
@@ -116,7 +116,7 @@ var ControlsPro = function()
 
     /**
      * Override Common.play()
-     * 
+     *
      */
     this.play = function()
     {
@@ -137,7 +137,7 @@ var ControlsPro = function()
 
     /**
      * Override Common.reverse()
-     * 
+     *
      */
     this.reverse = function()
     {
@@ -146,19 +146,19 @@ var ControlsPro = function()
         {
             this._playAllowed = true;
             if(this._fwd)
-            {            
+            {
                 this.pause();
                 this.swapDir();
             }
             this.resume();
         }
-        return this;        
+        return this;
     };
 
 
     /**
      * Override Common.pause()
-     * 
+     *
      */
     this.pause = function()
     {
@@ -190,28 +190,28 @@ var ControlsPro = function()
             }
         }
         return this;
-    };    
+    };
 
 
     /**
      * Override Common.resume()
-     * 
+     *
      */
     this.resume = function()
-    {   
+    {
 //        if(this._parent && this._parent.paused())
 //        {
-//            return this;        
+//            return this;
 //        }
 //        console.log(this._id, 'resume', (this._parent && this._parent.paused()? 'parent paused': 'parent running'));
         if(this._paused && (this._fwd && this._playAllowed || !this._fwd && this._reverseAllowed))
-        {           
+        {
             this._paused = false;
             this.prepare();
 
             // propagate resume to delay, if present
             if(this._delayDummy)
-            {               
+            {
                 this._delayDummy.resume();
                 return this;
             }
@@ -237,21 +237,21 @@ var ControlsPro = function()
                 if(this._duration)
                 {
                     // resume progress ticker, if needed
-                    this._startProgress();                    
+                    this._startProgress();
                 }
-                
+
                 // when the animation library does not have native support for begin callback
                 if(this._emulatedBegin && this._hasHandlers('_begin'))
                 {
                     this._runHandlers('_begin');
                 }
-                
+
                 // at both ends of the tween (begin in forward dir, end in backward dir) perform preTween actions
                 if(this.type != 'timeline' && ((this._position === 0 && this._localFwd) || (this._position == this._duration && !this._localFwd)))
                 {
                     this._preTween(this._localFwd);
                 }
-                this._resumeTween();                        
+                this._resumeTween();
             }
             else
             {
@@ -264,19 +264,24 @@ var ControlsPro = function()
                 else
                 {
                     this._run();
-                }            
+                }
             }
-        }        
+        }
         return this;
     };
 
 
     /**
      * Override Common.restart()
-     * 
+     *
      */
     this.restart = function()
     {
+        if(this._keyCurrentIndex !== null)
+        {
+            this._keyCurrentIndex = null;
+        }
+
         this.pause();
         this.setDir(true);
         this.back();
@@ -287,7 +292,7 @@ var ControlsPro = function()
 
     /**
      * Override Common.back()
-     * 
+     *
      */
     this.back = function()
     {
@@ -312,14 +317,14 @@ var ControlsPro = function()
             this._back();
         }
         this._playAllowed = this._fwd;
-        this._reverseAllowed = !this._playAllowed;        
+        this._reverseAllowed = !this._playAllowed;
         return this;
     };
 
 
     /**
      * Override Common.speed()
-     * 
+     *
      */
     this.speed = function(value)
     {
@@ -330,33 +335,33 @@ var ControlsPro = function()
 
         if(!this._running)
         {
-            this.invalidate();            
+            this.invalidate();
         }
-        value = parseSpeed(value);    
-        
+        value = parseSpeed(value);
+
         if(value != this._speed)
-        {        
+        {
             // changing speed in running animations is performed pausing and immediately resuming with the new speed
             var notPaused = !this._paused;
             if(notPaused)
             {
                 this.pause();
             }
-            
+
             this._speed = value;
 
             if(notPaused)
             {
                 this.resume();
-            }                
+            }
         }
-        return this;        
+        return this;
     };
 
 
-    /** 
+    /**
      * Calculate current time position, needed only by info methods like time() and progress()
-     * 
+     *
      * @returns {number}
      */
     this._getPosition = function()
@@ -375,9 +380,9 @@ var ControlsPro = function()
 
 
     /**
-     * Calculate the current percent progress, as a value between 0 and 1 
-     * 
-     * @returns {number} 
+     * Calculate the current percent progress, as a value between 0 and 1
+     *
+     * @returns {number}
      */
     this._getProgress = function()
     {
@@ -387,7 +392,7 @@ var ControlsPro = function()
 
     /**
      * Get the current running status
-     * 
+     *
      * @returns {boolean}
      */
     this._getPaused = function()
@@ -398,38 +403,38 @@ var ControlsPro = function()
 
     /**
      * Reset the internal playhead position on both ends of animation
-     * 
+     *
      */
     this._resetPosition = function()
     {
         this._paused = true;
         this._position = this._localFwd? this._duration : 0;
         this._startTime = this._pauseTime = 0;
-    };    
+    };
 
 
     /**
      * Used to emulate a progress / update callback when the driver lacks native support for it
-     * 
+     *
      */
     this._startProgress = function()
     {
         if(this._emulatedProgress && this._hasHandlers('progress'))
         {
             // passing 0 as first param, it will fire until it is manually removed
-            Tw.ticker.addCallback(0, this._id + '_progress', this._runHandlers, this, ['progress']);        
+            Tw.ticker.addCallback(0, this._id + '_progress', this._runHandlers, this, ['progress']);
         }
     };
 
 
     /**
      * Used to emulate a progress / update callback when the driver lacks native support for it
-     * 
+     *
      */
     this._stopProgress = function()
     {
         if(this._emulatedProgress && this._hasHandlers('progress'))
-        {        
+        {
             Tw.ticker.removeCallback(this._id + '_progress');
         }
     };
@@ -437,11 +442,11 @@ var ControlsPro = function()
 
     /**
      * Internal method used to restart the animation in both directions.
-     * 
+     *
      */
     this._restart = function()
     {
-        this._delayDummy = null;  
+        this._delayDummy = null;
         this.pause();
         this._back();
         this.resume();
@@ -450,12 +455,12 @@ var ControlsPro = function()
 
     /**
      * Used in loop or manual restart, it reset data and animation to the begin (or end) state accordingly to direction
-     * 
+     *
      * @returns {this}
      */
-    this._back = function() 
+    this._back = function()
     {
-        this._position = this._localFwd? 0 : this._duration;        
+        this._position = this._localFwd? 0 : this._duration;
         if(this._running)
         {
             this._delayDummy = null;
@@ -468,18 +473,18 @@ var ControlsPro = function()
 
     /**
      * Update loop counter when running in backward direction and restart
-     * 
+     *
      */
     this._loopRev = function()
     {
         this._loopsCount --;
-        this._restart();                        
+        this._restart();
     };
 
 
     /**
      * Update loop counter when running in forward direction and restart
-     * 
+     *
      */
     this._loopFwd = function()
     {
@@ -488,13 +493,13 @@ var ControlsPro = function()
         {
             this.swapLocalDir();
         }
-        this._restart();            
+        this._restart();
     };
 
 
     /**
      * loop controller, performed on both ends of animation, accordingly with current direction and yoyo property
-     * 
+     *
      */
     this._loopCheck = function()
     {
@@ -529,7 +534,7 @@ var ControlsPro = function()
             }
             else
             {
-                this._loopRev();                
+                this._loopRev();
             }
         }
     };
@@ -538,13 +543,13 @@ var ControlsPro = function()
 
     /**
      * Emulate delay and loopsDelay using a special Dummy Tween
-     * 
+     *
      * @param {number} delay
      * @param {function} callback
      * @param {function} [reverseCallback] - used only in loopsDelay
      */
     this._emulateDelay = function(delay, callback, reverseCallback)
-    {                        
+    {
         var dummy = this._delayDummy = this._getDummy()
             .duration(delay)
             .setCoreHandler('end', name, callback, this);
@@ -561,8 +566,8 @@ var ControlsPro = function()
             dummy.setCoreHandler('reverse', name, reverseCallback, this);
         }
 
-        dummy[this._fwd? 'play' : 'reverse']();        
-    };        
+        dummy[this._fwd? 'play' : 'reverse']();
+    };
 
 
     /**
@@ -595,7 +600,7 @@ var ControlsPro = function()
                 if(this.type != 'timeline')
                 {
                     this._postTween('end');
-                }                
+                }
                 this._playAllowed = false;
                 this._time = this._duration;
                 this._runHandlers('end');
@@ -604,7 +609,7 @@ var ControlsPro = function()
             else if(this._loops !== 0)
             {
                 this._loopCheck();
-            }                
+            }
         }
         else
         {
@@ -613,7 +618,7 @@ var ControlsPro = function()
                 if(this.type != 'timeline')
                 {
                     this._postTween('begin');
-                }                
+                }
                 this._reverseAllowed = false;
                 this._time = 0;
                 this._runHandlers('reverse');
@@ -622,7 +627,7 @@ var ControlsPro = function()
             else if(this._loops !== 0)
             {
                 this._loopCheck();
-            }            
+            }
         }
     };
 
@@ -630,7 +635,7 @@ var ControlsPro = function()
     /**
      * Create a Dummy object
      * @see TweeneDummy
-     * 
+     *
      * @returns {object}
      */
     this._getDummy = function()
@@ -642,6 +647,6 @@ var ControlsPro = function()
 
     // register some internal handlers
     this.setCoreHandler('_begin', '_begin', this._onTweenBegin, this);
-    this.setCoreHandler('_end', '_end', this._onTweenEnd, this);                    
-    
+    this.setCoreHandler('_end', '_end', this._onTweenEnd, this);
+
 };

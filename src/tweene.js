@@ -1,13 +1,13 @@
 /**
- * Tweene - JavaScript Animation Proxy 
- * @version 0.5.8
+ * Tweene - JavaScript Animation Proxy
+ * @version 0.5.9
  * @link http://tweene.com
- *   
+ *
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
- * 
- * @license Artistic License 2.0 
+ *
+ * @license Artistic License 2.0
  * See LICENSE.txt for details
- * 
+ *
  */
 
 /* jshint -W008 */
@@ -30,10 +30,10 @@ var compoundTransforms = transformProperties.slice(0, 8);
 
 // compound properties we parse to obtain a list of key - value couples
 var compoundNames = 'margin|padding|borderColor|borderWidth|borderRadius'.split('|');
-var compoundDirections = ['Top', 'Right', 'Bottom', 'Left'];    
+var compoundDirections = ['Top', 'Right', 'Bottom', 'Left'];
 var radiusDirections = ['TopLeft', 'TopRight', 'BottomRight', 'BottomLeft'];
 
-// base name and aliases for event names. Those with an empty string as value are the names used internally  
+// base name and aliases for event names. Those with an empty string as value are the names used internally
 var handlersMap = {
     begin: '',
     end: '',
@@ -56,10 +56,10 @@ var handlersMap = {
     onRepeat: 'loop',
     onReverse: 'reverse',
     onReverseComplete: 'reverse'
-};    
+};
 
 
-// base name and aliases for option names. Those with an empty string as value are the names used internally  
+// base name and aliases for option names. Those with an empty string as value are the names used internally
 var optionsMap = {
     delay: '',
     loops: '',
@@ -76,12 +76,12 @@ var optionsMap = {
 
 // base name and aliases for tween option names
 var tweenOptionsMap = {
-    easing: '', 
+    easing: '',
     duration: '',
     paused: '',
     to: '',
     from: '',
-    then: '',    
+    then: '',
     ease: 'easing'
 };
 
@@ -95,7 +95,7 @@ var easings = {
     'ease-in-out': [.42, 0, .58, 1],
     'in': [.42, 0, 1, 1],
     out: [0, 0, .58, 1],
-    'in-out': [.42, 0, .58, 1],            
+    'in-out': [.42, 0, .58, 1],
     snap: [0, 1, .5, 1],
     easeInCubic: [.550,.055,.675,.190],
     easeOutCubic: [.215,.61,.355,1],
@@ -120,7 +120,7 @@ var easings = {
     easeInOutSine: [.445,.05,.55,.95],
     easeInBack: [.6,-.28,.735,.045],
     easeOutBack: [.175, .885,.32,1.275],
-    easeInOutBack: [.68,-.55,.265,1.55]                        
+    easeInOutBack: [.68,-.55,.265,1.55]
 };
 
 
@@ -139,35 +139,35 @@ var speeds = {
 
 
 
-function isFunction(value) 
+function isFunction(value)
 {
     return typeof value == 'function';
 }
 
 
 
-function isNumber(value) 
+function isNumber(value)
 {
     return typeof value == 'number' || (value && typeof value == 'object' && Object.prototype.toString.call(value) == '[object Number]') || false;
 }
 
 
 
-function isString(value) 
+function isString(value)
 {
     return typeof value == 'string' || (value && typeof value == 'object' && Object.prototype.toString.call(value) == '[object String]') || false;
 }
 
 
 
-var isArray = Array.isArray || function(value) 
-{        
+var isArray = Array.isArray || function(value)
+{
     return value && typeof value == 'object' && typeof value.length == 'number' && Object.prototype.toString.call(value) == '[object Array]';
 };
 
 
 
-function isObject(value) 
+function isObject(value)
 {
     var type = typeof value;
     return type === 'function' || type === 'object' && !!value;
@@ -177,7 +177,7 @@ function isObject(value)
 /*
  * @link http://stackoverflow.com/questions/18082/validate-decimal-numbers-in-javascript-isnumeric
  */
-function isNumeric(value) 
+function isNumeric(value)
 {
     return !isArray(value) && (value - parseFloat(value) + 1) >= 0;
 }
@@ -199,12 +199,12 @@ function isEmpty(obj)
 
 function seemsPlainObject(value)
 {
-    return  isObject(value) && !(value instanceof Function) && value.constructor == Object;        
+    return  isObject(value) && !(value instanceof Function) && value.constructor == Object;
 }
 
 
 
-function extendObject(obj) 
+function extendObject(obj)
 {
     if (!isObject(obj))
     {
@@ -212,10 +212,10 @@ function extendObject(obj)
     }
 
     var source, name, i, length;
-    for (i = 1, length = arguments.length; i < length; i++) 
+    for (i = 1, length = arguments.length; i < length; i++)
     {
         source = arguments[i];
-        for (name in source) 
+        for (name in source)
         {
             obj[name] = source[name];
         }
@@ -224,7 +224,7 @@ function extendObject(obj)
 }
 
 
-function cloneObject(obj, deep) 
+function cloneObject(obj, deep)
 {
     if (isFunction(obj) || !isObject(obj))
     {
@@ -232,7 +232,7 @@ function cloneObject(obj, deep)
     }
     if(isArray(obj))
     {
-        obj = obj.slice();           
+        obj = obj.slice();
         if(deep)
         {
             for(var i = 0, end = obj.length; i < end; i++)
@@ -261,7 +261,7 @@ function cloneObject(obj, deep)
 
 
 
-function keys(obj) 
+function keys(obj)
 {
     if(Object.keys)
     {
@@ -280,13 +280,13 @@ function keys(obj)
 
 
 // simplified version of Array.indexOf polyfill
-function inArray(array, search) 
+function inArray(array, search)
 {
     if(!isArray(array))
     {
         throw 'expected an array as first param';
     }
-    
+
     if(array.indexOf)
     {
         return array.indexOf(search);
@@ -316,7 +316,7 @@ function toArray(args, pos)
 
 /**
  * convert time from seconds to milliseconds and vice versa
- * 
+ *
  * @param {number} value
  * @param {string} fromUnit - 's' | 'ms'
  * @param {string} toUnit - 's' | 'ms'
@@ -335,30 +335,30 @@ function convertTime(value, fromUnit, toUnit)
 
 /*
  *  Based on Bez http://github.com/rdallasgray/bez
- * 
+ *
  * Copyright Robert Dallas Gray. All rights reserved.
  * Provided under the FreeBSD license: https://github.com/rdallasgray/bez/blob/master/LICENSE.txt
-*/   
-function bezier(x1, y1, x2, y2) 
+*/
+function bezier(x1, y1, x2, y2)
 {
     var p1 = [x1, y1], p2 = [x2, y2],
         A = [null, null], B = [null, null], C = [null, null],
 
-        bezCoOrd = function(time, ax) 
+        bezCoOrd = function(time, ax)
         {
             C[ax] = 3 * p1[ax]; B[ax] = 3 * (p2[ax] - p1[ax]) - C[ax]; A[ax] = 1 - C[ax] - B[ax];
             return time * (C[ax] + time * (B[ax] + time * A[ax]));
         },
 
-        xDeriv = function(time) 
+        xDeriv = function(time)
         {
             return C[0] + time * (2 * B[0] + 3 * A[0] * time);
         },
 
-        xForT = function(time) 
+        xForT = function(time)
         {
             var x = time, i = 0, z;
-            while (++i < 14) 
+            while (++i < 14)
             {
                 z = bezCoOrd(x, 0) - time;
                 if (Math.abs(z) < 1e-3) break;
@@ -375,14 +375,14 @@ function bezier(x1, y1, x2, y2)
 
 /**
  * take as input compound properties defined as a space separated string of values and return the list of single value properties
- * 
+ *
  *   padding: 5 => paddingTop: 5, paddingRight: 5, paddingBottom: 5, paddingLeft: 5
- *   border-width: 2px 1px => borderTopWidth: 2px, borderRightWidth: 1px, borderBottomWidth: 2px, borderLeftWidth: 1px 
- * 
+ *   border-width: 2px 1px => borderTopWidth: 2px, borderRightWidth: 1px, borderBottomWidth: 2px, borderLeftWidth: 1px
+ *
  * @param {string} name
  * @param {string} value
  * @returns {object}
- */    
+ */
 function compoundMapping(name, value)
 {
     var parts, nameParts, prefix, suffix, dirs, values = {}, easing, i;
@@ -395,9 +395,9 @@ function compoundMapping(name, value)
     {
         easing = null;
     }
-                    
+
     parts = String(value).split(/\s+/);
-    
+
     switch(parts.length)
     {
         case 1: parts = [parts[0], parts[0], parts[0], parts[0]]; break;
@@ -408,9 +408,9 @@ function compoundMapping(name, value)
     nameParts = decamelize(name).split('-');
     prefix = nameParts[0];
     suffix = nameParts.length > 1? nameParts[1].substr(0, 1).toUpperCase() + nameParts[1].substr(1) : '';
-    
+
     dirs = name == 'borderRadius'? radiusDirections : compoundDirections;
-    
+
     for(i = 0; i < 4; i++)
     {
         values[prefix + dirs[i] + suffix] = easing? [parts[i], easing] : parts[i];
@@ -421,10 +421,10 @@ function compoundMapping(name, value)
 
 /**
  *  split commpound transform values
- *  
+ *
  *   scale: 1.2 => scaleX: 1.2, scaleY: 1.2
  *   rotate3d: 30, 60, 40 => rotateX: 30, rotateY: 60, rotateZ: 40
- *   
+ *
  * @param {string} name
  * @param {string} value
  * @returns {object}
@@ -441,10 +441,10 @@ function transformMapping(name, value)
     {
         easing = null;
     }
-                    
+
     parts = String(value).split(/\s*,\s*/);
     baseName = name.indexOf('3') !== -1? name.substr(0, name.length - 2) : name;
-    
+
     if(name == 'rotate3d')
     {
         if(parts.length == 4)
@@ -461,18 +461,18 @@ function transformMapping(name, value)
     {
         switch(parts.length)
         {
-            // for rotations, a single value is passed as Z-value, while for other transforms it is applied to X and Y       
+            // for rotations, a single value is passed as Z-value, while for other transforms it is applied to X and Y
             case 1:
                 parts = baseName == 'rotate' || baseName == 'rotation'? [null, null, parts[0]] : [parts[0], parts[0], null];
             break;
 
             case 2:
                 parts = [parts[0], parts[1], null];
-            break;                
+            break;
         }
-        
+
     }
-            
+
     for(var i = 0; i < dirs.length; i++)
     {
         if(parts[i] !== null)
@@ -483,7 +483,7 @@ function transformMapping(name, value)
     return values;
 }
 
-    
+
 
 function isTransformProperty(name)
 {
@@ -492,7 +492,7 @@ function isTransformProperty(name)
 
 
 // border-bottom-width -> borderBottomWidth
-function camelize(name) 
+function camelize(name)
 {
     return name.replace(/(\-[a-z])/g, function(value) {
         return value.substr(1).toUpperCase();
@@ -503,14 +503,14 @@ function camelize(name)
 // borderBottomWidth -> border-bottom-width
 function decamelize(name)
 {
-    return name.replace(/([A-Z])/g, '-$1').toLowerCase();    
+    return name.replace(/([A-Z])/g, '-$1').toLowerCase();
 }
 
 
 /**
- * accept a speed name shortcuts or a number and give back an acceptable positive value. 
+ * accept a speed name shortcuts or a number and give back an acceptable positive value.
  * Fallback to 1 if value is out of valid range
- * 
+ *
  * @param {string|number} value
  * @returns {number}
  */
@@ -534,29 +534,29 @@ function parseSpeed(value)
 
 /**
  * Tweene global class, is the unique identifier exported
- *  
- * You will never need to instantiate a Tweene object. You have to use Tweene static methods 
- * in order to obtain instances of tween and timeline objects of the different drivers 
- *   
+ *
+ * You will never need to instantiate a Tweene object. You have to use Tweene static methods
+ * in order to obtain instances of tween and timeline objects of the different drivers
+ *
  * @class
- *  
+ *
  */
-var Tweene = function() 
+var Tweene = function()
 {
     var _self = this;
-    
+
     // used for generate unique identifier for any tweene object (tweens, timelines, callbacks and labels)
     this._idCounter = 0;
-    
+
     // internally, all time values use this unit
-    this._coreTimeUnit = 'ms';   
-    
+    this._coreTimeUnit = 'ms';
+
     // time unit used when pure numbers are passed as delay or duration values. Users can change this value any time
     // when the user requires only GSAP driver, it defaults to 's' in order to mimic the library native API
     this.defaultTimeUnit = 'ms';
-        
-    this._macros = {};    
-                        
+
+    this._macros = {};
+
     this.easings = easings;
 
     this.durations = durations;
@@ -566,9 +566,9 @@ var Tweene = function()
     this.defaultDriver = 'jquery';
 
     this.defaultEasing = 'easeOutQuad';
-    
-    this.defaultDuration = '400ms';        
-    
+
+    this.defaultDuration = '400ms';
+
     // container for registered drivers
     var _drivers = {
             tween: {},
@@ -578,7 +578,7 @@ var Tweene = function()
 
         /**
          * Create a tween or timeline object of the specified driver. If driverName is not given, it fallbacks to default driver
-         * 
+         *
          * @param {string} 'tween' or 'timeline'
          * @param {string} [driverName] - one of the registered driver's name
          * @returns {object} tween or timeline object
@@ -587,21 +587,21 @@ var Tweene = function()
         {
             var d, i;
             driverName = (driverName? driverName : _self.defaultDriver).toLowerCase();
-            
+
             if(driverName in _drivers[type])
             {
-                d = _drivers[type][driverName];                
+                d = _drivers[type][driverName];
                 i = new d();
                 i.driverName = driverName;
                 return i;
             }
             throw 'Driver ' + name + ' not found';
         },
-        
-        
+
+
         /**
          * Common method used inside from(), to() and fromTo() to create a tween and pass arguments to it
-         * 
+         *
          * @param {arguments} args - list of arguments passed to original public method
          * @param {string} method - 'from' | 'to' | 'fromTo'
          * @returns {object} - return a tween object
@@ -615,20 +615,20 @@ var Tweene = function()
                 tw.target(args.shift())[method].apply(tw, args);
             }
 
-            return tw._immediateStart? tw.play() : tw;        
+            return tw._immediateStart? tw.play() : tw;
         };
 
 
     /**
-     * Register an animation driver 
-     * 
+     * Register an animation driver
+     *
      * @param {string} name - name of the driver
      * @param {string} type - 'tween' | 'timeline'
      * @param {function} construct - constructor function that defines the driver class
      * @returns {Tweene}
      */
     this.registerDriver = function(name, type, construct)
-    {        
+    {
         type = type.toLowerCase();
         if(type != 'tween')
         {
@@ -637,12 +637,12 @@ var Tweene = function()
         _drivers[type][name.toLowerCase()] = construct;
         return this;
     };
-    
-    
+
+
     /**
      * Define a macro for tween objects
      * @link http://tweene.com/docs/#macro
-     * 
+     *
      * @param {string} name
      * @param {function} macro - inside the function, 'this' refers to the tween object
      * @returns {Tweene}
@@ -652,12 +652,12 @@ var Tweene = function()
         this._macros[name] = macro;
         return this;
     };
-           
-       
+
+
     /**
      * Return an instance of a tween object
      * @link http://tweene.com/docs/#createTween
-     * 
+     *
      * @param {object|string} [target] jquery object or string selector of the dom element(s) to be animated
      * @param {string} [driver]
      * @returns {object}
@@ -671,7 +671,7 @@ var Tweene = function()
 
     /**
      * Apply instantly the properties values to the target
-     * 
+     *
      * @param {object|string} target
      * @param {object} values - CSS property - value map
      * @returns {unresolved}
@@ -686,47 +686,47 @@ var Tweene = function()
      * Create a tween object for a 'to' animation and pass the arguments to it. First argument is always the target.
      * If you don't set paused: true in the options passed, the tween will start immediately.
      * @link http://tweene.com/docs/#tweenTo
-     * 
+     *
      * @returns {object} - return the tween object
      */
-    this.to = function() 
+    this.to = function()
     {
         return _tweenNow(arguments, 'to');
     };
 
-    
+
     /**
      * Create a tween object for a 'from' animation and pass the arguments to it. First argument is always the target.
      * If you don't set paused: true in the options passed, the tween will start immediately.
      * @link http://tweene.com/docs/#tweenFrom
-     * 
+     *
      * @returns {object} - return the tween object
      */
-    this.from = function() 
+    this.from = function()
     {
         return _tweenNow(arguments, 'from');
     };
 
-    
+
     /**
      * Create a tween object for a 'fromTo' animation and pass the arguments to it. First argument is always the target.
      * If you don't set paused: true in the options passed, the tween will start immediately.
      * @link http://tweene.com/docs/#tweenFromTo
-     * 
+     *
      * @returns {object} - return the tween object
      */
-    this.fromTo = function() 
+    this.fromTo = function()
     {
         return _tweenNow(arguments, 'fromTo');
     };
-    
-        
+
+
     /**
      * Create a timeline object
      * @link http://tweene.com/docs/#createTimeline
-     * 
+     *
      * @param {object|string} [target] - it checks if the object passed as first param is a plain object (options) or not (target)
-     * @param {object} [options] 
+     * @param {object} [options]
      * @param {string} driver - name of the driver
      * @returns {object} - a timeline object
      */
@@ -747,7 +747,7 @@ var Tweene = function()
             .options(options)
             .target(lineTarget);
     };
-                         
+
 };
 
 var Tw = new Tweene();
@@ -756,6 +756,3 @@ if(window)
 {
     window.Tweene = Tw;
 }
-
- 
-
