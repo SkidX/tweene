@@ -5279,7 +5279,7 @@ return Tw;
 };
 
 if(typeof(define) === 'function' && define.amd) {
-   define(['jquery', 'velocity-animate'], func);
+   define(['jquery', 'velocity-animate'], func.bind(this, window));
 } else if(typeof(module) !== 'undefined' && module.exports) {
    var mod;
  mod = require('jquery');

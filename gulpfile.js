@@ -135,7 +135,7 @@ gulp.task('src', function(){
             "return Tw;\n" +
             "};\n\n" +
             "if(typeof(define) === 'function' && define.amd) {\n" +
-            "   define(['" + deps.join("', '") + "'], func);\n" +
+            "   define(['" + deps.join("', '") + "'], func.bind(this, window));\n" +
             "} else if(typeof(module) !== 'undefined' && module.exports) {\n" +
             "   var mod;\n";
         for(var i = 0, end = deps.length; i < end; i++)
