@@ -1,4 +1,4 @@
-# Tweene - JS Animation Proxy - v0.5.7
+# Tweene - JS Animation Proxy - v0.5.10
 
 __Tweene__ is a JS library that helps to improve your favourite animation engine, allowing you to do more and better.
 
@@ -23,11 +23,11 @@ Currently it can work together with [GSAP](http://www.greensock.com/gsap-js/), [
 ## Roadmap
 Changes and new features planned for next releases
 
-- __0.6.0__: Add support for stagger tweens
-- __0.7.0__: Remove dependencies on jQuery and Transit, CSS Transitions will be supported without external libraries
-- __0.8.0__: Add new Driver for [Web Animations Spec.](http://updates.html5rocks.com/2014/12/web-animation-playback)
-- __0.9.0__: Add support for scrubbing animation’s currentTime position on all supported driver
-- __1.0.0__: Add support for Keyframe based syntax. API stability.
+- __0.6.0__: Add support for scrubbing animation’s currentTime position
+- __0.7.0__: Add support for stagger tweens
+- __0.8.0__: Add new Driver for [Animate Plus](https://github.com/bendc/animateplus)
+- __0.9.0__: Add new Driver for [Move.js](https://github.com/visionmedia/move.js)
+- __0.10.0__: Add new Driver for [Web Animations Spec.](http://updates.html5rocks.com/2014/12/web-animation-playback)
 
 ## Getting started
 To start using Tweene just include the script after your animation library of choice.
@@ -43,7 +43,7 @@ Alternatively, you can download the repository and host the files locally.
 
 ```html
 // use Tweene with GSAP
-<script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.15.0/TweenMax.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.18.0/TweenMax.min.js"></script>
 <script src="//cdn.jsdelivr.net/tweene/latest/tweene-gsap.min.js"></script>
 
 // use Tweene with jQuery
@@ -61,16 +61,16 @@ Alternatively, you can download the repository and host the files locally.
 
 // use Tweene with Velocity.js
 <script src="//cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>;
-<script src="//cdn.jsdelivr.net/velocity/1.1/velocity.min.js"></script>
+<script src="//cdn.jsdelivr.net/velocity/1.2.2/velocity.min.js"></script>
 <script src="//cdn.jsdelivr.net/tweene/latest/tweene-velocity.min.js"></script>
 // or fetch all with a single HTTP request
 <script src="//cdn.jsdelivr.net/g/jquery,velocity@1.1,tweene(tweene-velocity.min.js)"></script>
 
 // use Tweene with more then one library
-<script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.15.0/TweenMax.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.18.0/TweenMax.min.js"></script>
 <script src="//cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
 <script src="//cdn.jsdelivr.net/jquery.transit/0.9.12/jquery.transit.min.js"></script>
-<script src="//cdn.jsdelivr.net/velocity/1.1/velocity.min.js"></script>
+<script src="//cdn.jsdelivr.net/velocity/1.2.2/velocity.min.js"></script>
 <script src="//cdn.jsdelivr.net/tweene/latest/tweene-all.min.js"></script>
 
 <script>
@@ -112,6 +112,7 @@ However, you can change it any time you want and also on a single call basis.
 Check http://tweene.com/docs/#duration for more details.
 
 ## Changelog
+- __0.5.10__ Fixed bug in jQuery driver.
 - __0.5.9__ Fixed restart() procedure when timelines are paused.
 - __0.5.8__ Added addPause() method. Fixed events call order.
 - __0.5.7__ Fixed wrong link to Velocity.js homepage
