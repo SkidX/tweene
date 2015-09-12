@@ -302,9 +302,7 @@ Tw.registerDriver('jquery', 'tween', function() {
                     options.complete = onComplete;
                 }
 
-                t1 = performance.now();
                 target.animate(values, options);
-                t2 = performance.now();
             }
             this._beginReady = true;
             this._endReady = true;

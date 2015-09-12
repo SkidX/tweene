@@ -5,7 +5,7 @@ var func = function(window, undef) {
 
 /**
  * Tweene - JavaScript Animation Proxy
- * @version 0.5.9
+ * @version 0.5.10
  * @link http://tweene.com
  *
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
@@ -6659,9 +6659,7 @@ Tw.registerDriver('jquery', 'tween', function() {
                     options.complete = onComplete;
                 }
 
-                t1 = performance.now();
                 target.animate(values, options);
-                t2 = performance.now();
             }
             this._beginReady = true;
             this._endReady = true;

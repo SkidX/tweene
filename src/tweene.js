@@ -1,6 +1,6 @@
 /**
  * Tweene - JavaScript Animation Proxy
- * @version 0.5.9
+ * @version 0.5.10
  * @link http://tweene.com
  *
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
