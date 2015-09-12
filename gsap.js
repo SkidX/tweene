@@ -3400,7 +3400,7 @@ return Tw;
 };
 
 if(typeof(define) === 'function' && define.amd) {
-   define(['gsap'], func);
+   define(['gsap'], func.bind(this, window));
 } else if(typeof(module) !== 'undefined' && module.exports) {
    var mod;
  mod = require('gsap');

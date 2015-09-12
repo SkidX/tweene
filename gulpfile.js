@@ -36,13 +36,13 @@ gulp.task('test', function (done) {
 
 gulp.task('testing', function (done) {
     karma.start({
-        configFile: __dirname + '/karma.conf.js', 
+        configFile: __dirname + '/karma.conf.js',
         singleRun: false
     }, done);
 });
 
 var modulesPath = 'src/';
-   
+
 var commons = [
     modulesPath + 'tweene.js',
     modulesPath + 'common.js',
@@ -53,89 +53,89 @@ var commons = [
 ];
 
 var pro = [
-    modulesPath + 'ticker.js',                
+    modulesPath + 'ticker.js',
     modulesPath + 'controls-pro.js',
     modulesPath + 'tween-pro.js',
     modulesPath + 'timeline-pro.js',
     modulesPath + 'tweene-dummy.js'
 ];
-   
+
 var drivers = {
     tweene: {
         files: commons.concat(pro, [
             modulesPath + 'tweene-gsap.js',
             modulesPath + 'tweene-velocity.js',
             modulesPath + 'tweene-transit.js',
-            modulesPath + 'tweene-jquery.js'               
+            modulesPath + 'tweene-jquery.js'
         ]),
         deps: ['jquery', 'jquery.transit', 'velocity-animate', 'gsap']
-    }, 
-    
+    },
+
     jquery: {
         files: commons.concat(pro, [
-            modulesPath + 'tweene-jquery.js'               
+            modulesPath + 'tweene-jquery.js'
         ]),
         deps: ['jquery']
     },
-    
+
     transit: {
         files: commons.concat(pro, [
-            modulesPath + 'tweene-transit.js'               
+            modulesPath + 'tweene-transit.js'
         ]),
         deps: ['jquery', 'jquery.transit']
     },
-    
+
     velocity: {
         files: commons.concat(pro, [
-            modulesPath + 'tweene-velocity.js'               
+            modulesPath + 'tweene-velocity.js'
         ]),
         deps: ['jquery', 'velocity-animate']
     },
-        
+
     gsap: {
         files: commons.concat([
             modulesPath + 'tweene-gsap.js'
         ]),
         deps: ['gsap']
     }
-           
+
 };
-   
-   
+
+
 var banner = [
     '/**',
     ' * <%= pkg.title %> - <%= pkg.description %>',
     ' * @version <%= pkg.version %>',
     ' * @link <%= pkg.homepage %>',
     " * Copyright (c) 2014, Federico Orru' <federico@buzzler.com>",
-    ' * ', 
+    ' * ',
     ' * @license <%= pkg.license %>',
     ' * See LICENSE.txt for details',
     ' * ',
     ' */',
     ''
-].join('\n');      
+].join('\n');
 
 
-gulp.task('src', function(){   
+gulp.task('src', function(){
 
-    var header = 
+    var header =
         ";(function (window) {\n" +
         "'use strict'; \n" +
         "var func = function(window, undef) {\n" +
         "'use strict'; \n\n",
-        footer = '',   
+        footer = '',
         driver, srcs, deps, streams = [];
-    
+
     for(driver in drivers)
     {
         srcs = drivers[driver].files;
         deps = drivers[driver].deps;
-        footer =    
+        footer =
             "return Tw;\n" +
             "};\n\n" +
             "if(typeof(define) === 'function' && define.amd) {\n" +
-            "   define(['" + deps.join("', '") + "'], func);\n" +
+            "   define(['" + deps.join("', '") + "'], func.bind(this, window));\n" +
             "} else if(typeof(module) !== 'undefined' && module.exports) {\n" +
             "   var mod;\n";
         for(var i = 0, end = deps.length; i < end; i++)
@@ -146,13 +146,13 @@ gulp.task('src', function(){
                 footer += " if(window) window.jQuery = window.$ = mod;\n";
             }
         }
-        footer += 
+        footer +=
             "module.exports = func(window);\n" +
             "} else {\n" +
             "   func(window);\n" +
             "}\n" +
             "}(typeof(global) !== 'undefined'? global : window));\n";
-            
+
         streams.push(
             gulp.src(srcs)
             .pipe(sourcemaps.init())
@@ -165,7 +165,7 @@ gulp.task('src', function(){
             .pipe(gulp.dest('./'))
         );
     }
-    return merge.apply(null, streams);        
+    return merge.apply(null, streams);
 });
 
 gulp.task('vendor', function()
@@ -193,27 +193,27 @@ gulp.task('css', function () {
             cascade: false
         }))
         .pipe(gulp.dest('examples/css'));
-});    
+});
 
 
-   
-gulp.task('default', ['src'], function(){   
-    
+
+gulp.task('default', ['src'], function(){
+
     var driver, streams = [], suffix;
-    
+
     for(driver in drivers)
     {
         suffix = driver == 'tweene'? 'all' : driver;
         streams.push(
-            gulp.src(driver + '.js')        
+            gulp.src(driver + '.js')
                 .pipe(uglify('tweene-' + suffix + '.min.js'))
                 .pipe(header(banner, {pkg: pkg}))
-                .pipe(size({gzip: true, title: driver + ': '}))            
+                .pipe(size({gzip: true, title: driver + ': '}))
                 .pipe(gulp.dest('minified/'))
         );
     }
-    return merge.apply(null, streams);    
-    
+    return merge.apply(null, streams);
+
 });
 
 

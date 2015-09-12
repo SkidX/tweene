@@ -5391,7 +5391,7 @@ return Tw;
 };
 
 if(typeof(define) === 'function' && define.amd) {
-   define(['jquery', 'jquery.transit'], func);
+   define(['jquery', 'jquery.transit'], func.bind(this, window));
 } else if(typeof(module) !== 'undefined' && module.exports) {
    var mod;
  mod = require('jquery');
