@@ -1,13 +1,13 @@
 /**
- * Tweene - JavaScript Animation Proxy 
- * 
+ * Tweene - JavaScript Animation Proxy
+ *
  * @link http://tweene.com
- *   
+ *
  * Copyright (c) 2014, Federico Orru'   <federico@buzzler.com>
- * 
- * @license Artistic License 2.0 
+ *
+ * @license Artistic License 2.0
  * See LICENSE.txt for details
- * 
+ *
  */
 
 
@@ -15,7 +15,7 @@
 /**
  * Vars and methods common to every timeline object, whatever is the driver used
  * @mixin
- * 
+ *
  */
 var TimelineCommon = function()
 {
@@ -36,13 +36,13 @@ var TimelineCommon = function()
      * @link http://tweene.com/docs/#nestedTimelines
      * @link http://tweene.com/docs/#directionalCallbacks
      * @link http://tweene.com/docs/#labels
-     * 
+     *
      * @param {string|object|number} child - number is accepted only when adding directional callback
      * @param {string|number} [startPosition]
      * @returns {this}
      */
     this.add = function(child, startPosition)
-    {                
+    {
         // adding a label
         if(isString(child))
         {
@@ -61,7 +61,7 @@ var TimelineCommon = function()
         {
             // adding a callback or directional callback
             if(isFunction(child) || (isNumber(child) && isFunction(startPosition)))
-            {   
+            {
                 var dir = 0, i = 0;
                 // when a number is passed as first arg, it is a directional callback and we need to shift left the other params
                 if(isNumber(child))
@@ -80,7 +80,7 @@ var TimelineCommon = function()
                 child = new Callback(child, scope, params, dir, false);
             }
 
-            child.parent(this);            
+            child.parent(this);
         }
 
         if(startPosition === void 0)
@@ -97,28 +97,28 @@ var TimelineCommon = function()
     /**
      * Add pause, with an optional callback
      * @link http://tweene.com/docs/#addPause
-     * 
+     *
      * @param {string|number} [startPosition]
      * @param {string|number} [callbackDirection]
-     * @param {function} [callback] - callback 
+     * @param {function} [callback] - callback
      * @param {array} [params] - callback params
      * @param {object} [scope] - callback scope
      * @returns {this}
      */
     this.addPause = function()
-    {                
+    {
         var args = toArray(arguments),
             startPosition = null,
             dir = 0,
-            callback = null, 
+            callback = null,
             params = [],
-            scope = null, 
-            arg, 
+            scope = null,
+            arg,
             child;
-        
+
         if(args.length)
         {
-            arg = args.shift();            
+            arg = args.shift();
             if(isFunction(arg))
             {
                 callback = arg;
@@ -126,11 +126,11 @@ var TimelineCommon = function()
             else
             {
                 startPosition = arg;
-            }                
-            
+            }
+
             if(args.length)
-            {            
-                arg = args.shift();            
+            {
+                arg = args.shift();
                 if(!callback)
                 {
                     if(isNumber(arg))
@@ -146,7 +146,7 @@ var TimelineCommon = function()
                         callback = arg;
                     }
                 }
-                
+
                 if(callback && args.length)
                 {
                     params = args.shift();
@@ -154,17 +154,17 @@ var TimelineCommon = function()
                     {
                         params = [params];
                     }
-                    
+
                     if(args.length)
                     {
                         scope = args.shift();
                     }
                 }
-            }            
+            }
         }
-        
+
         child = new Callback(callback, scope, params, dir, true);
-        child.parent(this);            
+        child.parent(this);
         this._children.push({id: child.id(), child: child, start: startPosition});
         this.invalidate();
         return this;
@@ -176,36 +176,36 @@ var TimelineCommon = function()
      * Create a tween and execute a previously registered macro on it
      * If the timeline has not a target specified, it expects a target as first param.
      * It expects a position as second (or first) param, all other params are passed to the tween exec() method
-     * 
+     *
      * @returns {this}
      */
     this.exec = function()
     {
-        var args = toArray(arguments);        
+        var args = toArray(arguments);
         if(args.length)
         {
             var target = this._target? this._target : args.shift();
             var tween = Tw.get(target, this.driverName);
             var pos = args.length > 1?  args.splice(1, 1)[0] : null;
             this.add(tween, pos);
-            tween.exec.apply(tween, args);            
+            tween.exec.apply(tween, args);
         }
         return this;
-    };    
+    };
 
     /**
-     * Schedule a tween with duration = 0 
+     * Schedule a tween with duration = 0
      * @link http://tweene.com/docs/#timelineSet
-     *  
+     *
      * @returns {this}
      */
     this.set = function()
     {
-        var args = toArray(arguments);        
+        var args = toArray(arguments);
         if(args.length)
         {
             var target = this._target? this._target : args.shift();
-            var tween = Tw.get(target, this.driverName);            
+            var tween = Tw.get(target, this.driverName);
             if(args.length)
             {
                 var values = args.shift();
@@ -220,9 +220,9 @@ var TimelineCommon = function()
 
 
     /**
-     * Shortcut for .add(Tweene.get().to()) 
+     * Shortcut for .add(Tweene.get().to())
      * @link http://tweene.com/docs/#timelineTo
-     * 
+     *
      * @returns {this}
      */
     this.to = function()
@@ -232,9 +232,9 @@ var TimelineCommon = function()
 
 
     /**
-     * Shortcut for .add(Tweene.get().fromTo()) 
+     * Shortcut for .add(Tweene.get().fromTo())
      * @link http://tweene.com/docs/#timelineFromTo
-     * 
+     *
      * @returns {this}
      */
     this.fromTo = function()
@@ -244,20 +244,20 @@ var TimelineCommon = function()
 
 
     /**
-     * Shortcut for .add(Tweene.get().from()) 
+     * Shortcut for .add(Tweene.get().from())
      * @link http://tweene.com/docs/#timelineFrom
-     * 
+     *
      * @returns {this}
      */
     this.from = function()
     {
         return this._tweenMethod(arguments, true, false);
-    };        
+    };
 
 
     /**
      * used internally for setting child timeline time position inside the parent
-     * 
+     *
      * @param {number} value
      * @returns {this}
      */
@@ -269,13 +269,13 @@ var TimelineCommon = function()
 
 
     /**
-     * Timeline need to process its children just before starting or when you ask for duration. See implementation in TimelinePro or 
+     * Timeline need to process its children just before starting or when you ask for duration. See implementation in TimelinePro or
      * in specific drivers
-     * 
+     *
      * @returns {this}
      */
     this.prepare = function()
-    {               
+    {
         if(this._ready)
         {
             return this;
@@ -290,7 +290,7 @@ var TimelineCommon = function()
 
     /**
      * Perform all the common actions needed by .to(), .from() and .fromTo()
-     * 
+     *
      * @param {arguments} args
      * @param {boolean} from
      * @param {boolean} to
@@ -298,22 +298,22 @@ var TimelineCommon = function()
      */
     this._tweenMethod = function(args, from, to)
     {
-        args = toArray(args);        
+        args = toArray(args);
         if(args.length)
         {
             // use first argument as target if the timeline does not have a global target set
             var target = this._target? this._target : args.shift();
-            var tween = Tw.get(target, this.driverName);            
+            var tween = Tw.get(target, this.driverName);
             var pos = tween.parseArguments(args, from, to, true);
             this.add(tween, pos);
         }
-        return this;            
+        return this;
     };
 
 
     /**
-     * Process all the children added evaluating their actual time position inside the timeline 
-     * 
+     * Process all the children added evaluating their actual time position inside the timeline
+     *
      * @returns {this}
      */
     this._mergeChildren = function()
@@ -322,8 +322,8 @@ var TimelineCommon = function()
         {
             return this;
         }
-        
-        // cursor will contains the end of the last processed child, while duration holds the overall end of the timeline 
+
+        // cursor will contains the end of the last processed child, while duration holds the overall end of the timeline
         this._cursor = this._duration = 0;
 
         var child, begin, end, start, childDelay, tweenable;
@@ -343,11 +343,11 @@ var TimelineCommon = function()
                     this._cursor += childDelay;
                     this._duration += childDelay;
                     child.delay(0);
-                }                           
+                }
             }
 
             // evaluate actual start position
-            begin = this._getStartPosition(this._duration, this._cursor, start);  
+            begin = this._getStartPosition(this._duration, this._cursor, start);
 
             if(child.type == 'label')
             {
@@ -362,13 +362,13 @@ var TimelineCommon = function()
                 {
                     child.offset(this._offset + begin);
                 }
-                // prepare() returns totalDuration 
+                // prepare() returns totalDuration
                 end = begin + child.prepare();
                 this._mergeTweenable(child, begin, end);
             }
             else
             {
-                // callbacks have duration = 0 
+                // callbacks have duration = 0
                 end = begin;
                 this._mergeCallback(child, begin, end);
             }
@@ -379,13 +379,13 @@ var TimelineCommon = function()
                 this._cursor = end;
                 if(this._cursor > this._duration)
                 {
-                    this._duration = this._cursor;                
+                    this._duration = this._cursor;
                 }
             }
             else
             {
-                this._cursor = this._duration = Infinity;                
-            }            
+                this._cursor = this._duration = Infinity;
+            }
         }
         return this;
     };
@@ -393,15 +393,15 @@ var TimelineCommon = function()
 
     /**
      * Evaluate actual time position of a child inside a timeline
-     * 
+     *
      * @param {number} currentDuration
      * @param {number} currentCursor - end of the previously processed child
      * @param {string|number} startPosition
-     * 
+     *
      * @returns {number}
      */
     this._getStartPosition = function(currentDuration, currentCursor, startPosition)
-    {       
+    {
         // by default, add to the end of the timeline, obtaining a queue of not-overlapping tweens
         if(startPosition === null)
         {
@@ -410,23 +410,23 @@ var TimelineCommon = function()
         var start = currentDuration, pos, sign = 0, toCursor = false;
         if(isString(startPosition))
         {
-            // parts: 
+            // parts:
             //  1 - label
             //  2 - relative operator, +=, ++=, -=, --=
             //  3 - time value, number or string with 's' or 'ms' suffix
-            var parts = startPosition.match(/^([a-z][^\+\-=]*)?(?:(\+{1,2}|\-{1,2})=)?([^\+\-=]+)?$/i);            
+            var parts = startPosition.match(/^([a-z][^\+\-=]*)?(?:(\+{1,2}|\-{1,2})=)?([^\+\-=]+)?$/i);
             if(parts === null)
             {
                 return currentDuration;
             }
-            
+
             pos = parts[3] !== void 0? this._parseTime(parts[3]) : 0;
 
             if(parts[2] !== void 0)
             {
-                toCursor = parts[2].length == 2;                
+                toCursor = parts[2].length == 2;
                 sign = parts[2].substr(0, 1) == '-'? -1 : 1;
-            }     
+            }
 
             if(parts[1] !== void 0 && parts[1] in this._labels)
             {
@@ -436,7 +436,7 @@ var TimelineCommon = function()
                     pos = 0;
                     sign = 1;
                 }
-            }                                    
+            }
             else
             {
                 if(sign)
@@ -449,7 +449,7 @@ var TimelineCommon = function()
                     sign = 1;
                 }
             }
-        }        
+        }
         else
         {
             start = 0;
@@ -461,7 +461,7 @@ var TimelineCommon = function()
         {
             return Infinity;
         }
-        
+
         // cannot add child in negative positions, fallback to 0
         return Math.max(0, start + (pos * sign));
     };

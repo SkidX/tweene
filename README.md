@@ -19,16 +19,6 @@ Currently it can work together with [GSAP](http://www.greensock.com/gsap-js/), [
 - [Documentation](http://tweene.com/docs)
 - [Examples](http://tweene.com/#examples)
 
-
-## Roadmap
-Changes and new features planned for next releases
-
-- __0.6.0__: Add support for scrubbing animation’s currentTime position
-- __0.7.0__: Add support for stagger tweens
-- __0.8.0__: Add new Driver for [Animate Plus](https://github.com/bendc/animateplus)
-- __0.9.0__: Add new Driver for [Move.js](https://github.com/visionmedia/move.js)
-- __0.10.0__: Add new Driver for [Web Animations Spec.](http://updates.html5rocks.com/2014/12/web-animation-playback)
-
 ## Getting started
 To start using Tweene just include the script after your animation library of choice.
 
@@ -112,6 +102,7 @@ However, you can change it any time you want and also on a single call basis.
 Check http://tweene.com/docs/#duration for more details.
 
 ## Changelog
+- __0.5.11__ Fixed a label related issue.
 - __0.5.10__ Fixed bug in jQuery driver.
 - __0.5.9__ Fixed restart() procedure when timelines are paused.
 - __0.5.8__ Added addPause() method. Fixed events call order.

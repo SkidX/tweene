@@ -1,7 +1,7 @@
 {
   "name": "tweene",
   "title": "Tweene",
-  "version": "0.5.10",
+  "version": "0.5.11",
   "description": "JavaScript Animation Proxy. It can work with GSAP, Velocity.js, Transit or jQuery.",
   "keywords": [
     "tweene",
@@ -46,7 +46,7 @@
   },
   "devDependencies": {
     "gsap": "^1.17.0",
-    "gulp": "^3.8.8",
+    "gulp": "^3.9.1",
     "gulp-autoprefixer": "^1.0.1",
     "gulp-browserify-thin": "^0.1.5",
     "gulp-concat": "^2.4.1",
@@ -54,7 +54,7 @@
     "gulp-jshint": "^1.8.4",
     "gulp-jshint-file-reporter": "0.0.1",
     "gulp-karma": "0.0.4",
-    "gulp-sass": "^2.0.1",
+    "gulp-sass": "^2.2.0",
     "gulp-size": "^1.1.0",
     "gulp-sourcemaps": "^1.2.2",
     "gulp-uglifyjs": "^0.4.2",
@@ -70,6 +70,7 @@
     "karma-jasmine": "^0.2.2",
     "karma-junit-reporter": "^0.2.2",
     "merge-stream": "^0.1.5",
+    "node-sass": "^3.4.2",
     "velocity-animate": "^1.2.2",
     "vinyl-map": "^1.0.1"
   }
