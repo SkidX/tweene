@@ -25,7 +25,7 @@ To start using Tweene just include the script after your animation library of ch
 [jsDelivr CDN](http://www.jsdelivr.com/#!tweene) provides free hosting for Tweene.
 You can simply replace the script URL with one of the minified files on jsDelivr like this:
 ```html
-<script src="//cdn.jsdelivr.net/tweene/VERSION_HERE/tweene-velocity.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/tweene@VERSION_HERE/minified/tweene-velocity.min.js"></script>
 ```
 For more details, like version aliasing, please visit the [README](https://github.com/jsdelivr/jsdelivr#usage).
 
@@ -34,34 +34,34 @@ Alternatively, you can download the repository and host the files locally.
 ```html
 // use Tweene with GSAP
 <script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.18.0/TweenMax.min.js"></script>
-<script src="//cdn.jsdelivr.net/tweene/latest/tweene-gsap.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/tweene@latest/minified/tweene-gsap.min.js"></script>
 
 // use Tweene with jQuery
-<script src="//cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>;
-<script src="//cdn.jsdelivr.net/tweene/latest/tweene-jquery.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script>;
+<script src="//cdn.jsdelivr.net/npm/tweene@latest/minified/tweene-jquery.min.js"></script>
 // or fetch all with a single HTTP request
-<script src="//cdn.jsdelivr.net/g/jquery,tweene(tweene-jquery.min.js)"></script>
+<script src="//cdn.jsdelivr.net/combine/npm/jquery,npm/tweene/minified/tweene-jquery.min.js"></script>
 
 // use Tweene with Transit
-<script src="//cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>;
-<script src="//cdn.jsdelivr.net/jquery.transit/0.9.12/jquery.transit.min.js"></script>
-<script src="//cdn.jsdelivr.net/tweene/latest/tweene-transit.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script>;
+<script src="//cdn.jsdelivr.net/npm/jquery.transit@0.9.12/jquery.transit.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/tweene@latest/minified/tweene-transit.min.js"></script>
 // or fetch all with a single HTTP request
-<script src="//cdn.jsdelivr.net/g/jquery,jquery.transit@0.9.12,tweene(tweene-transit.min.js)"></script>
+<script src="//cdn.jsdelivr.net/combine/npm/jquery,npm/jquery.transit@0.9.12,npm/tweene/minified/tweene-transit.min.js"></script>
 
 // use Tweene with Velocity.js
-<script src="//cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>;
-<script src="//cdn.jsdelivr.net/velocity/1.2.2/velocity.min.js"></script>
-<script src="//cdn.jsdelivr.net/tweene/latest/tweene-velocity.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script>;
+<script src="//cdn.jsdelivr.net/npm/velocity-animate@1.5.0/velocity.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/tweene@latest/minified/tweene-velocity.min.js"></script>
 // or fetch all with a single HTTP request
-<script src="//cdn.jsdelivr.net/g/jquery,velocity@1.1,tweene(tweene-velocity.min.js)"></script>
+<script src="//cdn.jsdelivr.net/combine/npm/jquery,npm/velocity-animate@1.5,npm/tweene/minified/tweene-velocity.min.js"></script>
 
 // use Tweene with more then one library
 <script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.18.0/TweenMax.min.js"></script>
-<script src="//cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
-<script src="//cdn.jsdelivr.net/jquery.transit/0.9.12/jquery.transit.min.js"></script>
-<script src="//cdn.jsdelivr.net/velocity/1.2.2/velocity.min.js"></script>
-<script src="//cdn.jsdelivr.net/tweene/latest/tweene-all.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/jquery.transit@0.9.12/jquery.transit.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/velocity-animate@1.5.0/velocity.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/tweene@latest/minified/tweene-all.min.js"></script>
 
 <script>
 // set the default time unit you want to use
